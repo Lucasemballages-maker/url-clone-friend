@@ -51,20 +51,17 @@ export const useSubscription = () => {
   }, [user]);
 
   const createCheckout = async (planId: string, isYearly: boolean) => {
-    try {
-      const { data, error } = await supabase.functions.invoke("create-checkout", {
-        body: { planId, isYearly },
-      });
+    const { data, error } = await supabase.functions.invoke("create-checkout", {
+      body: { planId, isYearly },
+    });
 
-      if (error) throw error;
-      if (data?.url) {
-        // Redirect in same window to avoid popup blockers
-        window.location.href = data.url;
-      }
-    } catch (error) {
-      console.error("Error creating checkout:", error);
-      throw error;
+    if (error) throw error;
+    if (data?.url) {
+      // Open in new tab to avoid issues with iframe redirects
+      window.open(data.url, "_blank");
+      return { url: data.url };
     }
+    throw new Error("No checkout URL returned");
   };
 
   const openCustomerPortal = async () => {
