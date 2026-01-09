@@ -1,4 +1,4 @@
-import { ShoppingCart, User, Star, Check } from "lucide-react";
+import { ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { StoreData } from "@/types/store";
 import { useState } from "react";
 
@@ -11,15 +11,19 @@ export const StorePreview = ({ storeData }: StorePreviewProps) => {
   const images = storeData.productImages.length > 0 ? storeData.productImages : ["/placeholder.svg"];
   const mainImage = images[currentImageIndex] || "/placeholder.svg";
 
-  const discount = storeData.originalPrice && storeData.productPrice 
-    ? Math.round(((parseFloat(storeData.originalPrice) - parseFloat(storeData.productPrice)) / parseFloat(storeData.originalPrice)) * 100)
-    : 0;
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
 
-  // Generate a light blue color from primary or use default
-  const accentColor = storeData.primaryColor || "#3B82F6";
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  // Teal color like clair-eau/copyfy
+  const tealColor = "#0D9488";
 
   return (
-    <div className="relative mx-auto" style={{ maxWidth: "340px" }}>
+    <div className="relative mx-auto" style={{ maxWidth: "320px" }}>
       {/* Phone Frame */}
       <div className="relative bg-gradient-to-b from-zinc-800 to-zinc-900 rounded-[3rem] p-2 shadow-2xl ring-1 ring-white/10">
         {/* Phone Notch */}
@@ -32,160 +36,85 @@ export const StorePreview = ({ storeData }: StorePreviewProps) => {
         
         {/* Phone Screen */}
         <div className="bg-white rounded-[2.5rem] overflow-hidden relative">
-          {/* Announcement Bar - Blue gradient like clair-eau */}
+          {/* Announcement Bar - Teal like Copyfy */}
           <div 
-            className="text-center py-2 px-4 text-[10px] text-white font-medium"
-            style={{ 
-              background: `linear-gradient(135deg, ${accentColor}, ${accentColor}cc)`,
-            }}
+            className="text-center py-3 px-6 text-[10px] text-white font-medium flex items-center justify-center gap-2"
+            style={{ backgroundColor: tealColor }}
           >
-            {storeData.announcementBar || "Livraison OFFERTE | Noté 4.8/5 d'après + de 20 000 clients"}
+            <ChevronLeft className="w-3 h-3 opacity-70" />
+            <span className="flex-1 leading-tight">
+              {storeData.announcementBar || "Livraison gratuite sur les commandes supérieures à 50 € | Livraison rapide dans le monde entier"}
+            </span>
+            <ChevronRight className="w-3 h-3 opacity-70" />
           </div>
 
-          {/* Navbar - Clean white with logo centered */}
-          <nav className="flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100">
-            <div className="flex items-center gap-4">
-              <span className="text-xs font-medium text-gray-800 underline underline-offset-4">ACCUEIL</span>
-              <span className="text-xs font-medium text-gray-500 uppercase">{storeData.storeName || "BOUTIQUE"}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span className="text-sm font-semibold text-gray-800" style={{ fontFamily: 'serif' }}>
-                {storeData.storeName || "Boutique"}
-              </span>
-              <span className="text-xs" style={{ color: accentColor }}>™</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <User className="w-4 h-4 text-gray-600" />
-              <ShoppingCart className="w-4 h-4 text-gray-600" />
+          {/* Navbar - Clean minimal */}
+          <nav className="flex items-center justify-center px-5 py-4 bg-white relative">
+            <span className="text-xl font-light tracking-wide text-zinc-700 lowercase" style={{ fontFamily: 'serif' }}>
+              {storeData.storeName || "douche"}
+            </span>
+            <div className="absolute right-5">
+              <ShoppingCart className="w-5 h-5 text-zinc-700" strokeWidth={1.5} />
             </div>
           </nav>
 
-          {/* Hero Section - Split layout like clair-eau */}
-          <div className="flex min-h-[320px]">
-            {/* Left Content */}
-            <div className="flex-1 flex flex-col justify-center px-4 py-6 bg-gray-50">
-              {/* Rating */}
-              <div className="flex items-center gap-1 mb-3">
-                {[...Array(5)].map((_, i) => (
-                  <Star 
-                    key={i} 
-                    className="w-3 h-3" 
-                    style={{ 
-                      fill: i < 4 ? '#FBBF24' : 'transparent',
-                      color: '#FBBF24'
-                    }} 
-                  />
-                ))}
-                <span className="text-[10px] ml-1" style={{ color: accentColor }}>
-                  Noté {storeData.rating || "4,8"} ({storeData.reviews || "21 883"}+ clients satisfaits)
-                </span>
-              </div>
-
-              {/* Headline */}
-              <h1 className="text-xl font-bold text-gray-900 leading-tight mb-4" style={{ fontFamily: 'serif' }}>
+          {/* Main Product Image Area */}
+          <div className="relative bg-[#f8f8f8] border border-zinc-100 mx-3 rounded-lg overflow-hidden">
+            {/* Product Info Overlay */}
+            <div className="absolute top-4 left-4 z-10 max-w-[45%]">
+              <h2 className="text-base font-bold text-zinc-900 leading-tight mb-2" style={{ fontFamily: 'serif' }}>
                 {storeData.headline || storeData.productName}
-              </h1>
-
-              {/* Benefits Pills */}
-              <div className="flex flex-wrap gap-1.5 mb-4">
-                {(storeData.benefits?.slice(0, 3) || ["Filtre chlore et métaux lourds", "Installation en 2 minutes", "Garantie 1 an incluse"]).map((benefit, index) => (
-                  <span 
-                    key={index}
-                    className="inline-flex items-center gap-1 text-[9px] px-2 py-1 rounded-full border font-medium"
-                    style={{ 
-                      borderColor: `${accentColor}40`,
-                      color: accentColor,
-                      backgroundColor: `${accentColor}08`
-                    }}
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: accentColor }} />
-                    {benefit}
-                  </span>
-                ))}
-              </div>
-
-              {/* CTA Button */}
-              <button 
-                className="w-full py-3 rounded-full text-white font-bold text-xs uppercase tracking-wide transition-all hover:opacity-90"
-                style={{ backgroundColor: accentColor }}
-              >
-                {storeData.cta || "ACHETER MAINTENANT"}
-              </button>
-
-              {/* Sub-benefits */}
-              <div className="flex items-center justify-center gap-4 mt-3 text-[9px]">
-                <span className="flex items-center gap-1 text-gray-500">
-                  <span className="w-3 h-3 rounded-full border border-gray-300 flex items-center justify-center">
-                    <Check className="w-2 h-2" />
-                  </span>
-                  Essayez sans risque
-                </span>
-                <span className="flex items-center gap-1" style={{ color: accentColor }}>
-                  <Check className="w-3 h-3" />
-                  Livraison OFFERTE
-                </span>
-              </div>
+              </h2>
+              <p className="text-[10px] text-zinc-600 leading-relaxed">
+                {storeData.description?.slice(0, 100) || "Highly efficient in removing residual chlorine, heavy metals and other harmful substances"}
+              </p>
             </div>
 
-            {/* Right Image - Full bleed product photo */}
-            <div className="w-[45%] relative overflow-hidden bg-gradient-to-br from-gray-200 to-gray-300">
+            {/* Main Image */}
+            <div className="aspect-[4/5] relative flex items-center justify-center p-4">
               <img
                 src={mainImage}
                 alt={storeData.productName}
-                className="w-full h-full object-cover"
+                className="max-w-full max-h-full object-contain"
                 onError={(e) => {
                   e.currentTarget.src = "/placeholder.svg";
                 }}
               />
+              
+              {/* Navigation Arrow - Right side */}
+              {images.length > 1 && (
+                <button 
+                  onClick={nextImage}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-sm hover:bg-white transition-colors"
+                >
+                  <ChevronRight className="w-4 h-4 text-zinc-600" />
+                </button>
+              )}
             </div>
           </div>
 
-          {/* Image Thumbnails */}
-          {images.length > 1 && (
-            <div className="flex gap-2 p-3 justify-center bg-white border-t border-gray-100">
-              {images.slice(0, 4).map((img, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentImageIndex(index)}
-                  className={`w-12 h-12 rounded-lg overflow-hidden transition-all ${
-                    index === currentImageIndex 
-                      ? 'ring-2 ring-blue-500 ring-offset-1 shadow-md' 
-                      : 'opacity-60 hover:opacity-100'
-                  }`}
-                >
-                  <img
-                    src={img}
-                    alt={`Thumbnail ${index + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.src = "/placeholder.svg";
-                    }}
-                  />
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Price Section */}
-          <div className="px-4 py-4 bg-white border-t border-gray-100">
-            <div className="flex items-center gap-3 mb-2">
-              <span className="text-xl font-bold text-gray-900">
-                {storeData.productPrice}€
-              </span>
-              {storeData.originalPrice && storeData.originalPrice !== storeData.productPrice && (
-                <>
-                  <span className="text-sm text-gray-400 line-through">
-                    {storeData.originalPrice}€
-                  </span>
-                  <span 
-                    className="text-[10px] font-bold px-2 py-0.5 rounded-full text-white"
-                    style={{ backgroundColor: '#22C55E' }}
-                  >
-                    Économisez {(parseFloat(storeData.originalPrice) - parseFloat(storeData.productPrice)).toFixed(0)}€
-                  </span>
-                </>
-              )}
-            </div>
+          {/* Thumbnails Row */}
+          <div className="flex gap-2 px-3 py-3 overflow-x-auto">
+            {images.slice(0, 5).map((img, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentImageIndex(index)}
+                className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
+                  index === currentImageIndex 
+                    ? 'border-zinc-400 shadow-md' 
+                    : 'border-zinc-200 opacity-70 hover:opacity-100'
+                }`}
+              >
+                <img
+                  src={img}
+                  alt={`Thumbnail ${index + 1}`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = "/placeholder.svg";
+                  }}
+                />
+              </button>
+            ))}
           </div>
 
           {/* Bottom safe area */}
