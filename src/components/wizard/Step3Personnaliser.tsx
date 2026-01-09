@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import StorePreview from "./StorePreview";
 
 interface StoreData {
   storeName: string;
@@ -148,7 +149,7 @@ export const Step3Personnaliser = ({
       </div>
 
       {/* Right Panel - Preview */}
-      <div className="w-[380px] flex flex-col shrink-0">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Preview Header */}
         <div className="flex items-center justify-between mb-4">
           <Select value={previewPage} onValueChange={setPreviewPage}>
@@ -166,81 +167,9 @@ export const Step3Personnaliser = ({
           </Button>
         </div>
 
-        {/* Phone Preview Frame */}
-        <div className="flex-1 bg-card rounded-2xl border border-border overflow-hidden">
-          {/* Announcement Bar */}
-          <div className="bg-blue-600 text-white text-xs text-center py-2 px-4 flex items-center justify-between">
-            <button className="text-white/70 hover:text-white">‹</button>
-            <span>{storeData.announcementBar}</span>
-            <button className="text-white/70 hover:text-white">›</button>
-          </div>
-
-          {/* Store Header */}
-          <div className="flex items-center justify-between p-4 border-b border-border">
-            <span className="font-semibold">{storeData.storeName.toLowerCase()}</span>
-            <ShoppingCart className="w-5 h-5 text-muted-foreground" />
-          </div>
-
-          {/* Product Content */}
-          <div className="overflow-y-auto max-h-[500px]">
-            {/* Product Image */}
-            <div className="aspect-square bg-secondary relative">
-              {storeData.productImages[0] ? (
-                <img
-                  src={storeData.productImages[0]}
-                  alt={storeData.productName}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                  <Package className="w-16 h-16" />
-                </div>
-              )}
-            </div>
-
-            {/* Product Thumbnails */}
-            <div className="flex gap-2 p-4 overflow-x-auto">
-              {storeData.productImages.slice(0, 5).map((img, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "w-14 h-14 rounded-lg overflow-hidden border-2 shrink-0",
-                    i === 0 ? "border-primary" : "border-transparent"
-                  )}
-                >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
-                </div>
-              ))}
-            </div>
-
-            {/* Product Info */}
-            <div className="p-4">
-              <div className="flex items-center gap-1 mb-2">
-                <div className="flex text-yellow-400">
-                  {"★★★★★".split("").map((star, i) => (
-                    <span key={i}>{star}</span>
-                  ))}
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  Noté {storeData.rating} ({storeData.reviews}+ clients satisfaits)
-                </span>
-              </div>
-              <h2 className="text-xl font-bold mb-2">{storeData.productName}</h2>
-              <p className="text-sm text-muted-foreground mb-4">
-                Description du produit générée par l'IA pour maximiser les conversions...
-              </p>
-              <div className="flex items-center gap-3 mb-4">
-                <span className="text-2xl font-bold">{storeData.productPrice}€</span>
-                <span className="text-lg text-muted-foreground line-through">{storeData.originalPrice}€</span>
-                <span className="px-2 py-1 bg-green-500/20 text-green-500 text-xs rounded-md font-medium">
-                  -30%
-                </span>
-              </div>
-              <Button className="w-full bg-primary hover:bg-primary/90">
-                Acheter maintenant
-              </Button>
-            </div>
-          </div>
+        {/* Store Preview */}
+        <div className="flex-1 overflow-auto rounded-xl border border-border">
+          <StorePreview storeData={storeData} />
         </div>
       </div>
     </div>
