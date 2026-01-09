@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Star } from "lucide-react";
+import { ArrowRight, Star, Package } from "lucide-react";
 
 const CTASection = () => {
   const avatars = [
@@ -33,23 +33,26 @@ const CTASection = () => {
           </div>
           
           <p className="text-muted-foreground mb-2">
-            <span className="text-foreground font-semibold">29,870+</span> ont déjà rejoint
+            <span className="text-foreground font-semibold">12,450+</span> apps générées
           </p>
 
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
-            Lance ta boutique aujourd'hui
+            Crée ton app e-commerce
             <br />
-            gratuitement avec l'IA
+            à partir de 29€/mois
           </h2>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-            <Button variant="hero" size="xl">
-              Commencer mon essai gratuit
+            <Button variant="hero" size="xl" asChild>
+              <Link to="/auth">
+                <Package className="w-5 h-5 mr-2" />
+                Créer mon app maintenant
+              </Link>
             </Button>
             <Button variant="hero-outline" size="xl" asChild>
               <Link to="/pricing">
-                Voir les tarifs
+                Voir les formules
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
               </Link>
             </Button>
@@ -58,7 +61,7 @@ const CTASection = () => {
           {/* Trust badges */}
           <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
             <span>✓ Annule quand tu veux</span>
-            <span>✓ Pas de CB requise</span>
+            <span>✓ App prête en 2 min</span>
           </div>
         </div>
       </div>

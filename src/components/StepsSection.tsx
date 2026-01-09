@@ -1,27 +1,27 @@
 import { Button } from "@/components/ui/button";
-import { Link, Wand2, Upload } from "lucide-react";
+import { Link, Wand2, Rocket, Smartphone, Store } from "lucide-react";
 
 const steps = [
   {
     number: 1,
     icon: Link,
-    title: "Copie le lien du produit",
-    description: "Copie le lien de la page de ton produit via AliExpress ou n'importe quel boutique Shopify.",
-    time: "Gagne 2 heures",
+    title: "Colle ton lien AliExpress",
+    description: "Copie le lien du produit AliExpress que tu veux vendre. Notre IA récupère automatiquement toutes les infos.",
+    time: "30 secondes",
   },
   {
     number: 2,
     icon: Wand2,
-    title: "Génération automatique",
-    description: "Copyfy récupère les images et génère ta boutique 100% personnalisable.",
-    time: "Gagne 35 heures",
+    title: "L'IA génère ton app",
+    description: "Notre IA crée une application e-commerce complète : design, fiches produits, paiements, tout est prêt.",
+    time: "2 minutes",
   },
   {
     number: 3,
-    icon: Upload,
-    title: "Import et vente",
-    description: "Connecte ton compte Shopify à ta boutique, importe ta nouvelle boutique et commence à vendre.",
-    time: "Gagne 3 heures",
+    icon: Rocket,
+    title: "Lance et vends",
+    description: "Ton app est prête à recevoir des commandes. Partage le lien et commence à vendre immédiatement.",
+    time: "Instantané",
   },
 ];
 
@@ -35,13 +35,16 @@ const StepsSection = () => {
         {/* Section Header */}
         <div className="text-center mb-16">
           <span className="text-primary text-sm font-medium uppercase tracking-wider">
-            Génère ta boutique
+            Simple comme 1-2-3
           </span>
           <h2 className="text-3xl md:text-4xl font-bold mt-4 mb-4">
-            Génère ta boutique optimisée conversion
+            De lien AliExpress à app prête
             <br />
             en 3 étapes simples
           </h2>
+          <p className="text-muted-foreground max-w-xl mx-auto">
+            Plus besoin de coder ou de designer. Colle ton lien, notre IA fait le reste.
+          </p>
         </div>
 
         {/* Steps */}
@@ -80,24 +83,26 @@ const StepsSection = () => {
           })}
         </div>
 
-        {/* Example Shops */}
+        {/* Example Apps */}
         <div className="text-center">
           <p className="text-muted-foreground mb-8">
-            Boutiques d'exemples générés par Copyfy
+            Exemples d'apps générées par notre IA
           </p>
           <div className="flex justify-center gap-6 flex-wrap">
-            {[1, 2].map((i) => (
+            {[
+              { name: "TechWatch Pro", category: "Montres" },
+              { name: "BeautyGlow", category: "Beauté" },
+            ].map((app, i) => (
               <div
                 key={i}
                 className="glass rounded-xl overflow-hidden card-hover border-gradient w-72"
               >
                 <div className="aspect-video bg-gradient-to-br from-muted to-secondary flex items-center justify-center">
-                  <Store className="w-12 h-12 text-muted-foreground/50" />
+                  <Smartphone className="w-12 h-12 text-muted-foreground/50" />
                 </div>
-                <div className="p-4">
-                  <Button variant="ghost" size="sm" className="w-full">
-                    Voir boutique
-                  </Button>
+                <div className="p-4 text-left">
+                  <p className="font-semibold">{app.name}</p>
+                  <p className="text-xs text-muted-foreground">{app.category}</p>
                 </div>
               </div>
             ))}
@@ -107,8 +112,5 @@ const StepsSection = () => {
     </section>
   );
 };
-
-// Import needed icon
-import { Store } from "lucide-react";
 
 export default StepsSection;

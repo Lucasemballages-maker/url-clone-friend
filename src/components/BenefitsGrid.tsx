@@ -1,35 +1,35 @@
-import { Users, Layout, Sliders, Sparkles, GraduationCap, MessageCircle } from "lucide-react";
+import { Zap, Palette, CreditCard, Smartphone, Shield, Headphones } from "lucide-react";
 
 const benefits = [
   {
-    icon: Users,
-    title: "Adapté aux débutants",
-    description: "Clair et direct. Pas besoin d'être expert.",
+    icon: Zap,
+    title: "Prêt en 2 minutes",
+    description: "Colle ton lien, l'IA génère ton app. C'est aussi simple que ça.",
   },
   {
-    icon: Layout,
-    title: "Plateforme tout-en-un",
-    description: "Tout ce qu'il te faut pour aller de 0 à ta première vente et plus encore.",
+    icon: Palette,
+    title: "Design professionnel",
+    description: "Templates premium qui inspirent confiance et convertissent.",
   },
   {
-    icon: Sliders,
-    title: "Vue personnalisable",
-    description: "Filtre, trie, ou enregistre. Adapte tes recherches à tes besoins.",
+    icon: CreditCard,
+    title: "Paiements Stripe intégrés",
+    description: "Accepte CB, Apple Pay, Google Pay dès le premier jour.",
   },
   {
-    icon: Sparkles,
-    title: "Boosté par l'IA",
-    description: "Recherche, génère et obtiens tout avec Copyfy AI.",
+    icon: Smartphone,
+    title: "App mobile-first",
+    description: "Optimisée pour mobile où tes clients achètent vraiment.",
   },
   {
-    icon: GraduationCap,
-    title: "Formation Ecommerce",
-    description: "Suis un chemin défini par des experts e-commerce. GRATUIT.",
+    icon: Shield,
+    title: "Sécurisé & fiable",
+    description: "Hébergement premium, SSL inclus, disponibilité 99.9%.",
   },
   {
-    icon: MessageCircle,
-    title: "Coaching hebdomadaire",
-    description: "Rencontre et discute avec un expert e-commerce.",
+    icon: Headphones,
+    title: "Support réactif",
+    description: "Une question ? Notre équipe te répond rapidement.",
   },
 ];
 
@@ -40,6 +40,16 @@ const BenefitsGrid = () => {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
       
       <div className="container mx-auto px-4 relative z-10">
+        {/* Section Header */}
+        <div className="text-center mb-12">
+          <span className="text-primary text-sm font-medium uppercase tracking-wider">
+            Pourquoi nous choisir
+          </span>
+          <h2 className="text-3xl md:text-4xl font-bold mt-4 mb-4">
+            Tout ce qu'il te faut pour vendre
+          </h2>
+        </div>
+
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
           {benefits.map((benefit, index) => {
             const Icon = benefit.icon;
