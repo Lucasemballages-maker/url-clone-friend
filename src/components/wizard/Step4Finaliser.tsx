@@ -1,16 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { 
-  ArrowLeft, 
-  CheckCircle, 
-  ExternalLink, 
-  Copy, 
-  Download,
-  Rocket,
-  Sparkles
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { ArrowLeft } from "lucide-react";
 import StorePreview from "./StorePreview";
-
 import { StoreData } from "@/types/store";
 
 interface Step4FinaliserProps {
@@ -22,102 +12,32 @@ interface Step4FinaliserProps {
 
 export const Step4Finaliser = ({
   storeData,
-  storeUrl,
   onBack,
-  onFinish,
 }: Step4FinaliserProps) => {
-  const { toast } = useToast();
-
-  const copyUrl = () => {
-    navigator.clipboard.writeText(storeUrl);
-    toast({
-      title: "Lien copié !",
-      description: "Le lien de votre boutique a été copié dans le presse-papier",
-    });
-  };
-
   return (
-    <div className="flex gap-8 h-[calc(100vh-200px)]">
-      {/* Left Panel - Success Info */}
-      <div className="w-96 shrink-0 flex flex-col">
-        {/* Success Icon */}
-        <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mb-6">
-          <CheckCircle className="w-10 h-10 text-green-500" />
-        </div>
-
-        {/* Success Message */}
-        <h1 className="text-2xl font-bold mb-2">
-          Votre boutique est prête ! 🎉
-        </h1>
-        <p className="text-muted-foreground mb-6">
-          L'IA a généré votre boutique <strong>{storeData.storeName}</strong> avec succès.
-        </p>
-
-        {/* Store URL Card */}
-        <div className="glass rounded-xl p-4 border-gradient mb-6">
-          <p className="text-xs text-muted-foreground mb-2">Lien de votre boutique</p>
-          <div className="flex items-center gap-2 bg-secondary rounded-lg px-3 py-2">
-            <Rocket className="w-4 h-4 text-primary" />
-            <span className="flex-1 text-sm font-medium truncate">{storeUrl}</span>
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={copyUrl}>
-              <Copy className="w-3 h-3" />
-            </Button>
-          </div>
-        </div>
-
-        {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="glass rounded-lg p-3 border-gradient text-center">
-            <div className="text-xl font-bold text-primary">1</div>
-            <div className="text-xs text-muted-foreground">Produit</div>
-          </div>
-          <div className="glass rounded-lg p-3 border-gradient text-center">
-            <div className="text-xl font-bold text-primary">{storeData.productImages.length}</div>
-            <div className="text-xs text-muted-foreground">Images</div>
-          </div>
-          <div className="glass rounded-lg p-3 border-gradient text-center">
-            <div className="text-xl font-bold text-green-500">✓</div>
-            <div className="text-xs text-muted-foreground">Optimisée</div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-col gap-3 mb-6">
-          <Button
-            variant="hero"
-            size="lg"
-            className="gap-2"
-            onClick={() => window.open(storeUrl, "_blank")}
-          >
-            <ExternalLink className="w-4 h-4" />
-            Voir ma boutique
-          </Button>
-          <Button variant="outline" size="lg" className="gap-2">
-            <Download className="w-4 h-4" />
-            Exporter le thème
-          </Button>
-        </div>
-
-        {/* Continue Button */}
-        <div className="pt-4 border-t border-border">
-          <Button onClick={onFinish} variant="ghost" className="gap-2 w-full">
-            <Sparkles className="w-4 h-4" />
-            Créer une autre boutique
-          </Button>
-        </div>
-
-        {/* Navigation */}
-        <div className="mt-auto pt-4">
-          <Button variant="ghost" onClick={onBack} className="gap-2">
-            <ArrowLeft className="w-4 h-4" />
-            Retour aux modifications
-          </Button>
-        </div>
+    <div className="flex flex-col h-[calc(100vh-200px)]">
+      {/* Store Preview - Full Width */}
+      <div className="flex-1 overflow-auto rounded-xl border border-border mb-6">
+        <StorePreview storeData={storeData} />
       </div>
 
-      {/* Right Panel - Store Preview */}
-      <div className="flex-1 overflow-auto rounded-xl border border-border">
-        <StorePreview storeData={storeData} />
+      {/* Bottom Actions */}
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" onClick={onBack} className="gap-2">
+          <ArrowLeft className="w-4 h-4" />
+          Retour
+        </Button>
+
+        <Button variant="hero" size="xl" className="gap-3">
+          <svg 
+            className="w-5 h-5" 
+            viewBox="0 0 24 24" 
+            fill="currentColor"
+          >
+            <path d="M15.337 3.415c-.193-.016-.233.296-.233.296l-.318 2.033-.022-.007A4.667 4.667 0 0 0 13.119 5c-1.736-.011-3.075.84-3.583 2.136-.507 1.296.012 2.755.862 3.675.851.92 2.088 1.447 3.295 2.135 1.207.688 2.422 1.54 2.764 3.073.342 1.533-.344 3.285-1.838 4.246-1.493.96-3.744.95-5.545-.158a7.357 7.357 0 0 1-2.217-2.1l1.263-2.1c.41.544.923 1.016 1.517 1.39 1.13.716 2.534.878 3.522.287.988-.59 1.342-1.82.91-2.757-.432-.937-1.523-1.583-2.597-2.197-1.074-.614-2.193-1.304-2.907-2.411-.714-1.107-.984-2.674-.394-4.017.59-1.343 2.064-2.423 3.893-2.564 1.828-.14 3.8.545 5.065 1.935l-1.292 2.009z"/>
+          </svg>
+          Connecter votre Shopify
+        </Button>
       </div>
     </div>
   );
