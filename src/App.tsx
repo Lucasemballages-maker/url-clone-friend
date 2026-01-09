@@ -11,6 +11,7 @@ import Pricing from "./pages/Pricing";
 import Auth from "./pages/Auth";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Help from "./pages/Help";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/apps" element={<MyApps />} />
             <Route path="/dashboard/help" element={<Help />} />
+            <Route path="/dashboard/settings" element={<Settings />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
