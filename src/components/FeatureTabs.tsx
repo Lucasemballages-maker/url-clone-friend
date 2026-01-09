@@ -3,16 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { Wand2, ShoppingBag, CreditCard, Palette, ArrowRight, Smartphone, ChevronLeft, ChevronRight } from "lucide-react";
 
-import mockupSkincare from "@/assets/mockup-skincare.png";
-import mockupFitness from "@/assets/mockup-fitness.png";
-import mockupSmartwatch from "@/assets/mockup-smartwatch.png";
-import mockupHeadphones from "@/assets/store-mockup-preview.png";
+import mockupShower from "@/assets/mockup-shower.png";
+import mockupSerum from "@/assets/mockup-serum.png";
+import mockupEarbuds from "@/assets/mockup-earbuds.png";
+import mockupFitness from "@/assets/mockup-fitness-new.png";
 
 const storeMockups = [
-  { id: 1, image: mockupHeadphones, name: "Casque Audio Premium", category: "Électronique" },
-  { id: 2, image: mockupSkincare, name: "Sérum Anti-Âge", category: "Beauté" },
-  { id: 3, image: mockupFitness, name: "Bandes de Résistance", category: "Fitness" },
-  { id: 4, image: mockupSmartwatch, name: "Montre Connectée", category: "Tech" },
+  { id: 1, image: mockupShower, name: "Douche Purifiée", category: "Maison" },
+  { id: 2, image: mockupSerum, name: "Sérum Anti-Âge Premium", category: "Beauté" },
+  { id: 3, image: mockupEarbuds, name: "Écouteurs Sans Fil", category: "Tech" },
+  { id: 4, image: mockupFitness, name: "Fitness Pro", category: "Sport" },
 ];
 
 const tabs = [
