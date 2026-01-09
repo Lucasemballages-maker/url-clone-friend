@@ -1,48 +1,41 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Search, Megaphone, Store, BarChart3, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Wand2, ShoppingBag, CreditCard, Palette, ArrowRight, Smartphone } from "lucide-react";
 
 const tabs = [
   {
+    id: "generation",
+    label: "Génération IA",
+    icon: Wand2,
+    title: "Une app complète en quelques clics",
+    description: "Colle simplement ton lien AliExpress. Notre IA extrait les images, crée des descriptions optimisées pour la conversion, et génère une app e-commerce professionnelle prête à vendre.",
+  },
+  {
     id: "products",
-    label: "Parcours des produits gagnants",
-    icon: Search,
-    title: "Trouve les produits qui se vendent",
-    description: "Filtre par niche ou tape le nom d'un produit : Copyfy AI scanne plus de 100 000 produits qui se vendent en ce moment et affiche les meilleurs avec toutes leurs données.",
-    cta: "Essaie gratuitement",
-    link: "En savoir plus",
+    label: "Fiches produits",
+    icon: ShoppingBag,
+    title: "Fiches produits qui convertissent",
+    description: "Descriptions persuasives rédigées par l'IA, images optimisées, avis générés, variantes de produits... Tout est pensé pour maximiser tes conversions et tes ventes.",
   },
   {
-    id: "ads",
-    label: "Explore les publicités",
-    icon: Megaphone,
-    title: "Découvre les pubs qui performent",
-    description: "Filtre et analyse les publicités qui performent le mieux. Copyfy AI parcourt toutes les plateformes publicitaires pour sélectionner les meilleures pubs dans différentes niches.",
-    cta: "Essaie gratuitement",
-    link: "En savoir plus",
+    id: "payments",
+    label: "Paiements intégrés",
+    icon: CreditCard,
+    title: "Accepte les paiements immédiatement",
+    description: "Stripe est intégré nativement. Carte bancaire, Apple Pay, Google Pay... Tes clients peuvent payer en toute sécurité dès le premier jour. Tu reçois l'argent directement.",
   },
   {
-    id: "shops",
-    label: "Découvre les boutiques qui vendent",
-    icon: Store,
-    title: "Explore les meilleures boutiques",
-    description: "Découvre les meilleures boutiques avec leurs données clés : meilleures pubs, nombre de pubs actives, traffic et revenue par mois, bestseller, et plein d'autres.",
-    cta: "Essaie gratuitement",
-    link: "En savoir plus",
-  },
-  {
-    id: "analysis",
-    label: "Analyse tes concurrents",
-    icon: BarChart3,
-    title: "Traque et analyse la concurrence",
-    description: "Traque et analyse tes concurrents. Découvre leurs nouvelles pubs, revenues, marchés, thèmes, produits et apps. Chatte avec Copyfy AI pour obtenir rapidement les informations.",
-    cta: "Essaie gratuitement",
-    link: "En savoir plus",
+    id: "design",
+    label: "Design premium",
+    icon: Palette,
+    title: "Des designs qui inspirent confiance",
+    description: "Templates professionnels, couleurs personnalisables, logos, typographies... Ton app a l'air d'une vraie marque établie. Tes clients font confiance et achètent.",
   },
 ];
 
 const FeatureTabs = () => {
-  const [activeTab, setActiveTab] = useState("products");
+  const [activeTab, setActiveTab] = useState("generation");
 
   const activeFeature = tabs.find((tab) => tab.id === activeTab)!;
 
@@ -52,15 +45,15 @@ const FeatureTabs = () => {
         {/* Section Header */}
         <div className="text-center mb-12">
           <span className="text-primary text-sm font-medium uppercase tracking-wider">
-            Trouve ton produit gagnant
+            Tout inclus
           </span>
           <h2 className="text-3xl md:text-4xl font-bold mt-4 mb-4">
-            Copyfy booste ta stratégie de
+            Une app e-commerce complète
             <br />
-            recherche produit avec l'IA
+            générée par l'IA
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Copyfy AI t'aide à trouver les meilleurs produits à lancer en analysant les pubs, les meilleures boutiques et tes concurrents.
+            Tout ce dont tu as besoin pour lancer ton business de dropshipping, sans aucune compétence technique.
           </p>
         </div>
 
@@ -96,12 +89,16 @@ const FeatureTabs = () => {
               {activeFeature.description}
             </p>
             <div className="flex items-center gap-4">
-              <Button variant="hero" size="lg">
-                {activeFeature.cta}
+              <Button variant="hero" size="lg" asChild>
+                <Link to="/auth">
+                  Créer mon app
+                </Link>
               </Button>
-              <Button variant="ghost" size="lg" className="group">
-                {activeFeature.link}
-                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              <Button variant="ghost" size="lg" className="group" asChild>
+                <Link to="/pricing">
+                  Voir les formules
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                </Link>
               </Button>
             </div>
           </div>
@@ -110,7 +107,7 @@ const FeatureTabs = () => {
           <div className="order-1 lg:order-2">
             <div className="glass rounded-2xl p-1 card-hover border-gradient">
               <div className="bg-card rounded-xl overflow-hidden">
-                {/* Mock Dashboard */}
+                {/* Mock App */}
                 <div className="bg-secondary/50 p-4 flex items-center gap-4 border-b border-border">
                   <div className="flex gap-1.5">
                     <div className="w-3 h-3 rounded-full bg-red-500/50" />
@@ -118,63 +115,35 @@ const FeatureTabs = () => {
                     <div className="w-3 h-3 rounded-full bg-green-500/50" />
                   </div>
                   <div className="flex-1 flex justify-center">
-                    <div className="bg-muted px-4 py-1.5 rounded-lg text-xs text-muted-foreground">
-                      app.copyfy.io
+                    <div className="bg-muted px-4 py-1.5 rounded-lg text-xs text-muted-foreground flex items-center gap-2">
+                      <Smartphone className="w-3 h-3" />
+                      monapp.copyfy.app
                     </div>
                   </div>
                 </div>
                 
                 <div className="p-6">
-                  {/* Sidebar + Main */}
-                  <div className="flex gap-4">
-                    {/* Mini Sidebar */}
-                    <div className="w-40 shrink-0 hidden md:block">
-                      <div className="flex items-center gap-2 mb-6">
-                        <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
-                          <span className="text-xs font-bold text-primary-foreground">C</span>
-                        </div>
-                        <span className="text-sm font-medium">copyfy</span>
-                      </div>
-                      <div className="space-y-1">
-                        {["Dashboard", "Top Products", "Top Shops", "Top Ads"].map((item, i) => (
-                          <div
-                            key={item}
-                            className={`px-3 py-2 rounded-lg text-sm ${
-                              i === 1 ? "bg-secondary text-foreground" : "text-muted-foreground"
-                            }`}
-                          >
-                            {item}
-                          </div>
-                        ))}
-                      </div>
+                  {/* Product Preview */}
+                  <div className="space-y-4">
+                    <div className="aspect-video bg-gradient-to-br from-primary/10 to-secondary rounded-xl flex items-center justify-center">
+                      <ShoppingBag className="w-12 h-12 text-primary/30" />
                     </div>
-
-                    {/* Main Content */}
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-4">
-                        <h4 className="font-semibold">The Sill</h4>
-                        <span className="text-xs text-muted-foreground">Launched in 2016</span>
+                    <div>
+                      <p className="text-xs text-primary font-medium mb-1">NOUVEAU</p>
+                      <h4 className="font-semibold mb-2">Smart Watch Pro Max</h4>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Montre connectée avec suivi fitness, notifications et design premium...
+                      </p>
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="text-2xl font-bold">€49,99</span>
+                        <span className="text-muted-foreground line-through">€89,99</span>
+                        <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full font-medium">
+                          -44%
+                        </span>
                       </div>
-                      
-                      {/* Stats Grid */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                        {[
-                          { label: "Estimated Daily Sales", value: "$27,980", change: "+23%" },
-                          { label: "Monthly Sales", value: "$839,4K", change: "+23%" },
-                          { label: "Products count", value: "140", change: null },
-                          { label: "Orders", value: "15,215", change: "+11%" },
-                        ].map((stat, i) => (
-                          <div key={i} className="bg-muted/50 rounded-lg p-3">
-                            <p className="text-xs text-muted-foreground mb-1">{stat.label}</p>
-                            <div className="flex items-baseline gap-2">
-                              <span className="font-bold text-lg">{stat.value}</span>
-                              {stat.change && (
-                                <span className="text-xs text-success">{stat.change}</span>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                      <Button variant="hero" size="sm" className="w-full">
+                        Ajouter au panier
+                      </Button>
                     </div>
                   </div>
                 </div>

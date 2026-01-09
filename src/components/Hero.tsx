@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Star } from "lucide-react";
+import { ArrowRight, Star, Package } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   const avatars = [
@@ -24,35 +25,39 @@ const Hero = () => {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border-gradient mb-8 animate-fade-in-up">
             <span className="px-2 py-0.5 bg-primary/20 text-primary text-xs font-semibold rounded-full">
-              NEW
+              NOUVEAU
             </span>
             <span className="text-sm text-muted-foreground">
-              Génère ta boutique avec IA
+              Colle ton lien AliExpress → App prête
             </span>
             <ArrowRight className="w-4 h-4 text-muted-foreground" />
           </div>
 
           {/* Headline */}
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-            Trouve ton produit gagnant
+            Colle ton lien AliExpress
             <br />
-            et crée ta boutique en{" "}
-            <span className="text-gradient">5 minutes avec IA</span>
+            <span className="text-gradient">Reçois ton app e-commerce</span>
           </h1>
 
           {/* Subtitle */}
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            Tout pour trouver des produits gagnants, créer ta boutique IA et l'importer sur Shopify en un clic. Crée et lance ta boutique aujourd'hui.
+            Colle un lien produit AliExpress et notre IA génère une application e-commerce complète, prête à vendre. Design professionnel, fiches produits optimisées, paiements intégrés.
           </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-            <Button variant="hero" size="xl">
-              Lance ta boutique avec l'IA
+            <Button variant="hero" size="xl" asChild>
+              <Link to="/auth">
+                <Package className="w-5 h-5 mr-2" />
+                Créer mon app maintenant
+              </Link>
             </Button>
-            <Button variant="hero-outline" size="xl">
-              Voir les plans
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            <Button variant="hero-outline" size="xl" asChild>
+              <Link to="/pricing">
+                Voir les formules
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </Link>
             </Button>
           </div>
 
@@ -61,9 +66,9 @@ const Hero = () => {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="text-primary">❝</span>
               <span className="uppercase tracking-wider text-xs">
-                Approuvé par <span className="text-foreground font-semibold">+29,870</span>
+                Déjà <span className="text-foreground font-semibold">+12,450</span>
               </span>
-              <span className="uppercase tracking-wider text-xs">E-Commerçants</span>
+              <span className="uppercase tracking-wider text-xs">Apps générées</span>
               <span className="text-primary">❞</span>
             </div>
             
@@ -83,7 +88,7 @@ const Hero = () => {
               {/* Rating */}
               <div className="flex items-center gap-1">
                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                <span className="font-semibold text-foreground">4.8/5</span>
+                <span className="font-semibold text-foreground">4.9/5</span>
               </div>
             </div>
           </div>

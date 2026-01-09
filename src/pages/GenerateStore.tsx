@@ -6,48 +6,90 @@ import {
   Sparkles, 
   Link as LinkIcon, 
   Wand2, 
-  Upload, 
+  Rocket, 
   ArrowRight, 
   Loader2,
   CheckCircle,
-  Store,
+  Smartphone,
   Palette,
   Type,
-  Image
+  Image,
+  ExternalLink,
+  Copy
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const steps = [
-  { id: 1, title: "Colle ton lien", description: "Lien AliExpress ou Shopify", icon: LinkIcon },
+  { id: 1, title: "Colle ton lien", description: "Lien AliExpress", icon: LinkIcon },
   { id: 2, title: "L'IA génère", description: "Création automatique", icon: Wand2 },
   { id: 3, title: "Personnalise", description: "Ajuste à ton goût", icon: Palette },
-  { id: 4, title: "Exporte", description: "Import vers Shopify", icon: Upload },
+  { id: 4, title: "Publie", description: "Lance ton app", icon: Rocket },
 ];
 
 const GenerateStore = () => {
   const [productUrl, setProductUrl] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [generatedStore, setGeneratedStore] = useState<any>(null);
+  const [generatedApp, setGeneratedApp] = useState<any>(null);
+  const { toast } = useToast();
+
+  const isValidAliExpressUrl = (url: string) => {
+    return url.includes("aliexpress.com") || url.includes("aliexpress.ru") || url.includes("a]li");
+  };
 
   const handleGenerate = async () => {
-    if (!productUrl) return;
+    if (!productUrl) {
+      toast({
+        title: "Lien requis",
+        description: "Colle un lien AliExpress pour générer ton app",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!isValidAliExpressUrl(productUrl)) {
+      toast({
+        title: "Lien invalide",
+        description: "Merci de coller un lien AliExpress valide",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsGenerating(true);
     setCurrentStep(1);
     
     // Simulate AI generation steps
-    setTimeout(() => setCurrentStep(2), 1500);
-    setTimeout(() => setCurrentStep(3), 3000);
+    setTimeout(() => setCurrentStep(2), 2000);
+    setTimeout(() => setCurrentStep(3), 4000);
     setTimeout(() => {
       setCurrentStep(4);
       setIsGenerating(false);
-      setGeneratedStore({
-        name: "Ma Boutique",
-        product: "Smart Watch Pro",
+      setGeneratedApp({
+        name: "SmartWatch Store",
+        product: "Smart Watch Pro Max",
+        price: "49.99",
+        originalPrice: "89.99",
+        discount: "44%",
+        appUrl: "https://smartwatch.copyfy.app",
         theme: "Moderne",
         colors: ["#3B82F6", "#1E293B", "#FFFFFF"],
       });
-    }, 4500);
+      toast({
+        title: "App générée ! 🎉",
+        description: "Ton application e-commerce est prête",
+      });
+    }, 6000);
+  };
+
+  const copyAppUrl = () => {
+    if (generatedApp?.appUrl) {
+      navigator.clipboard.writeText(generatedApp.appUrl);
+      toast({
+        title: "Lien copié !",
+        description: "Le lien de ton app a été copié",
+      });
+    }
   };
 
   return (
@@ -60,11 +102,11 @@ const GenerateStore = () => {
             <span className="text-sm font-medium">Propulsé par l'IA</span>
           </div>
           <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            Génère ta boutique en quelques secondes
+            Génère ton app depuis AliExpress
           </h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Colle simplement le lien d'un produit AliExpress ou d'une boutique Shopify. 
-            Notre IA s'occupe du reste : images, descriptions, design.
+            Colle le lien d'un produit AliExpress. Notre IA crée une application 
+            e-commerce complète, prête à recevoir des commandes.
           </p>
         </div>
 
@@ -112,18 +154,18 @@ const GenerateStore = () => {
         </div>
 
         {/* Input Section */}
-        {!generatedStore && (
+        {!generatedApp && (
           <div className="glass rounded-2xl p-8 border-gradient max-w-2xl mx-auto">
             <div className="space-y-6">
               <div>
                 <label className="block text-sm font-medium mb-2">
-                  Lien du produit
+                  Lien du produit AliExpress
                 </label>
                 <div className="flex gap-3">
                   <div className="relative flex-1">
                     <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                     <Input
-                      placeholder="https://aliexpress.com/item/... ou https://myshop.myshopify.com/..."
+                      placeholder="https://fr.aliexpress.com/item/..."
                       value={productUrl}
                       onChange={(e) => setProductUrl(e.target.value)}
                       className="pl-10 h-12 bg-secondary border-border"
@@ -132,7 +174,7 @@ const GenerateStore = () => {
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mt-2">
-                  Supporte: AliExpress, Amazon, Shopify, et plus
+                  Colle le lien complet du produit AliExpress que tu veux vendre
                 </p>
               </div>
 
@@ -151,7 +193,7 @@ const GenerateStore = () => {
                 ) : (
                   <>
                     <Sparkles className="w-5 h-5" />
-                    Générer ma boutique
+                    Générer mon app e-commerce
                   </>
                 )}
               </Button>
@@ -159,18 +201,32 @@ const GenerateStore = () => {
           </div>
         )}
 
-        {/* Generated Store Preview */}
-        {generatedStore && (
+        {/* Generated App Preview */}
+        {generatedApp && (
           <div className="space-y-8">
             {/* Success Message */}
             <div className="glass rounded-2xl p-6 border-gradient text-center">
-              <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-success" />
+              <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-green-500" />
               </div>
-              <h2 className="text-2xl font-bold mb-2">Ta boutique est prête ! 🎉</h2>
-              <p className="text-muted-foreground">
-                L'IA a généré ta boutique en moins de 5 secondes.
+              <h2 className="text-2xl font-bold mb-2">Ton app est prête ! 🎉</h2>
+              <p className="text-muted-foreground mb-4">
+                L'IA a généré ton application e-commerce complète
               </p>
+              
+              {/* App URL */}
+              <div className="flex items-center justify-center gap-2 bg-secondary rounded-lg px-4 py-3 max-w-md mx-auto">
+                <Smartphone className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium">{generatedApp.appUrl}</span>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={copyAppUrl}>
+                  <Copy className="w-4 h-4" />
+                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                  <a href={generatedApp.appUrl} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </Button>
+              </div>
             </div>
 
             {/* Preview */}
@@ -184,34 +240,35 @@ const GenerateStore = () => {
                 </div>
                 <div className="flex-1 flex justify-center">
                   <div className="bg-muted px-4 py-1.5 rounded-lg text-xs text-muted-foreground flex items-center gap-2">
-                    <Store className="w-3 h-3" />
-                    maboutique.myshopify.com
+                    <Smartphone className="w-3 h-3" />
+                    {generatedApp.appUrl}
                   </div>
                 </div>
               </div>
 
-              {/* Store Preview */}
+              {/* App Preview */}
               <div className="p-8">
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   {/* Product Image Placeholder */}
-                  <div className="aspect-square bg-gradient-to-br from-secondary to-muted rounded-xl flex items-center justify-center">
-                    <Image className="w-16 h-16 text-muted-foreground/30" />
+                  <div className="aspect-square bg-gradient-to-br from-primary/10 to-secondary rounded-xl flex items-center justify-center">
+                    <Image className="w-16 h-16 text-primary/30" />
                   </div>
 
                   {/* Product Info */}
                   <div>
                     <span className="text-xs text-primary font-medium uppercase tracking-wider">
-                      Nouveau
+                      Best-seller
                     </span>
-                    <h3 className="text-2xl font-bold mt-2 mb-4">{generatedStore.product}</h3>
+                    <h3 className="text-2xl font-bold mt-2 mb-4">{generatedApp.product}</h3>
                     <p className="text-muted-foreground mb-6">
-                      Description générée par l'IA : Découvrez notre produit innovant qui combine qualité premium et design moderne pour une expérience utilisateur exceptionnelle.
+                      Montre connectée premium avec suivi fitness, notifications intelligentes, 
+                      design élégant et autonomie exceptionnelle. Parfaite pour le quotidien.
                     </p>
                     <div className="flex items-center gap-4 mb-6">
-                      <span className="text-3xl font-bold">€49,99</span>
-                      <span className="text-lg text-muted-foreground line-through">€79,99</span>
-                      <span className="px-2 py-1 bg-success/20 text-success text-sm rounded-lg font-medium">
-                        -38%
+                      <span className="text-3xl font-bold">€{generatedApp.price}</span>
+                      <span className="text-lg text-muted-foreground line-through">€{generatedApp.originalPrice}</span>
+                      <span className="px-2 py-1 bg-green-500/20 text-green-500 text-sm rounded-lg font-medium">
+                        -{generatedApp.discount}
                       </span>
                     </div>
                     <Button variant="hero" size="lg" className="w-full">
@@ -229,7 +286,7 @@ const GenerateStore = () => {
                   <Palette className="w-6 h-6 text-primary" />
                 </div>
                 <h3 className="font-semibold mb-1">Couleurs</h3>
-                <p className="text-sm text-muted-foreground">Personnalise les couleurs</p>
+                <p className="text-sm text-muted-foreground">Change les couleurs de ton app</p>
               </div>
               <div className="glass rounded-xl p-6 card-hover border-gradient cursor-pointer group">
                 <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
@@ -249,20 +306,22 @@ const GenerateStore = () => {
 
             {/* Actions */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button variant="hero" size="xl" className="gap-2">
-                <Upload className="w-5 h-5" />
-                Exporter vers Shopify
+              <Button variant="hero" size="xl" className="gap-2" asChild>
+                <a href={generatedApp.appUrl} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="w-5 h-5" />
+                  Voir mon app en ligne
+                </a>
               </Button>
               <Button 
                 variant="hero-outline" 
                 size="xl"
                 onClick={() => {
-                  setGeneratedStore(null);
+                  setGeneratedApp(null);
                   setProductUrl("");
                   setCurrentStep(0);
                 }}
               >
-                Générer une autre boutique
+                Générer une autre app
               </Button>
             </div>
           </div>

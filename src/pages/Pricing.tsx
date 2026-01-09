@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Check, Zap, Crown, Building2, ArrowRight } from "lucide-react";
+import { Check, Zap, Crown, Rocket, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -10,43 +11,45 @@ const plans = [
   {
     id: "starter",
     name: "Starter",
-    description: "Parfait pour débuter et tester la plateforme",
+    description: "Parfait pour tester et lancer ta première app",
     icon: Zap,
     monthlyPrice: 29,
     yearlyPrice: 290,
     features: [
-      "50 recherches produits/mois",
-      "10 générations de boutique",
-      "Accès aux Top Produits",
+      "1 app e-commerce générée",
+      "Design personnalisable",
+      "Fiche produit optimisée",
+      "Intégration paiements Stripe",
       "Support par email",
-      "1 utilisateur",
+      "Mises à jour incluses",
     ],
     notIncluded: [
-      "Analyse des concurrents",
-      "Top Ads illimité",
-      "API Access",
+      "Multi-produits",
+      "Domaine personnalisé",
+      "Analytics avancés",
     ],
     popular: false,
-    cta: "Commencer",
+    cta: "Commencer à 29€/mois",
   },
   {
     id: "pro",
     name: "Pro",
-    description: "Pour les entrepreneurs sérieux",
+    description: "Pour les entrepreneurs qui veulent scaler",
     icon: Crown,
-    monthlyPrice: 79,
-    yearlyPrice: 790,
+    monthlyPrice: 49,
+    yearlyPrice: 490,
     features: [
-      "Recherches produits illimitées",
-      "Générations de boutique illimitées",
-      "Accès aux Top Produits",
-      "Analyse des concurrents",
-      "Top Ads illimité",
+      "5 apps e-commerce générées",
+      "Multi-produits par app",
+      "Design premium personnalisable",
+      "Fiches produits optimisées SEO",
+      "Intégration paiements Stripe",
+      "Domaine personnalisé",
+      "Analytics de base",
       "Support prioritaire",
-      "3 utilisateurs",
     ],
     notIncluded: [
-      "API Access",
+      "Analytics avancés",
     ],
     popular: true,
     cta: "Essai gratuit 7 jours",
@@ -54,22 +57,25 @@ const plans = [
   {
     id: "business",
     name: "Business",
-    description: "Pour les agences et grandes équipes",
-    icon: Building2,
-    monthlyPrice: 199,
-    yearlyPrice: 1990,
+    description: "Pour les pros du dropshipping",
+    icon: Rocket,
+    monthlyPrice: 79,
+    yearlyPrice: 790,
     features: [
-      "Tout du plan Pro",
-      "API Access complet",
-      "Utilisateurs illimités",
-      "Account manager dédié",
-      "Formation personnalisée",
-      "SLA garanti",
-      "Facturation personnalisée",
+      "Apps illimitées",
+      "Multi-produits illimités",
+      "Designs premium exclusifs",
+      "Fiches produits IA avancées",
+      "Intégration paiements Stripe",
+      "Domaines personnalisés illimités",
+      "Analytics avancés",
+      "A/B Testing intégré",
+      "Support VIP 24/7",
+      "Formation dropshipping",
     ],
     notIncluded: [],
     popular: false,
-    cta: "Contacter les ventes",
+    cta: "Passer au Business",
   },
 ];
 
@@ -89,11 +95,11 @@ const Pricing = () => {
               <span className="text-sm font-medium text-primary">Tarifs simples et transparents</span>
             </div>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              Choisissez le plan{" "}
-              <span className="text-gradient">parfait pour vous</span>
+              Choisis ta formule{" "}
+              <span className="text-gradient">et lance ton business</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-              Commencez gratuitement, puis évoluez selon vos besoins. Annulez à tout moment.
+              Colle un lien AliExpress, reçois une app prête à vendre. Commence dès 29€/mois.
             </p>
 
             {/* Toggle */}
@@ -181,9 +187,12 @@ const Pricing = () => {
                       variant={plan.popular ? "hero" : "outline"}
                       size="lg"
                       className="w-full group"
+                      asChild
                     >
-                      {plan.cta}
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      <Link to="/auth">
+                        {plan.cta}
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </Link>
                     </Button>
                   </CardFooter>
                 </Card>
@@ -194,7 +203,7 @@ const Pricing = () => {
           {/* FAQ or Trust badges */}
           <div className="mt-20 text-center">
             <p className="text-muted-foreground mb-6">
-              Paiement sécurisé par Stripe • Annulation à tout moment • Support 24/7
+              Paiement sécurisé par Stripe • Annulation à tout moment • Support réactif
             </p>
             <div className="flex items-center justify-center gap-8 opacity-50">
               <span className="text-sm font-medium">Visa</span>
