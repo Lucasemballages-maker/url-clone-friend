@@ -35,7 +35,7 @@ const benefits = [
 
 const BenefitsGrid = () => {
   return (
-    <section className="py-24 relative">
+    <section id="pourquoi-nous" className="py-24 relative scroll-mt-20">
       {/* Background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
       

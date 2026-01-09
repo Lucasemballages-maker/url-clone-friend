@@ -20,9 +20,9 @@ const Navbar = () => {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            <a href="#pourquoi-nous" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link to="/#pourquoi-nous" className="text-muted-foreground hover:text-foreground transition-colors">
               Pourquoi nous choisir ?
-            </a>
+            </Link>
             <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
               Tarifs
             </Link>
@@ -51,9 +51,9 @@ const Navbar = () => {
         {isOpen && (
           <div className="md:hidden py-4 border-t border-border/50">
             <div className="flex flex-col gap-4">
-              <a href="#pourquoi-nous" className="text-muted-foreground hover:text-foreground transition-colors py-2">
+              <Link to="/#pourquoi-nous" className="text-muted-foreground hover:text-foreground transition-colors py-2">
                 Pourquoi nous choisir ?
-              </a>
+              </Link>
               <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors py-2">
                 Tarifs
               </Link>
