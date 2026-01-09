@@ -7,7 +7,7 @@ import Step3Personnaliser from "@/components/wizard/Step3Personnaliser";
 import Step4Finaliser from "@/components/wizard/Step4Finaliser";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-
+import { aliexpressApi, AliExpressProduct } from "@/lib/api/aliexpress";
 interface ProductImage {
   id: string;
   url: string;
@@ -115,27 +115,61 @@ const Dashboard = () => {
     setIsLoading(true);
     setLoadingMessage("Extraction des données du produit...");
 
-    // Simulate extraction
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setLoadingMessage("Analyse des images...");
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setLoadingMessage("Génération des images IA...");
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      const response = await aliexpressApi.scrapeProduct(productUrl);
 
-    // Set mock data
-    setProductImages(mockProductImages);
-    setStoreData((prev) => ({
-      ...prev,
-      productImages: mockProductImages.filter((img) => img.isSelected).map((img) => img.url),
-    }));
+      if (!response.success || !response.data) {
+        toast({
+          title: "Erreur",
+          description: response.error || "Impossible d'extraire les données du produit",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return;
+      }
 
-    setIsLoading(false);
-    setCurrentStep(2);
-    
-    toast({
-      title: "Produit extrait !",
-      description: "Les données du produit ont été récupérées avec succès",
-    });
+      const product = response.data;
+      
+      setLoadingMessage("Traitement des images...");
+      
+      // Convert scraped images to ProductImage format
+      const scrapedImages: ProductImage[] = product.images.map((url, index) => ({
+        id: `scraped-${index}`,
+        url,
+        isAiGenerated: false,
+        isSelected: index < 4, // Select first 4 by default
+      }));
+
+      setProductImages(scrapedImages);
+      setStoreName(product.title.split(' ').slice(0, 3).join(' ').toUpperCase());
+      setStoreData({
+        storeName: product.title.split(' ').slice(0, 3).join(' ').toUpperCase(),
+        productName: product.title,
+        productPrice: product.price,
+        originalPrice: product.originalPrice,
+        rating: product.rating.replace('.', ','),
+        reviews: product.reviews,
+        productImages: scrapedImages.filter((img) => img.isSelected).map((img) => img.url),
+        primaryColor: "#3B82F6",
+        announcementBar: "Livraison gratuite sur les commandes supérieures à 50 € | Livraison rapide dans le monde entier",
+      });
+
+      setIsLoading(false);
+      setCurrentStep(2);
+      
+      toast({
+        title: "Produit extrait !",
+        description: `${scrapedImages.length} images et informations récupérées`,
+      });
+    } catch (error) {
+      console.error('Error scraping:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'extraction",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+    }
   };
 
   // Configure from history
