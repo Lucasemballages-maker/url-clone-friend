@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import StorePreview from "./StorePreview";
+import PricingModal from "./PricingModal";
 import { StoreData } from "@/types/store";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Step4FinaliserProps {
   storeData: StoreData;
@@ -14,6 +18,28 @@ export const Step4Finaliser = ({
   storeData,
   onBack,
 }: Step4FinaliserProps) => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [showPricingModal, setShowPricingModal] = useState(false);
+
+  const handleConnectShopify = () => {
+    if (!user) {
+      // User not logged in, show pricing modal
+      setShowPricingModal(true);
+    } else {
+      // User is logged in, proceed with Shopify connection
+      // TODO: Implement Shopify connection
+      console.log("Connect to Shopify");
+    }
+  };
+
+  const handleSelectPlan = (planId: string, isYearly: boolean) => {
+    // Store the selected plan in sessionStorage for after auth
+    sessionStorage.setItem("selectedPlan", JSON.stringify({ planId, isYearly }));
+    // Redirect to auth page
+    navigate("/auth");
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-200px)]">
       {/* Store Preview - Full Width */}
@@ -28,7 +54,7 @@ export const Step4Finaliser = ({
           Retour
         </Button>
 
-        <Button variant="hero" size="xl" className="gap-3">
+        <Button variant="hero" size="xl" className="gap-3" onClick={handleConnectShopify}>
           <svg 
             className="w-5 h-5" 
             viewBox="0 0 24 24" 
@@ -39,6 +65,13 @@ export const Step4Finaliser = ({
           Connecter votre Shopify
         </Button>
       </div>
+
+      {/* Pricing Modal for non-authenticated users */}
+      <PricingModal
+        open={showPricingModal}
+        onOpenChange={setShowPricingModal}
+        onSelectPlan={handleSelectPlan}
+      />
     </div>
   );
 };
