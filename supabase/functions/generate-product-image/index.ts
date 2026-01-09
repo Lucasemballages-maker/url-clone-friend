@@ -31,10 +31,10 @@ Deno.serve(async (req) => {
     const productDescription = productName || 'household product';
     
     const stylePrompts: Record<string, string> = {
-      lifestyle: `Generate a NEW professional product photography image for e-commerce. Create a similar type of product as shown (a ${productDescription}) in an elegant lifestyle setting - like a modern bathroom or kitchen. Use warm, inviting lighting. The product should look premium and desirable. Do NOT copy any logos or branding - create a generic clean product design. Make it look like a high-end e-commerce photo.`,
-      studio: `Generate a NEW professional studio product photography image. Create a similar type of product as shown (a ${productDescription}) on a clean white or soft gradient background with professional studio lighting. Add subtle shadows and reflections. The product should look premium and clean with no visible branding. Make it look like a catalog photo.`,
-      outdoor: `Generate a NEW professional outdoor product photography image. Create a similar type of product as shown (a ${productDescription}) in a beautiful natural outdoor setting with soft natural lighting. The scene should be aspirational and make the product look appealing. No logos or branding visible.`,
-      minimal: `Generate a NEW minimalist product photography image. Create a similar type of product as shown (a ${productDescription}) with a clean, simple background. Use soft shadows and clean lines. Modern and elegant style. No logos or text on the product.`,
+      lifestyle: `You MUST generate and output an image. Create a professional e-commerce product photo of a ${productDescription} placed in an elegant lifestyle setting like a modern bathroom or kitchen. Warm inviting lighting, premium look, no logos or branding. Output the generated image.`,
+      studio: `You MUST generate and output an image. Create a professional studio product photo of a ${productDescription} on a clean white or soft gradient background with studio lighting, subtle shadows and reflections. Premium clean look, no branding. Output the generated image.`,
+      outdoor: `You MUST generate and output an image. Create a professional outdoor product photo of a ${productDescription} in a beautiful natural setting with soft natural lighting. Aspirational and appealing, no logos. Output the generated image.`,
+      minimal: `You MUST generate and output an image. Create a minimalist product photo of a ${productDescription} with clean simple background, soft shadows, modern elegant style. No logos or text. Output the generated image.`,
     };
 
     const prompt = stylePrompts[style] || stylePrompts.lifestyle;
