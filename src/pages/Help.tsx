@@ -7,6 +7,12 @@ import {
   ExternalLink
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const helpItems = [
   {
@@ -19,13 +25,40 @@ const helpItems = [
     icon: MessageCircle,
     title: "FAQ",
     description: "Questions fréquemment posées",
-    link: "#",
+    link: "#faq",
   },
   {
     icon: Mail,
     title: "Contact",
     description: "support@dropyfy.com",
     link: "mailto:support@dropyfy.com",
+  },
+];
+
+const faqItems = [
+  {
+    question: "Comment créer ma première boutique ?",
+    answer: "Collez simplement un lien de produit AliExpress dans le dashboard, choisissez la langue et cliquez sur 'Générer'. L'IA créera automatiquement votre boutique en moins de 2 minutes.",
+  },
+  {
+    question: "Quels types de liens sont supportés ?",
+    answer: "Nous supportons actuellement les liens AliExpress. Le support pour Amazon et d'autres plateformes est prévu prochainement.",
+  },
+  {
+    question: "Comment connecter ma boutique à Shopify ?",
+    answer: "Une fois votre boutique créée, cliquez sur 'Connecter à Shopify' à l'étape 4. Vous serez redirigé vers la page de tarification pour choisir un abonnement, puis votre produit sera automatiquement exporté vers Shopify.",
+  },
+  {
+    question: "Puis-je modifier ma boutique après sa création ?",
+    answer: "Oui, vous pouvez modifier tous les éléments de votre boutique : textes, images, couleurs et prix. Retrouvez vos boutiques dans la section 'Mes apps'.",
+  },
+  {
+    question: "Comment fonctionne la génération d'images IA ?",
+    answer: "Notre IA génère automatiquement des images professionnelles de votre produit dans différents styles (lifestyle, studio). Vous pouvez également générer des images supplémentaires à l'étape 2.",
+  },
+  {
+    question: "Quels sont les moyens de paiement acceptés ?",
+    answer: "Nous acceptons les cartes bancaires (Visa, Mastercard, American Express) via Stripe. Tous les paiements sont sécurisés.",
   },
 ];
 
@@ -45,7 +78,7 @@ const Help = () => {
         </div>
 
         {/* Help Items */}
-        <div className="space-y-3">
+        <div className="space-y-3 mb-12">
           {helpItems.map((item) => (
             <a
               key={item.title}
@@ -66,8 +99,25 @@ const Help = () => {
           ))}
         </div>
 
+        {/* FAQ Section */}
+        <div id="faq" className="mb-12">
+          <h2 className="text-lg font-semibold mb-4">Questions fréquentes</h2>
+          <Accordion type="single" collapsible className="w-full">
+            {faqItems.map((item, index) => (
+              <AccordionItem key={index} value={`item-${index}`}>
+                <AccordionTrigger className="text-left">
+                  {item.question}
+                </AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  {item.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+
         {/* Footer */}
-        <div className="mt-12 text-center">
+        <div className="text-center">
           <p className="text-sm text-muted-foreground mb-4">
             Besoin d'une assistance immédiate ?
           </p>
