@@ -6,8 +6,9 @@ import Step2Selectionner from "@/components/wizard/Step2Selectionner";
 import Step3Personnaliser from "@/components/wizard/Step3Personnaliser";
 import Step4Finaliser from "@/components/wizard/Step4Finaliser";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles, Image, Wand2, Check } from "lucide-react";
 import { aliexpressApi, AliExpressProduct, ImageStyle } from "@/lib/api/aliexpress";
+import { Progress } from "@/components/ui/progress";
 interface ProductImage {
   id: string;
   url: string;
@@ -68,10 +69,18 @@ const mockProductImages: ProductImage[] = [
   },
 ];
 
+interface LoadingStep {
+  id: string;
+  label: string;
+  status: 'pending' | 'loading' | 'done';
+}
+
 const Dashboard = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("");
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [loadingSteps, setLoadingSteps] = useState<LoadingStep[]>([]);
   const { toast } = useToast();
 
   // Step 1 state
@@ -107,10 +116,30 @@ const Dashboard = () => {
     if (!productUrl) return;
 
     setIsLoading(true);
+    setLoadingProgress(0);
+    
+    // Initialize loading steps
+    const initialSteps: LoadingStep[] = [
+      { id: 'scrape', label: 'Extraction des données du produit', status: 'loading' },
+      { id: 'reformulate', label: 'Reformulation du texte avec l\'IA', status: 'pending' },
+      { id: 'images', label: 'Traitement des images', status: 'pending' },
+      { id: 'ai-lifestyle', label: 'Génération image IA Lifestyle', status: 'pending' },
+      { id: 'ai-studio', label: 'Génération image IA Studio', status: 'pending' },
+    ];
+    setLoadingSteps(initialSteps);
     setLoadingMessage("Extraction des données du produit...");
+
+    const updateStep = (stepId: string, status: LoadingStep['status']) => {
+      setLoadingSteps(prev => prev.map(s => s.id === stepId ? { ...s, status } : s));
+      const stepIndex = initialSteps.findIndex(s => s.id === stepId);
+      if (status === 'done') {
+        setLoadingProgress(((stepIndex + 1) / initialSteps.length) * 100);
+      }
+    };
 
     try {
       const response = await aliexpressApi.scrapeProduct(productUrl);
+      updateStep('scrape', 'done');
 
       if (!response.success || !response.data) {
         toast({
@@ -124,6 +153,7 @@ const Dashboard = () => {
 
       const product = response.data;
       
+      updateStep('reformulate', 'loading');
       setLoadingMessage("Reformulation du texte avec l'IA...");
       
       // Reformulate product text with AI
@@ -132,6 +162,7 @@ const Dashboard = () => {
         product.description,
         language
       );
+      updateStep('reformulate', 'done');
 
       const reformulated = reformulateResponse.success && reformulateResponse.data
         ? reformulateResponse.data
@@ -143,6 +174,7 @@ const Dashboard = () => {
             cta: 'Acheter maintenant',
           };
       
+      updateStep('images', 'loading');
       setLoadingMessage("Traitement des images...");
       
       // Convert scraped images to ProductImage format
@@ -152,13 +184,18 @@ const Dashboard = () => {
         isAiGenerated: false,
         isSelected: index < 4, // Select first 4 by default
       }));
+      updateStep('images', 'done');
 
       // Auto-generate AI images for different styles
-      setLoadingMessage("Génération des images IA...");
-      const styles: ImageStyle[] = ['lifestyle', 'studio'];
+      const styles: { style: ImageStyle; stepId: string }[] = [
+        { style: 'lifestyle', stepId: 'ai-lifestyle' },
+        { style: 'studio', stepId: 'ai-studio' },
+      ];
       const aiImages: ProductImage[] = [];
       
-      for (const style of styles) {
+      for (const { style, stepId } of styles) {
+        updateStep(stepId, 'loading');
+        setLoadingMessage(`Génération de l'image ${style === 'lifestyle' ? 'Lifestyle' : 'Studio'}...`);
         try {
           const aiResponse = await aliexpressApi.generateProductImage(
             scrapedImages[0]?.url || product.images[0],
@@ -174,8 +211,10 @@ const Dashboard = () => {
               isSelected: true,
             });
           }
+          updateStep(stepId, 'done');
         } catch (err) {
           console.error(`Error generating ${style} image:`, err);
+          updateStep(stepId, 'done');
         }
       }
 
@@ -318,13 +357,66 @@ const Dashboard = () => {
   if (isLoading) {
     return (
       <DashboardLayout>
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-6">
-              <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        <div className="min-h-screen flex items-center justify-center p-6">
+          <div className="w-full max-w-md">
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/40 flex items-center justify-center mx-auto mb-6 relative">
+                <Wand2 className="w-10 h-10 text-primary animate-pulse" />
+                <div className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
+              </div>
+              <h2 className="text-2xl font-bold mb-2">Création en cours...</h2>
+              <p className="text-muted-foreground">{loadingMessage}</p>
             </div>
-            <h2 className="text-xl font-semibold mb-2">{loadingMessage}</h2>
-            <p className="text-muted-foreground">Veuillez patienter...</p>
+
+            {/* Progress bar */}
+            <div className="mb-8">
+              <div className="flex justify-between text-sm text-muted-foreground mb-2">
+                <span>Progression</span>
+                <span>{Math.round(loadingProgress)}%</span>
+              </div>
+              <Progress value={loadingProgress} className="h-3" />
+            </div>
+
+            {/* Steps list */}
+            <div className="space-y-3 bg-card/50 rounded-xl p-4 border border-border">
+              {loadingSteps.map((step) => (
+                <div
+                  key={step.id}
+                  className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                    step.status === 'loading' 
+                      ? 'bg-primary/10 border border-primary/30' 
+                      : step.status === 'done' 
+                        ? 'bg-green-500/10' 
+                        : 'opacity-50'
+                  }`}
+                >
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0">
+                    {step.status === 'loading' ? (
+                      <Loader2 className="w-5 h-5 text-primary animate-spin" />
+                    ) : step.status === 'done' ? (
+                      <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                        <Check className="w-5 h-5 text-white" />
+                      </div>
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
+                        {step.id.includes('ai') ? (
+                          <Sparkles className="w-4 h-4 text-muted-foreground" />
+                        ) : (
+                          <Image className="w-4 h-4 text-muted-foreground" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  <span className={`text-sm font-medium ${
+                    step.status === 'done' ? 'text-green-500' : 
+                    step.status === 'loading' ? 'text-primary' : 'text-muted-foreground'
+                  }`}>
+                    {step.label}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </DashboardLayout>
