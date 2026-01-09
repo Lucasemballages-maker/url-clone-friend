@@ -125,14 +125,18 @@ const FeatureTabs = () => {
                 <div className="p-6">
                   {/* Product Preview */}
                   <div className="space-y-4">
-                    <div className="aspect-video bg-gradient-to-br from-primary/10 to-secondary rounded-xl flex items-center justify-center">
-                      <ShoppingBag className="w-12 h-12 text-primary/30" />
+                    <div className="aspect-video bg-white rounded-xl flex items-center justify-center overflow-hidden">
+                      <img 
+                        src="/src/assets/product-preview-headphones.png" 
+                        alt="Casque Audio Premium" 
+                        className="w-full h-full object-contain p-2"
+                      />
                     </div>
                     <div>
-                      <p className="text-xs text-primary font-medium mb-1">NOUVEAU</p>
-                      <h4 className="font-semibold mb-2">Smart Watch Pro Max</h4>
+                      <p className="text-xs text-primary font-medium mb-1">🔥 BEST-SELLER</p>
+                      <h4 className="font-semibold mb-2">Casque Audio Premium Sans Fil</h4>
                       <p className="text-sm text-muted-foreground mb-4">
-                        Montre connectée avec suivi fitness, notifications et design premium...
+                        Son immersif, réduction de bruit active, 40h d'autonomie...
                       </p>
                       <div className="flex items-center gap-3 mb-4">
                         <span className="text-2xl font-bold">€49,99</span>
