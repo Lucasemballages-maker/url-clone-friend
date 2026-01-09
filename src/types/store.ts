@@ -11,5 +11,8 @@ export interface StoreData {
   reviews: string;
   productImages: string[];
   primaryColor: string;
+  backgroundColor: string;
+  textColor: string;
+  accentColor: string;
   announcementBar: string;
 }

@@ -107,6 +107,9 @@ const Dashboard = () => {
     reviews: "21 883",
     productImages: [],
     primaryColor: "#3B82F6",
+    backgroundColor: "#0F0F0F",
+    textColor: "#FFFFFF",
+    accentColor: "#F59E0B",
     announcementBar: "Livraison gratuite sur les commandes supérieures à 50 € | Livraison rapide dans le monde entier",
   });
   const [storeUrl] = useState("https://votre-boutique.lovable.app");
@@ -234,6 +237,9 @@ const Dashboard = () => {
         reviews: product.reviews,
         productImages: allImages.filter((img) => img.isSelected).map((img) => img.url),
         primaryColor: "#3B82F6",
+        backgroundColor: "#0F0F0F",
+        textColor: "#FFFFFF",
+        accentColor: "#F59E0B",
         announcementBar: "Livraison gratuite sur les commandes supérieures à 50 € | Livraison rapide dans le monde entier",
       });
 
