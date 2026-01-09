@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
 import StepIndicator from "@/components/wizard/StepIndicator";
 import Step1Charger from "@/components/wizard/Step1Charger";
@@ -9,37 +9,15 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Sparkles, Image, Wand2, Check } from "lucide-react";
 import { aliexpressApi, AliExpressProduct, ImageStyle } from "@/lib/api/aliexpress";
 import { Progress } from "@/components/ui/progress";
+import { useStoreHistory, HistoryItem } from "@/hooks/useStoreHistory";
+import { StoreData } from "@/types/store";
+
 interface ProductImage {
   id: string;
   url: string;
   isAiGenerated: boolean;
   isSelected: boolean;
 }
-
-interface HistoryItem {
-  id: string;
-  productName: string;
-  productUrl: string;
-  productImage: string;
-  language: string;
-  type: string;
-  updatedAt: string;
-}
-
-import { StoreData } from "@/types/store";
-
-// Simulated history data
-const mockHistory: HistoryItem[] = [
-  {
-    id: "1",
-    productName: "Filtre de Douche Purifica...",
-    productUrl: "https://fr.aliexpress.com/item/...",
-    productImage: "https://ae01.alicdn.com/kf/S6cb2b4b5c3e448bba92d0f0a0c3c6f0aH.jpg",
-    language: "fr",
-    type: "Boutique",
-    updatedAt: "il y a 7 minutes",
-  },
-];
 
 // Simulated product images from AliExpress scraping
 const mockProductImages: ProductImage[] = [
@@ -82,11 +60,13 @@ const Dashboard = () => {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [loadingSteps, setLoadingSteps] = useState<LoadingStep[]>([]);
   const { toast } = useToast();
+  
+  // History from database
+  const { history, saveConfiguration } = useStoreHistory();
 
   // Step 1 state
   const [productUrl, setProductUrl] = useState("");
   const [language, setLanguage] = useState("fr");
-  const [history] = useState<HistoryItem[]>(mockHistory);
 
   // Step 2 state
   const [storeName, setStoreName] = useState("VOTRE MARQUE");
@@ -224,7 +204,8 @@ const Dashboard = () => {
       const allImages = [...aiImages, ...scrapedImages];
       setProductImages(allImages);
       setStoreName(reformulated.title.split(' ').slice(0, 3).join(' ').toUpperCase());
-      setStoreData({
+      
+      const newStoreData: StoreData = {
         storeName: reformulated.title.split(' ').slice(0, 3).join(' ').toUpperCase(),
         productName: reformulated.title,
         headline: reformulated.headline,
@@ -241,7 +222,18 @@ const Dashboard = () => {
         textColor: "#FFFFFF",
         accentColor: "#F59E0B",
         announcementBar: "Livraison gratuite sur les commandes supérieures à 50 € | Livraison rapide dans le monde entier",
-      });
+      };
+      
+      setStoreData(newStoreData);
+
+      // Save configuration to history
+      await saveConfiguration(
+        reformulated.title,
+        productUrl,
+        allImages[0]?.url || "",
+        language,
+        newStoreData
+      );
 
       setIsLoading(false);
       setCurrentStep(2);
@@ -265,8 +257,20 @@ const Dashboard = () => {
   const handleConfigureHistory = (item: HistoryItem) => {
     setProductUrl(item.productUrl);
     setStoreName(item.productName.replace("...", ""));
+    
+    // If we have stored storeData, restore it
+    if (item.storeData) {
+      setStoreData(item.storeData);
+      const restoredImages: ProductImage[] = (item.storeData.productImages || []).map((url, idx) => ({
+        id: `restored-${idx}`,
+        url,
+        isAiGenerated: false,
+        isSelected: true,
+      }));
+      setProductImages(restoredImages);
+    }
+    
     setCurrentStep(2);
-    setProductImages(mockProductImages);
   };
 
   // Toggle image selection
