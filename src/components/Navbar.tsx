@@ -26,9 +26,6 @@ const Navbar = () => {
             <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
               Tarifs
             </Link>
-            <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-              Affiliation
-            </a>
           </div>
 
           {/* Desktop CTA */}
@@ -60,9 +57,6 @@ const Navbar = () => {
               <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors py-2">
                 Tarifs
               </Link>
-              <a href="#" className="text-muted-foreground hover:text-foreground transition-colors py-2">
-                Affiliation
-              </a>
               <div className="flex flex-col gap-2 pt-4 border-t border-border/50">
                 <Button variant="ghost" className="w-full justify-center" asChild>
                   <Link to="/auth">Connexion</Link>
