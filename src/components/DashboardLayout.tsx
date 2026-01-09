@@ -1,30 +1,27 @@
 import { ReactNode, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
-  LayoutDashboard, 
-  Search, 
-  Store, 
-  Megaphone, 
   Sparkles, 
+  Smartphone, 
   Settings, 
   HelpCircle,
   ChevronLeft,
   Menu,
   LogOut,
-  User
+  User,
+  Crown,
+  LayoutGrid
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
 interface DashboardLayoutProps {
   children: ReactNode;
 }
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Top Products", href: "/dashboard/products", icon: Search },
-  { name: "Top Shops", href: "/dashboard/shops", icon: Store },
-  { name: "Top Ads", href: "/dashboard/ads", icon: Megaphone },
-  { name: "Génère ta boutique", href: "/dashboard/generate", icon: Sparkles, highlight: true },
+  { name: "Créer une app", href: "/dashboard", icon: Sparkles, highlight: true },
+  { name: "Mes apps", href: "/dashboard/apps", icon: Smartphone },
 ];
 
 const bottomNavigation = [
@@ -34,8 +31,15 @@ const bottomNavigation = [
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/");
+  };
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -96,7 +100,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               >
                 <Icon className="w-5 h-5 shrink-0" />
                 {!sidebarCollapsed && <span>{item.name}</span>}
-                {item.highlight && !sidebarCollapsed && (
+                {item.highlight && !sidebarCollapsed && !isActive && (
                   <span className="ml-auto px-1.5 py-0.5 text-[10px] bg-primary text-primary-foreground rounded font-semibold">
                     IA
                   </span>
@@ -104,6 +108,24 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               </Link>
             );
           })}
+
+          {/* Upgrade Card */}
+          {!sidebarCollapsed && (
+            <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/20">
+              <div className="flex items-center gap-2 mb-2">
+                <Crown className="w-4 h-4 text-primary" />
+                <span className="text-sm font-semibold">Passe au Pro</span>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                Génère des apps illimitées et accède aux features premium.
+              </p>
+              <Button variant="hero" size="sm" className="w-full" asChild>
+                <Link to="/pricing">
+                  Voir les offres
+                </Link>
+              </Button>
+            </div>
+          )}
         </nav>
 
         {/* Bottom Navigation */}
@@ -130,12 +152,12 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </div>
             {!sidebarCollapsed && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">Utilisateur</p>
-                <p className="text-xs text-muted-foreground truncate">Pro Plan</p>
+                <p className="text-sm font-medium truncate">{user?.email?.split("@")[0] || "Utilisateur"}</p>
+                <p className="text-xs text-muted-foreground truncate">Starter</p>
               </div>
             )}
             {!sidebarCollapsed && (
-              <Button variant="ghost" size="icon" className="shrink-0">
+              <Button variant="ghost" size="icon" className="shrink-0" onClick={handleSignOut}>
                 <LogOut className="w-4 h-4" />
               </Button>
             )}
