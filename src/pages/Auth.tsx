@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
 
 const authSchema = z.object({
   email: z.string().trim().email("Adresse email invalide").max(255),
@@ -19,9 +20,41 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signUp, signIn } = useAuth();
+  const { signUp, signIn, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Handle checkout after login if plan was selected
+  useEffect(() => {
+    const handlePendingCheckout = async () => {
+      if (!user) return;
+      
+      const savedPlan = sessionStorage.getItem("selectedPlan");
+      if (savedPlan) {
+        try {
+          const { planId, isYearly } = JSON.parse(savedPlan);
+          sessionStorage.removeItem("selectedPlan");
+          
+          const { data, error } = await supabase.functions.invoke("create-checkout", {
+            body: { planId, isYearly },
+          });
+
+          if (error) throw error;
+          if (data?.url) {
+            window.open(data.url, "_blank");
+          }
+          navigate("/dashboard");
+        } catch (error) {
+          console.error("Error creating checkout:", error);
+          navigate("/dashboard");
+        }
+      } else {
+        navigate("/dashboard");
+      }
+    };
+
+    handlePendingCheckout();
+  }, [user, navigate]);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,7 +84,6 @@ const Auth = () => {
         title: "Compte créé !",
         description: "Vous êtes maintenant connecté.",
       });
-      navigate("/dashboard");
     }
   };
 
@@ -83,7 +115,6 @@ const Auth = () => {
         title: "Bienvenue !",
         description: "Connexion réussie.",
       });
-      navigate("/dashboard");
     }
   };
 

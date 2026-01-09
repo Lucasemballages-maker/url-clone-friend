@@ -1,11 +1,14 @@
 import { useState } from "react";
-import { Check, Zap, Crown, Rocket, ArrowRight } from "lucide-react";
+import { Check, Zap, Crown, Rocket, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useToast } from "@/hooks/use-toast";
 
 const plans = [
   {
@@ -14,7 +17,7 @@ const plans = [
     description: "Parfait pour tester et lancer ta première app",
     icon: Zap,
     monthlyPrice: 29,
-    yearlyPrice: Math.round(29 * 12 * 0.81), // 19% de réduction = 282€
+    yearlyPrice: Math.round(29 * 12 * 0.81),
     features: [
       "1 app e-commerce générée",
       "Design personnalisable",
@@ -37,7 +40,7 @@ const plans = [
     description: "Pour les entrepreneurs qui veulent scaler",
     icon: Crown,
     monthlyPrice: 49,
-    yearlyPrice: Math.round(49 * 12 * 0.81), // 19% de réduction = 476€
+    yearlyPrice: Math.round(49 * 12 * 0.81),
     features: [
       "5 apps e-commerce générées",
       "Multi-produits par app",
@@ -60,7 +63,7 @@ const plans = [
     description: "Pour les pros du dropshipping",
     icon: Rocket,
     monthlyPrice: 79,
-    yearlyPrice: Math.round(79 * 12 * 0.81), // 19% de réduction = 768€
+    yearlyPrice: Math.round(79 * 12 * 0.81),
     features: [
       "Apps illimitées",
       "Multi-produits illimités",
@@ -81,6 +84,35 @@ const plans = [
 
 const Pricing = () => {
   const [isYearly, setIsYearly] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { createCheckout, subscribed, planName } = useSubscription();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSelectPlan = async (planId: string) => {
+    if (!user) {
+      // Store the selected plan and redirect to auth
+      sessionStorage.setItem("selectedPlan", JSON.stringify({ planId, isYearly }));
+      navigate("/auth");
+      return;
+    }
+
+    // User is logged in, create checkout session
+    setLoadingPlan(planId);
+    try {
+      await createCheckout(planId, isYearly);
+    } catch (error) {
+      console.error("Error creating checkout:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer la session de paiement. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -128,6 +160,8 @@ const Pricing = () => {
               const Icon = plan.icon;
               const price = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
               const period = isYearly ? "/an" : "/mois";
+              const isLoading = loadingPlan === plan.id;
+              const isCurrentPlan = subscribed && planName?.toLowerCase() === plan.id;
               
               return (
                 <Card
@@ -136,12 +170,19 @@ const Pricing = () => {
                     plan.popular
                       ? "border-primary bg-primary/5 shadow-lg shadow-primary/20"
                       : "border-border/50 bg-card/50"
-                  }`}
+                  } ${isCurrentPlan ? "ring-2 ring-green-500" : ""}`}
                 >
                   {plan.popular && (
                     <div className="absolute top-0 right-0">
                       <div className="bg-primary text-primary-foreground text-xs font-bold px-4 py-1 rounded-bl-lg">
                         POPULAIRE
+                      </div>
+                    </div>
+                  )}
+                  {isCurrentPlan && (
+                    <div className="absolute top-0 left-0">
+                      <div className="bg-green-500 text-white text-xs font-bold px-4 py-1 rounded-br-lg">
+                        VOTRE PLAN
                       </div>
                     </div>
                   )}
@@ -187,12 +228,19 @@ const Pricing = () => {
                       variant={plan.popular ? "hero" : "outline"}
                       size="lg"
                       className="w-full group"
-                      asChild
+                      onClick={() => handleSelectPlan(plan.id)}
+                      disabled={isLoading || loadingPlan !== null || isCurrentPlan}
                     >
-                      <Link to="/auth">
-                        {plan.cta}
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                      </Link>
+                      {isLoading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : isCurrentPlan ? (
+                        "Plan actuel"
+                      ) : (
+                        <>
+                          {plan.cta}
+                          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        </>
+                      )}
                     </Button>
                   </CardFooter>
                 </Card>
