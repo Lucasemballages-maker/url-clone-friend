@@ -54,6 +54,14 @@ interface Step3PersonnaliserProps {
   onNext: () => void;
 }
 
+const colorPresets = [
+  { name: "Moderne", primary: "#8B5CF6", background: "#0F0F0F", text: "#FFFFFF", accent: "#F59E0B" },
+  { name: "Élégant", primary: "#1E40AF", background: "#FAFAFA", text: "#1F2937", accent: "#DC2626" },
+  { name: "Nature", primary: "#059669", background: "#F0FDF4", text: "#1F2937", accent: "#84CC16" },
+  { name: "Luxe", primary: "#D4AF37", background: "#1A1A1A", text: "#FFFFFF", accent: "#B8860B" },
+  { name: "Minimaliste", primary: "#000000", background: "#FFFFFF", text: "#374151", accent: "#6B7280" },
+];
+
 export const Step3Personnaliser = ({
   storeData,
   setStoreData,
@@ -78,6 +86,16 @@ export const Step3Personnaliser = ({
     const newBenefits = [...storeData.benefits];
     newBenefits[index] = value;
     setStoreData({ ...storeData, benefits: newBenefits });
+  };
+
+  const applyPreset = (preset: typeof colorPresets[0]) => {
+    setStoreData({
+      ...storeData,
+      primaryColor: preset.primary,
+      backgroundColor: preset.background,
+      textColor: preset.text,
+      accentColor: preset.accent,
+    });
   };
 
   const renderSectionContent = (sectionId: string) => {
@@ -225,6 +243,157 @@ export const Step3Personnaliser = ({
     }
   };
 
+  const renderStylesContent = () => (
+    <div className="space-y-6">
+      {/* Color Presets */}
+      <div className="space-y-3">
+        <Label className="text-base font-semibold">Thèmes prédéfinis</Label>
+        <div className="grid grid-cols-2 gap-3">
+          {colorPresets.map((preset) => (
+            <button
+              key={preset.name}
+              onClick={() => applyPreset(preset)}
+              className="flex items-center gap-3 p-3 rounded-lg border border-border hover:border-primary/50 transition-all text-left group"
+            >
+              <div className="flex gap-1">
+                <div 
+                  className="w-5 h-5 rounded-full border border-white/20" 
+                  style={{ backgroundColor: preset.primary }} 
+                />
+                <div 
+                  className="w-5 h-5 rounded-full border border-white/20" 
+                  style={{ backgroundColor: preset.background }} 
+                />
+              </div>
+              <span className="text-sm font-medium group-hover:text-primary transition-colors">
+                {preset.name}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Custom Colors */}
+      <div className="space-y-4">
+        <Label className="text-base font-semibold">Couleurs personnalisées</Label>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="primaryColor" className="text-sm">Couleur primaire</Label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                id="primaryColor"
+                value={storeData.primaryColor}
+                onChange={(e) => updateStoreData("primaryColor", e.target.value)}
+                className="w-10 h-10 rounded-lg border border-border cursor-pointer"
+              />
+              <Input
+                value={storeData.primaryColor}
+                onChange={(e) => updateStoreData("primaryColor", e.target.value)}
+                className="flex-1 uppercase"
+                maxLength={7}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="backgroundColor" className="text-sm">Couleur de fond</Label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                id="backgroundColor"
+                value={storeData.backgroundColor || "#0F0F0F"}
+                onChange={(e) => updateStoreData("backgroundColor", e.target.value)}
+                className="w-10 h-10 rounded-lg border border-border cursor-pointer"
+              />
+              <Input
+                value={storeData.backgroundColor || "#0F0F0F"}
+                onChange={(e) => updateStoreData("backgroundColor", e.target.value)}
+                className="flex-1 uppercase"
+                maxLength={7}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="textColor" className="text-sm">Couleur du texte</Label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                id="textColor"
+                value={storeData.textColor || "#FFFFFF"}
+                onChange={(e) => updateStoreData("textColor", e.target.value)}
+                className="w-10 h-10 rounded-lg border border-border cursor-pointer"
+              />
+              <Input
+                value={storeData.textColor || "#FFFFFF"}
+                onChange={(e) => updateStoreData("textColor", e.target.value)}
+                className="flex-1 uppercase"
+                maxLength={7}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="accentColor" className="text-sm">Couleur d'accent</Label>
+            <div className="flex items-center gap-2">
+              <input
+                type="color"
+                id="accentColor"
+                value={storeData.accentColor || "#F59E0B"}
+                onChange={(e) => updateStoreData("accentColor", e.target.value)}
+                className="w-10 h-10 rounded-lg border border-border cursor-pointer"
+              />
+              <Input
+                value={storeData.accentColor || "#F59E0B"}
+                onChange={(e) => updateStoreData("accentColor", e.target.value)}
+                className="flex-1 uppercase"
+                maxLength={7}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Preview */}
+      <div className="space-y-3">
+        <Label className="text-base font-semibold">Aperçu des couleurs</Label>
+        <div 
+          className="p-6 rounded-lg border border-border"
+          style={{ backgroundColor: storeData.backgroundColor || "#0F0F0F" }}
+        >
+          <h3 
+            className="text-lg font-bold mb-2"
+            style={{ color: storeData.textColor || "#FFFFFF" }}
+          >
+            Titre d'exemple
+          </h3>
+          <p 
+            className="text-sm mb-4 opacity-80"
+            style={{ color: storeData.textColor || "#FFFFFF" }}
+          >
+            Voici un exemple de texte pour visualiser vos couleurs.
+          </p>
+          <div className="flex gap-2">
+            <button
+              className="px-4 py-2 rounded-lg text-white text-sm font-medium"
+              style={{ backgroundColor: storeData.primaryColor }}
+            >
+              Bouton primaire
+            </button>
+            <button
+              className="px-4 py-2 rounded-lg text-white text-sm font-medium"
+              style={{ backgroundColor: storeData.accentColor || "#F59E0B" }}
+            >
+              Bouton accent
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="flex h-[calc(100vh-200px)] gap-6">
       {/* Left Panel - Editor */}
@@ -260,28 +429,34 @@ export const Step3Personnaliser = ({
           ))}
         </div>
 
-        {/* Sections List */}
-        <div className="flex-1 overflow-y-auto space-y-2">
-          {sections.map((section) => {
-            const Icon = section.icon;
-            const isActive = activeSection === section.id;
-            return (
-              <div key={section.id} className="rounded-xl border border-border overflow-hidden">
-                <button
-                  onClick={() => setActiveSection(isActive ? null : section.id)}
-                  className="w-full flex items-center gap-3 p-4 bg-card hover:bg-muted/50 transition-all text-left group"
-                >
-                  <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                  <span className="flex-1 font-medium">{section.title}</span>
-                  <ChevronDown className={cn(
-                    "w-4 h-4 text-muted-foreground transition-transform",
-                    isActive && "rotate-180"
-                  )} />
-                </button>
-                {isActive && renderSectionContent(section.id)}
-              </div>
-            );
-          })}
+        {/* Content based on tab */}
+        <div className="flex-1 overflow-y-auto">
+          {activeTab === "styles" ? (
+            renderStylesContent()
+          ) : (
+            <div className="space-y-2">
+              {sections.map((section) => {
+                const Icon = section.icon;
+                const isActive = activeSection === section.id;
+                return (
+                  <div key={section.id} className="rounded-xl border border-border overflow-hidden">
+                    <button
+                      onClick={() => setActiveSection(isActive ? null : section.id)}
+                      className="w-full flex items-center gap-3 p-4 bg-card hover:bg-muted/50 transition-all text-left group"
+                    >
+                      <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <span className="flex-1 font-medium">{section.title}</span>
+                      <ChevronDown className={cn(
+                        "w-4 h-4 text-muted-foreground transition-transform",
+                        isActive && "rotate-180"
+                      )} />
+                    </button>
+                    {isActive && renderSectionContent(section.id)}
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Navigation Buttons */}
