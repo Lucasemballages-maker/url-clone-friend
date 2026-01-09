@@ -1,6 +1,13 @@
 import { Button } from "@/components/ui/button";
-import { Link, Wand2, Rocket, Smartphone, Store } from "lucide-react";
+import { Link, Wand2, Rocket } from "lucide-react";
 
+import mockupTechwatch from "@/assets/mockup-techwatch.png";
+import mockupBeautyglow from "@/assets/mockup-beautyglow.png";
+
+const exampleApps = [
+  { name: "TechWatch Pro", category: "Montres", image: mockupTechwatch },
+  { name: "BeautyGlow", category: "Beauté", image: mockupBeautyglow },
+];
 const steps = [
   {
     number: 1,
@@ -89,16 +96,17 @@ const StepsSection = () => {
             Exemples d'apps générées par notre IA
           </p>
           <div className="flex justify-center gap-6 flex-wrap">
-            {[
-              { name: "TechWatch Pro", category: "Montres" },
-              { name: "BeautyGlow", category: "Beauté" },
-            ].map((app, i) => (
+            {exampleApps.map((app, i) => (
               <div
                 key={i}
                 className="glass rounded-xl overflow-hidden card-hover border-gradient w-72"
               >
-                <div className="aspect-video bg-gradient-to-br from-muted to-secondary flex items-center justify-center">
-                  <Smartphone className="w-12 h-12 text-muted-foreground/50" />
+                <div className="aspect-video overflow-hidden">
+                  <img 
+                    src={app.image} 
+                    alt={app.name}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
                 <div className="p-4 text-left">
                   <p className="font-semibold">{app.name}</p>
