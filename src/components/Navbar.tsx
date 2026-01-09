@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, ChevronDown } from "lucide-react";
 
@@ -27,9 +28,9 @@ const Navbar = () => {
               <span>Ressources</span>
               <ChevronDown className="w-4 h-4" />
             </div>
-            <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors">
+            <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors">
               Tarifs
-            </a>
+            </Link>
             <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
               Affiliation
             </a>
@@ -64,9 +65,9 @@ const Navbar = () => {
               <a href="#" className="text-muted-foreground hover:text-foreground transition-colors py-2">
                 Ressources
               </a>
-              <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors py-2">
+              <Link to="/pricing" className="text-muted-foreground hover:text-foreground transition-colors py-2">
                 Tarifs
-              </a>
+              </Link>
               <a href="#" className="text-muted-foreground hover:text-foreground transition-colors py-2">
                 Affiliation
               </a>

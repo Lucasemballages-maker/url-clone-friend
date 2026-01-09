@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Star } from "lucide-react";
 
@@ -46,9 +47,11 @@ const CTASection = () => {
             <Button variant="hero" size="xl">
               Commencer mon essai gratuit
             </Button>
-            <Button variant="hero-outline" size="xl">
-              Voir les tarifs
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            <Button variant="hero-outline" size="xl" asChild>
+              <Link to="/pricing">
+                Voir les tarifs
+                <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              </Link>
             </Button>
           </div>
 
