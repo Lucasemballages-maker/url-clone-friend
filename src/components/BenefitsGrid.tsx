@@ -43,7 +43,7 @@ const BenefitsGrid = () => {
         {/* Section Header */}
         <div className="text-center mb-12">
           <span className="text-primary text-sm font-medium uppercase tracking-wider">
-            Pourquoi nous choisir
+            POURQUOI NOUS CHOISIR
           </span>
           <h2 className="text-3xl md:text-4xl font-bold mt-4 mb-4">
             Tout ce qu'il te faut pour vendre
