@@ -33,7 +33,7 @@ const CTASection = () => {
           </div>
           
           <p className="text-muted-foreground mb-2">
-            <span className="text-foreground font-semibold">12,450+</span> apps générées
+            <span className="text-foreground font-semibold">19,328+</span> apps générées
           </p>
 
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-6">
