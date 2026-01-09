@@ -153,7 +153,34 @@ const Dashboard = () => {
         isSelected: index < 4, // Select first 4 by default
       }));
 
-      setProductImages(scrapedImages);
+      // Auto-generate AI images for different styles
+      setLoadingMessage("Génération des images IA...");
+      const styles: ImageStyle[] = ['lifestyle', 'studio'];
+      const aiImages: ProductImage[] = [];
+      
+      for (const style of styles) {
+        try {
+          const aiResponse = await aliexpressApi.generateProductImage(
+            scrapedImages[0]?.url || product.images[0],
+            reformulated.title,
+            style
+          );
+          
+          if (aiResponse.success && aiResponse.data?.imageUrl) {
+            aiImages.push({
+              id: `ai-${style}-${Date.now()}`,
+              url: aiResponse.data.imageUrl,
+              isAiGenerated: true,
+              isSelected: true,
+            });
+          }
+        } catch (err) {
+          console.error(`Error generating ${style} image:`, err);
+        }
+      }
+
+      const allImages = [...aiImages, ...scrapedImages];
+      setProductImages(allImages);
       setStoreName(reformulated.title.split(' ').slice(0, 3).join(' ').toUpperCase());
       setStoreData({
         storeName: reformulated.title.split(' ').slice(0, 3).join(' ').toUpperCase(),
@@ -166,7 +193,7 @@ const Dashboard = () => {
         originalPrice: product.originalPrice,
         rating: product.rating.replace('.', ','),
         reviews: product.reviews,
-        productImages: scrapedImages.filter((img) => img.isSelected).map((img) => img.url),
+        productImages: allImages.filter((img) => img.isSelected).map((img) => img.url),
         primaryColor: "#3B82F6",
         announcementBar: "Livraison gratuite sur les commandes supérieures à 50 € | Livraison rapide dans le monde entier",
       });
