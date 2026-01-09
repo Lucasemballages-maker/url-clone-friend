@@ -11,17 +11,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import StorePreview from "./StorePreview";
 
-interface StoreData {
-  storeName: string;
-  productName: string;
-  productPrice: string;
-  originalPrice: string;
-  rating: string;
-  reviews: string;
-  productImages: string[];
-  primaryColor: string;
-  announcementBar: string;
-}
+import { StoreData } from "@/types/store";
 
 interface Step4FinaliserProps {
   storeData: StoreData;

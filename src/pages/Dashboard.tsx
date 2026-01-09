@@ -25,17 +25,7 @@ interface HistoryItem {
   updatedAt: string;
 }
 
-interface StoreData {
-  storeName: string;
-  productName: string;
-  productPrice: string;
-  originalPrice: string;
-  rating: string;
-  reviews: string;
-  productImages: string[];
-  primaryColor: string;
-  announcementBar: string;
-}
+import { StoreData } from "@/types/store";
 
 // Simulated history data
 const mockHistory: HistoryItem[] = [
@@ -98,6 +88,10 @@ const Dashboard = () => {
   const [storeData, setStoreData] = useState<StoreData>({
     storeName: "VOTRE MARQUE",
     productName: "Filtre de Douche Purificateur",
+    headline: "Une eau pure pour une peau saine",
+    description: "Découvrez notre solution innovante pour transformer votre douche quotidienne en moment de bien-être.",
+    benefits: ["Qualité premium", "Installation facile", "Garantie 1 an"],
+    cta: "Acheter maintenant",
     productPrice: "29.90",
     originalPrice: "49.90",
     rating: "4,8",
@@ -106,7 +100,7 @@ const Dashboard = () => {
     primaryColor: "#3B82F6",
     announcementBar: "Livraison gratuite sur les commandes supérieures à 50 € | Livraison rapide dans le monde entier",
   });
-  const [storeUrl] = useState("https://clair-eau.com");
+  const [storeUrl] = useState("https://votre-boutique.lovable.app");
 
   // Step 1: Generate (extract product data)
   const handleGenerate = async () => {
@@ -130,6 +124,25 @@ const Dashboard = () => {
 
       const product = response.data;
       
+      setLoadingMessage("Reformulation du texte avec l'IA...");
+      
+      // Reformulate product text with AI
+      const reformulateResponse = await aliexpressApi.reformulateProduct(
+        product.title,
+        product.description,
+        language
+      );
+
+      const reformulated = reformulateResponse.success && reformulateResponse.data
+        ? reformulateResponse.data
+        : {
+            title: product.title,
+            headline: product.title,
+            description: product.description || 'Découvrez ce produit exceptionnel.',
+            benefits: ['Qualité premium', 'Livraison rapide', 'Satisfaction garantie'],
+            cta: 'Acheter maintenant',
+          };
+      
       setLoadingMessage("Traitement des images...");
       
       // Convert scraped images to ProductImage format
@@ -141,10 +154,14 @@ const Dashboard = () => {
       }));
 
       setProductImages(scrapedImages);
-      setStoreName(product.title.split(' ').slice(0, 3).join(' ').toUpperCase());
+      setStoreName(reformulated.title.split(' ').slice(0, 3).join(' ').toUpperCase());
       setStoreData({
-        storeName: product.title.split(' ').slice(0, 3).join(' ').toUpperCase(),
-        productName: product.title,
+        storeName: reformulated.title.split(' ').slice(0, 3).join(' ').toUpperCase(),
+        productName: reformulated.title,
+        headline: reformulated.headline,
+        description: reformulated.description,
+        benefits: reformulated.benefits,
+        cta: reformulated.cta,
         productPrice: product.price,
         originalPrice: product.originalPrice,
         rating: product.rating.replace('.', ','),
