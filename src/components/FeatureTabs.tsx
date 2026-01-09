@@ -108,16 +108,16 @@ const FeatureTabs = () => {
         </div>
 
         {/* Content */}
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-6xl mx-auto">
           {/* Left: Description */}
-          <div className="order-2 lg:order-1">
-            <h3 className="text-2xl md:text-3xl font-bold mb-4">
+          <div className="order-2 lg:order-1 text-center lg:text-left px-2">
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-bold mb-4">
               {activeFeature.title}
             </h3>
-            <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
+            <p className="text-muted-foreground text-base sm:text-lg mb-8 leading-relaxed">
               {activeFeature.description}
             </p>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
               <Button variant="hero" size="lg" asChild>
                 <Link to="/auth">
                   Créer mon app
@@ -133,29 +133,30 @@ const FeatureTabs = () => {
           </div>
 
           {/* Right: Preview Card with Carousel */}
-          <div className="order-1 lg:order-2">
+          <div className="order-1 lg:order-2 w-full max-w-md mx-auto lg:max-w-none">
             <div className="glass rounded-2xl p-1 card-hover border-gradient">
               <div className="bg-card rounded-xl overflow-hidden">
                 {/* Mock App Header */}
-                <div className="bg-secondary/50 p-4 flex items-center gap-4 border-b border-border">
+                <div className="bg-secondary/50 p-3 sm:p-4 flex items-center gap-4 border-b border-border">
                   <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-red-500/50" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-500/50" />
-                    <div className="w-3 h-3 rounded-full bg-green-500/50" />
+                    <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-red-500/50" />
+                    <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-yellow-500/50" />
+                    <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-green-500/50" />
                   </div>
                   <div className="flex-1 flex justify-center">
-                    <div className="bg-muted px-4 py-1.5 rounded-lg text-xs text-muted-foreground flex items-center gap-2">
+                    <div className="bg-muted px-3 py-1 sm:px-4 sm:py-1.5 rounded-lg text-xs text-muted-foreground flex items-center gap-2">
                       <Smartphone className="w-3 h-3" />
-                      monapp.dropyfy.app
+                      <span className="hidden xs:inline">monapp.dropyfy.app</span>
+                      <span className="xs:hidden">dropyfy.app</span>
                     </div>
                   </div>
                 </div>
                 
                 {/* Carousel */}
-                <div className="relative">
-                  <div className="overflow-hidden">
+                <div className="relative aspect-[4/3]">
+                  <div className="absolute inset-0 overflow-hidden">
                     <div 
-                      className="flex transition-transform duration-500 ease-out"
+                      className="flex h-full transition-transform duration-500 ease-out"
                       style={{ transform: `translateX(-${currentMockup * 100}%)` }}
                     >
                       {storeMockups.map((mockup) => (
@@ -163,7 +164,7 @@ const FeatureTabs = () => {
                           key={mockup.id}
                           src={mockup.image} 
                           alt={mockup.name}
-                          className="w-full h-auto flex-shrink-0"
+                          className="w-full h-full object-cover flex-shrink-0"
                         />
                       ))}
                     </div>
@@ -184,7 +185,7 @@ const FeatureTabs = () => {
                   </button>
 
                   {/* Dots Indicator */}
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
                     {storeMockups.map((_, index) => (
                       <button
                         key={index}
@@ -199,9 +200,9 @@ const FeatureTabs = () => {
                   </div>
 
                   {/* Current Store Label */}
-                  <div className="absolute top-4 left-4 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-lg">
-                    <p className="text-xs text-white/70">{storeMockups[currentMockup].category}</p>
-                    <p className="text-sm font-medium text-white">{storeMockups[currentMockup].name}</p>
+                  <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg">
+                    <p className="text-[10px] sm:text-xs text-white/70">{storeMockups[currentMockup].category}</p>
+                    <p className="text-xs sm:text-sm font-medium text-white">{storeMockups[currentMockup].name}</p>
                   </div>
                 </div>
               </div>
