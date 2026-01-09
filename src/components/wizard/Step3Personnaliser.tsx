@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import StorePreview from "./StorePreview";
+import StoreHomePreview from "./StoreHomePreview";
 import { StoreData } from "@/types/store";
 
 interface Section {
@@ -157,8 +158,12 @@ export const Step3Personnaliser = ({
         </div>
 
         {/* Store Preview */}
-        <div className="flex-1 overflow-auto rounded-xl border border-border">
-          <StorePreview storeData={storeData} />
+        <div className="flex-1 overflow-auto rounded-xl border border-border bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 flex items-center justify-center py-6">
+          {previewPage === "product" ? (
+            <StorePreview storeData={storeData} />
+          ) : (
+            <StoreHomePreview storeData={storeData} />
+          )}
         </div>
       </div>
     </div>
