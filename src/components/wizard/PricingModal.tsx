@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Zap, Crown, Rocket, ArrowRight, X } from "lucide-react";
+import { Check, Zap, Crown, Rocket, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -9,6 +9,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const plans = [
   {
@@ -72,6 +76,37 @@ interface PricingModalProps {
 
 export const PricingModal = ({ open, onOpenChange, onSelectPlan }: PricingModalProps) => {
   const [isYearly, setIsYearly] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { createCheckout } = useSubscription();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSelectPlan = async (planId: string) => {
+    if (!user) {
+      // Store the selected plan and redirect to auth
+      sessionStorage.setItem("selectedPlan", JSON.stringify({ planId, isYearly }));
+      onOpenChange(false);
+      navigate("/auth");
+      return;
+    }
+
+    // User is logged in, create checkout session
+    setLoadingPlan(planId);
+    try {
+      await createCheckout(planId, isYearly);
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error creating checkout:", error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de créer la session de paiement. Veuillez réessayer.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -81,7 +116,7 @@ export const PricingModal = ({ open, onOpenChange, onSelectPlan }: PricingModalP
             Choisissez votre formule pour continuer
           </DialogTitle>
           <p className="text-muted-foreground mt-2">
-            Créez un compte et connectez votre Shopify en quelques clics
+            {user ? "Sélectionnez un plan pour accéder à toutes les fonctionnalités" : "Créez un compte et connectez votre Shopify en quelques clics"}
           </p>
         </DialogHeader>
 
@@ -110,6 +145,7 @@ export const PricingModal = ({ open, onOpenChange, onSelectPlan }: PricingModalP
             const Icon = plan.icon;
             const price = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
             const period = isYearly ? "/an" : "/mois";
+            const isLoading = loadingPlan === plan.id;
             
             return (
               <Card
@@ -161,10 +197,17 @@ export const PricingModal = ({ open, onOpenChange, onSelectPlan }: PricingModalP
                     variant={plan.popular ? "hero" : "outline"}
                     size="default"
                     className="w-full group"
-                    onClick={() => onSelectPlan(plan.id, isYearly)}
+                    onClick={() => handleSelectPlan(plan.id)}
+                    disabled={isLoading || loadingPlan !== null}
                   >
-                    {plan.cta}
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    {isLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <>
+                        {plan.cta}
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </>
+                    )}
                   </Button>
                 </CardFooter>
               </Card>
