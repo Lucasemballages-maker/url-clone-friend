@@ -1,19 +1,20 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { 
   ArrowLeft, 
   ArrowRight, 
   ExternalLink,
-  ChevronRight,
+  ChevronDown,
   Info,
   Package,
-  Layout,
   Image,
   ThumbsUp,
   RefreshCw,
   Star,
   HelpCircle,
-  ShoppingCart,
   X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -60,7 +61,7 @@ export const Step3Personnaliser = ({
   onNext,
 }: Step3PersonnaliserProps) => {
   const [activeTab, setActiveTab] = useState<TabId>("product");
-  const [activeSection, setActiveSection] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<string | null>("product-info");
   const [previewPage, setPreviewPage] = useState("product");
 
   const tabs = [
@@ -68,6 +69,161 @@ export const Step3Personnaliser = ({
     { id: "home" as TabId, label: "Page d'accueil" },
     { id: "styles" as TabId, label: "Styles" },
   ];
+
+  const updateStoreData = (field: keyof StoreData, value: string | string[]) => {
+    setStoreData({ ...storeData, [field]: value });
+  };
+
+  const updateBenefit = (index: number, value: string) => {
+    const newBenefits = [...storeData.benefits];
+    newBenefits[index] = value;
+    setStoreData({ ...storeData, benefits: newBenefits });
+  };
+
+  const renderSectionContent = (sectionId: string) => {
+    switch (sectionId) {
+      case "product-info":
+        return (
+          <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
+            <div className="space-y-2">
+              <Label htmlFor="productName">Nom du produit</Label>
+              <Input
+                id="productName"
+                value={storeData.productName}
+                onChange={(e) => updateStoreData("productName", e.target.value)}
+                placeholder="Nom du produit"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="productPrice">Prix</Label>
+                <Input
+                  id="productPrice"
+                  value={storeData.productPrice}
+                  onChange={(e) => updateStoreData("productPrice", e.target.value)}
+                  placeholder="29.99€"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="originalPrice">Prix barré</Label>
+                <Input
+                  id="originalPrice"
+                  value={storeData.originalPrice}
+                  onChange={(e) => updateStoreData("originalPrice", e.target.value)}
+                  placeholder="59.99€"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case "product-section":
+        return (
+          <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
+            <div className="space-y-2">
+              <Label htmlFor="headline">Titre principal</Label>
+              <Input
+                id="headline"
+                value={storeData.headline}
+                onChange={(e) => updateStoreData("headline", e.target.value)}
+                placeholder="Titre accrocheur"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={storeData.description}
+                onChange={(e) => updateStoreData("description", e.target.value)}
+                placeholder="Description du produit..."
+                rows={4}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cta">Bouton d'action</Label>
+              <Input
+                id="cta"
+                value={storeData.cta}
+                onChange={(e) => updateStoreData("cta", e.target.value)}
+                placeholder="Acheter maintenant"
+              />
+            </div>
+          </div>
+        );
+
+      case "image-text":
+        return (
+          <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
+            <div className="space-y-2">
+              <Label>Avantages du produit</Label>
+              {storeData.benefits.map((benefit, index) => (
+                <Input
+                  key={index}
+                  value={benefit}
+                  onChange={(e) => updateBenefit(index, e.target.value)}
+                  placeholder={`Avantage ${index + 1}`}
+                  className="mb-2"
+                />
+              ))}
+            </div>
+          </div>
+        );
+
+      case "difference":
+        return (
+          <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
+            <div className="space-y-2">
+              <Label htmlFor="announcementBar">Barre d'annonce</Label>
+              <Input
+                id="announcementBar"
+                value={storeData.announcementBar}
+                onChange={(e) => updateStoreData("announcementBar", e.target.value)}
+                placeholder="Livraison gratuite..."
+              />
+            </div>
+          </div>
+        );
+
+      case "reviews":
+        return (
+          <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="rating">Note</Label>
+                <Input
+                  id="rating"
+                  value={storeData.rating}
+                  onChange={(e) => updateStoreData("rating", e.target.value)}
+                  placeholder="4.8"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="reviews">Nombre d'avis</Label>
+                <Input
+                  id="reviews"
+                  value={storeData.reviews}
+                  onChange={(e) => updateStoreData("reviews", e.target.value)}
+                  placeholder="1,234"
+                />
+              </div>
+            </div>
+          </div>
+        );
+
+      case "clinical":
+      case "faq":
+        return (
+          <div className="p-4 bg-muted/30 rounded-lg">
+            <p className="text-sm text-muted-foreground">
+              Cette section sera personnalisable prochainement.
+            </p>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
 
   return (
     <div className="flex h-[calc(100vh-200px)] gap-6">
@@ -108,19 +264,22 @@ export const Step3Personnaliser = ({
         <div className="flex-1 overflow-y-auto space-y-2">
           {sections.map((section) => {
             const Icon = section.icon;
+            const isActive = activeSection === section.id;
             return (
-              <button
-                key={section.id}
-                onClick={() => setActiveSection(activeSection === section.id ? null : section.id)}
-                className="w-full flex items-center gap-3 p-4 rounded-xl bg-card border border-border hover:border-primary/30 transition-all text-left group"
-              >
-                <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                <span className="flex-1 font-medium">{section.title}</span>
-                <ChevronRight className={cn(
-                  "w-4 h-4 text-muted-foreground transition-transform",
-                  activeSection === section.id && "rotate-90"
-                )} />
-              </button>
+              <div key={section.id} className="rounded-xl border border-border overflow-hidden">
+                <button
+                  onClick={() => setActiveSection(isActive ? null : section.id)}
+                  className="w-full flex items-center gap-3 p-4 bg-card hover:bg-muted/50 transition-all text-left group"
+                >
+                  <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                  <span className="flex-1 font-medium">{section.title}</span>
+                  <ChevronDown className={cn(
+                    "w-4 h-4 text-muted-foreground transition-transform",
+                    isActive && "rotate-180"
+                  )} />
+                </button>
+                {isActive && renderSectionContent(section.id)}
+              </div>
             );
           })}
         </div>
