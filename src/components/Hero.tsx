@@ -66,7 +66,7 @@ const Hero = () => {
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span className="text-primary">❝</span>
               <span className="uppercase tracking-wider text-xs">
-                Déjà <span className="text-foreground font-semibold">+12,450</span>
+                Déjà <span className="text-foreground font-semibold">+19,328</span>
               </span>
               <span className="uppercase tracking-wider text-xs">Apps générées</span>
               <span className="text-primary">❞</span>
