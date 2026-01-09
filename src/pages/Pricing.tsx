@@ -14,7 +14,7 @@ const plans = [
     description: "Parfait pour tester et lancer ta première app",
     icon: Zap,
     monthlyPrice: 29,
-    yearlyPrice: 290,
+    yearlyPrice: Math.round(29 * 12 * 0.81), // 19% de réduction = 282€
     features: [
       "1 app e-commerce générée",
       "Design personnalisable",
@@ -37,7 +37,7 @@ const plans = [
     description: "Pour les entrepreneurs qui veulent scaler",
     icon: Crown,
     monthlyPrice: 49,
-    yearlyPrice: 490,
+    yearlyPrice: Math.round(49 * 12 * 0.81), // 19% de réduction = 476€
     features: [
       "5 apps e-commerce générées",
       "Multi-produits par app",
@@ -60,7 +60,7 @@ const plans = [
     description: "Pour les pros du dropshipping",
     icon: Rocket,
     monthlyPrice: 79,
-    yearlyPrice: 790,
+    yearlyPrice: Math.round(79 * 12 * 0.81), // 19% de réduction = 768€
     features: [
       "Apps illimitées",
       "Multi-produits illimités",
@@ -116,7 +116,7 @@ const Pricing = () => {
               </span>
               {isYearly && (
                 <span className="px-2 py-1 text-xs font-semibold bg-green-500/20 text-green-400 rounded-full">
-                  -17%
+                  -19%
                 </span>
               )}
             </div>
