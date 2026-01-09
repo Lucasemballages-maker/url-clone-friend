@@ -208,8 +208,10 @@ const Dashboard = () => {
 
   // Generate AI image
   const handleGenerateAiImage = async (style: ImageStyle = 'lifestyle') => {
-    // Find the first selected image to use as reference
-    const referenceImage = productImages.find((img) => img.isSelected && !img.isAiGenerated);
+    // Find any selected image to use as reference (prefer non-AI images)
+    const referenceImage = productImages.find((img) => img.isSelected && !img.isAiGenerated) 
+      || productImages.find((img) => img.isSelected);
+    
     if (!referenceImage) {
       toast({
         title: "Aucune image de référence",
@@ -218,6 +220,8 @@ const Dashboard = () => {
       });
       return;
     }
+    
+    console.log('Generating AI image with reference:', referenceImage.url, 'style:', style);
 
     setIsGeneratingImage(true);
 
