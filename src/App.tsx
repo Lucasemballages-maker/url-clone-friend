@@ -6,10 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
-import GenerateStore from "./pages/GenerateStore";
-import Products from "./pages/Products";
-import TopShops from "./pages/TopShops";
-import TopAds from "./pages/TopAds";
+import MyApps from "./pages/MyApps";
 import Pricing from "./pages/Pricing";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -28,10 +25,7 @@ const App = () => (
             <Route path="/pricing" element={<Pricing />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/generate" element={<GenerateStore />} />
-            <Route path="/dashboard/products" element={<Products />} />
-            <Route path="/dashboard/shops" element={<TopShops />} />
-            <Route path="/dashboard/ads" element={<TopAds />} />
+            <Route path="/dashboard/apps" element={<MyApps />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
