@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import StorePreview from "./StorePreview";
 import PricingModal from "./PricingModal";
 import { StoreData } from "@/types/store";
-import { useAuth } from "@/hooks/useAuth";
+import { useSubscription } from "@/hooks/useSubscription";
 
 interface Step4FinaliserProps {
   storeData: StoreData;
@@ -18,26 +17,23 @@ export const Step4Finaliser = ({
   storeData,
   onBack,
 }: Step4FinaliserProps) => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+  const { subscribed } = useSubscription();
   const [showPricingModal, setShowPricingModal] = useState(false);
 
   const handleConnectShopify = () => {
-    if (!user) {
-      // User not logged in, show pricing modal
+    if (!subscribed) {
+      // User doesn't have an active subscription, show pricing modal
       setShowPricingModal(true);
     } else {
-      // User is logged in, proceed with Shopify connection
+      // User has an active subscription, proceed with Shopify connection
       // TODO: Implement Shopify connection
       console.log("Connect to Shopify");
     }
   };
 
   const handleSelectPlan = (planId: string, isYearly: boolean) => {
-    // Store the selected plan in sessionStorage for after auth
-    sessionStorage.setItem("selectedPlan", JSON.stringify({ planId, isYearly }));
-    // Redirect to auth page
-    navigate("/auth");
+    // The PricingModal will handle checkout directly via useSubscription
+    console.log("Plan selected:", planId, isYearly);
   };
 
   return (
