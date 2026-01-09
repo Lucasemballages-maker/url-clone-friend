@@ -31,10 +31,10 @@ Deno.serve(async (req) => {
     const productDescription = productName || 'household product';
     
     const stylePrompts: Record<string, string> = {
-      lifestyle: `You MUST generate and output an image. Create a professional e-commerce product photo of a ${productDescription} placed in an elegant lifestyle setting like a modern bathroom or kitchen. Warm inviting lighting, premium look, no logos or branding. Output the generated image.`,
-      studio: `You MUST generate and output an image. Create a professional studio product photo of a ${productDescription} on a clean white or soft gradient background with studio lighting, subtle shadows and reflections. Premium clean look, no branding. Output the generated image.`,
-      outdoor: `You MUST generate and output an image. Create a professional outdoor product photo of a ${productDescription} in a beautiful natural setting with soft natural lighting. Aspirational and appealing, no logos. Output the generated image.`,
-      minimal: `You MUST generate and output an image. Create a minimalist product photo of a ${productDescription} with clean simple background, soft shadows, modern elegant style. No logos or text. Output the generated image.`,
+      lifestyle: `IMPORTANT: Keep the EXACT product from the source image. Transform ONLY the background and lighting. Create a professional lifestyle photo with the product placed in an elegant modern setting (bathroom, kitchen, or living room). Use warm, inviting lighting. Premium aesthetic. Keep the product identical to the source image - do not change its appearance, color, or design. Only enhance the background and lighting.`,
+      studio: `IMPORTANT: Keep the EXACT product from the source image. Transform ONLY the background. Create a professional studio product photo on a clean white or soft gradient background with professional studio lighting, subtle shadows and reflections. Premium clean look. The product must remain identical to the source image - only change the background to studio setting.`,
+      outdoor: `IMPORTANT: Keep the EXACT product from the source image. Transform ONLY the background and lighting. Create a professional outdoor product photo with the product in a beautiful natural setting with soft natural lighting. Aspirational and appealing. Keep the product exactly as it appears in the source image - only change the environment to outdoor.`,
+      minimal: `IMPORTANT: Keep the EXACT product from the source image. Transform ONLY the background. Create a minimalist product photo with clean simple background, soft shadows, modern elegant style. The product itself must remain unchanged from the source image - only modify the background to be minimal and clean.`,
     };
 
     const prompt = stylePrompts[style] || stylePrompts.lifestyle;
