@@ -83,6 +83,9 @@ export const PricingModal = ({ open, onOpenChange, onSelectPlan }: PricingModalP
   const { toast } = useToast();
 
   const handleSelectPlan = async (planId: string) => {
+    // Call the parent callback to store data before checkout
+    onSelectPlan(planId, isYearly);
+    
     if (!user) {
       // Store the selected plan and redirect to auth
       sessionStorage.setItem("selectedPlan", JSON.stringify({ planId, isYearly }));
