@@ -395,14 +395,14 @@ export const Step3Personnaliser = ({
   );
 
   return (
-    <div className="flex h-[calc(100vh-200px)] gap-6">
+    <div className="flex flex-col lg:flex-row min-h-[calc(100vh-200px)] gap-6">
       {/* Left Panel - Editor */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 order-2 lg:order-1">
         {/* Warning Banner */}
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-4 mb-6 flex items-start gap-3">
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 flex items-start gap-2 sm:gap-3">
           <span className="text-amber-500 text-lg">⚠</span>
           <div className="flex-1">
-            <p className="text-sm text-amber-200">
+            <p className="text-xs sm:text-sm text-amber-200">
               <strong>Remarque:</strong> Une fois votre thème mis à jour sur Shopify, vous pouvez le personnaliser et l'optimiser pour qu'il corresponde parfaitement à votre marque.
             </p>
           </div>
@@ -412,13 +412,13 @@ export const Step3Personnaliser = ({
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 border-b border-border mb-6">
+        <div className="flex gap-1 border-b border-border mb-4 sm:mb-6 overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "px-4 py-3 text-sm font-medium transition-colors border-b-2 -mb-px",
+                "px-3 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap",
                 activeTab === tab.id
                   ? "border-primary text-foreground"
                   : "border-transparent text-muted-foreground hover:text-foreground"
@@ -442,10 +442,10 @@ export const Step3Personnaliser = ({
                   <div key={section.id} className="rounded-xl border border-border overflow-hidden">
                     <button
                       onClick={() => setActiveSection(isActive ? null : section.id)}
-                      className="w-full flex items-center gap-3 p-4 bg-card hover:bg-muted/50 transition-all text-left group"
+                      className="w-full flex items-center gap-2 sm:gap-3 p-3 sm:p-4 bg-card hover:bg-muted/50 transition-all text-left group"
                     >
-                      <Icon className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                      <span className="flex-1 font-medium">{section.title}</span>
+                      <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground group-hover:text-primary transition-colors" />
+                      <span className="flex-1 font-medium text-sm sm:text-base">{section.title}</span>
                       <ChevronDown className={cn(
                         "w-4 h-4 text-muted-foreground transition-transform",
                         isActive && "rotate-180"
@@ -460,20 +460,20 @@ export const Step3Personnaliser = ({
         </div>
 
         {/* Navigation Buttons */}
-        <div className="flex justify-between pt-6 border-t border-border mt-6">
-          <Button variant="ghost" onClick={onBack} className="gap-2">
+        <div className="flex justify-between pt-4 sm:pt-6 border-t border-border mt-4 sm:mt-6">
+          <Button variant="ghost" onClick={onBack} className="gap-2 text-sm">
             <ArrowLeft className="w-4 h-4" />
-            Retour
+            <span className="hidden sm:inline">Retour</span>
           </Button>
-          <Button onClick={onNext} className="gap-2 bg-primary hover:bg-primary/90">
-            Suivant
+          <Button onClick={onNext} className="gap-2 bg-primary hover:bg-primary/90 text-sm">
+            <span className="hidden sm:inline">Suivant</span>
             <ArrowRight className="w-4 h-4" />
           </Button>
         </div>
       </div>
 
       {/* Right Panel - Preview */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="w-full lg:flex-1 flex flex-col min-w-0 order-1 lg:order-2 mb-4 lg:mb-0">
         {/* Preview Header */}
         <div className="flex items-center justify-between mb-4">
           <Select value={previewPage} onValueChange={setPreviewPage}>
