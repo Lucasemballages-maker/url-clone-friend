@@ -95,6 +95,11 @@ export const PricingModal = ({ open, onOpenChange, onSelectPlan }: PricingModalP
     setLoadingPlan(planId);
     try {
       await createCheckout(planId, isYearly);
+      // Checkout opened in new tab, show confirmation
+      toast({
+        title: "Paiement en cours",
+        description: "La page de paiement Stripe s'est ouverte dans un nouvel onglet.",
+      });
       onOpenChange(false);
     } catch (error) {
       console.error("Error creating checkout:", error);
