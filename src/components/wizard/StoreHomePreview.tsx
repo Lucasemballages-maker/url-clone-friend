@@ -135,9 +135,13 @@ export const StoreHomePreview = ({ storeData }: StoreHomePreviewProps) => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {storeData.originalPrice && (
-                      <span className="text-zinc-400 line-through text-xs">{storeData.originalPrice}</span>
+                      <span className="text-zinc-400 line-through text-xs">
+                        {storeData.originalPrice.includes('€') ? storeData.originalPrice : `${storeData.originalPrice}€`}
+                      </span>
                     )}
-                    <span className="text-lg font-bold" style={{ color: primaryColor }}>{storeData.productPrice || "49,90€"}</span>
+                    <span className="text-lg font-bold" style={{ color: primaryColor }}>
+                      {storeData.productPrice ? (storeData.productPrice.includes('€') ? storeData.productPrice : `${storeData.productPrice}€`) : "49,90€"}
+                    </span>
                   </div>
                   <button 
                     className="text-white text-[9px] font-bold px-4 py-2 rounded-full flex items-center gap-1"

@@ -174,9 +174,13 @@ export const StorePreview = ({ storeData }: StorePreviewProps) => {
               {/* Price */}
               <div className="flex items-center gap-2 mb-3">
                 {storeData.originalPrice && (
-                  <span className="text-zinc-400 line-through text-sm">{storeData.originalPrice}</span>
+                  <span className="text-zinc-400 line-through text-sm">
+                    {storeData.originalPrice.includes('€') ? storeData.originalPrice : `${storeData.originalPrice}€`}
+                  </span>
                 )}
-                <span className="text-xl font-bold" style={{ color: primaryColor }}>{storeData.productPrice || "49,90€"}</span>
+                <span className="text-xl font-bold" style={{ color: primaryColor }}>
+                  {storeData.productPrice ? (storeData.productPrice.includes('€') ? storeData.productPrice : `${storeData.productPrice}€`) : "49,90€"}
+                </span>
                 {storeData.originalPrice && storeData.productPrice && (
                   <span className="bg-red-500 text-white text-[8px] px-2 py-0.5 rounded-full">PROMO</span>
                 )}
