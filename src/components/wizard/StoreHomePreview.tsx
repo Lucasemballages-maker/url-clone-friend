@@ -8,9 +8,10 @@ interface StoreHomePreviewProps {
 export const StoreHomePreview = ({ storeData }: StoreHomePreviewProps) => {
   const mainImage = storeData.productImages[0] || "/placeholder.svg";
   
-  // Primary color - blue like the template
-  const primaryColor = "#4A90E2";
-  const gradientBg = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
+  // Use storeData colors with fallbacks
+  const primaryColor = storeData.primaryColor || "#4A90E2";
+  const accentColor = storeData.accentColor || "#764ba2";
+  const gradientBg = `linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 100%)`;
 
   return (
     <div className="relative mx-auto" style={{ maxWidth: "320px" }}>
@@ -54,7 +55,7 @@ export const StoreHomePreview = ({ storeData }: StoreHomePreviewProps) => {
             >
               {/* Badge */}
               <div className="inline-flex items-center gap-1 bg-white/20 px-3 py-1.5 rounded-full text-[9px] mb-3">
-                <span>⭐ Noté 4.8 (21 883+ clients satisfaits)</span>
+                <span>⭐ Noté {storeData.rating || "4.8"} ({storeData.reviews || "21 883"}+ clients satisfaits)</span>
               </div>
               
               <h1 className="text-xl font-bold mb-3 leading-tight">
@@ -78,8 +79,8 @@ export const StoreHomePreview = ({ storeData }: StoreHomePreviewProps) => {
               </div>
               
               {/* CTA */}
-              <button className="bg-white text-[11px] font-bold px-8 py-3 rounded-full shadow-lg mt-3" style={{ color: "#667eea" }}>
-                ACHETER MAINTENANT
+              <button className="bg-white text-[11px] font-bold px-8 py-3 rounded-full shadow-lg mt-3" style={{ color: primaryColor }}>
+                {storeData.cta || "ACHETER MAINTENANT"}
               </button>
               
               {/* Trust badges */}
@@ -107,9 +108,11 @@ export const StoreHomePreview = ({ storeData }: StoreHomePreviewProps) => {
                       e.currentTarget.src = "/placeholder.svg";
                     }}
                   />
-                  <div className="absolute top-2 left-2 bg-red-500 text-white text-[8px] font-bold px-2 py-1 rounded-full">
-                    -29%
-                  </div>
+                  {storeData.originalPrice && storeData.productPrice && (
+                    <div className="absolute top-2 left-2 bg-red-500 text-white text-[8px] font-bold px-2 py-1 rounded-full">
+                      PROMO
+                    </div>
+                  )}
                 </div>
                 
                 <div className="flex items-center gap-1 mb-1">
@@ -118,7 +121,7 @@ export const StoreHomePreview = ({ storeData }: StoreHomePreviewProps) => {
                       <Star key={i} className="w-3 h-3 fill-current" />
                     ))}
                   </div>
-                  <span className="text-[8px] text-zinc-500">(21 883 avis)</span>
+                  <span className="text-[8px] text-zinc-500">({storeData.reviews || "21 883"} avis)</span>
                 </div>
                 
                 <h3 className="text-sm font-bold text-zinc-800 mb-1">
@@ -131,8 +134,10 @@ export const StoreHomePreview = ({ storeData }: StoreHomePreviewProps) => {
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-zinc-400 line-through text-xs">69,90€</span>
-                    <span className="text-lg font-bold" style={{ color: primaryColor }}>49,90€</span>
+                    {storeData.originalPrice && (
+                      <span className="text-zinc-400 line-through text-xs">{storeData.originalPrice}</span>
+                    )}
+                    <span className="text-lg font-bold" style={{ color: primaryColor }}>{storeData.productPrice || "49,90€"}</span>
                   </div>
                   <button 
                     className="text-white text-[9px] font-bold px-4 py-2 rounded-full flex items-center gap-1"
@@ -205,9 +210,9 @@ export const StoreHomePreview = ({ storeData }: StoreHomePreviewProps) => {
               style={{ background: gradientBg }}
             >
               <h2 className="text-lg font-bold mb-2">Prêt à transformer votre douche ?</h2>
-              <p className="text-[10px] opacity-90 mb-4">Rejoignez plus de 21 000 clients satisfaits</p>
-              <button className="bg-white text-[11px] font-bold px-8 py-3 rounded-full shadow-lg" style={{ color: "#667eea" }}>
-                COMMANDER MAINTENANT
+              <p className="text-[10px] opacity-90 mb-4">Rejoignez plus de {storeData.reviews || "21 000"} clients satisfaits</p>
+              <button className="bg-white text-[11px] font-bold px-8 py-3 rounded-full shadow-lg" style={{ color: primaryColor }}>
+                {storeData.cta || "COMMANDER MAINTENANT"}
               </button>
               <div className="flex justify-center gap-4 mt-3 text-[8px] opacity-80">
                 <span>✓ Paiement sécurisé</span>
