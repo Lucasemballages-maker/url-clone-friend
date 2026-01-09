@@ -19,38 +19,17 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 
-const apps = [
-  { 
-    id: 1,
-    name: "TechWatch Pro", 
-    product: "Smart Watch Ultra", 
-    url: "https://techwatch.dropyfy.app",
-    createdAt: "Il y a 2 heures",
-    status: "active",
-    views: 234,
-    orders: 12
-  },
-  { 
-    id: 2,
-    name: "BeautyGlow Store", 
-    product: "Sérum Anti-âge", 
-    url: "https://beautyglow.dropyfy.app",
-    createdAt: "Hier",
-    status: "active",
-    views: 567,
-    orders: 23
-  },
-  { 
-    id: 3,
-    name: "FitPro Shop", 
-    product: "Bandes de résistance", 
-    url: "https://fitpro.dropyfy.app",
-    createdAt: "Il y a 3 jours",
-    status: "draft",
-    views: 89,
-    orders: 3
-  },
-];
+// Les apps seront chargées depuis la base de données
+const apps: Array<{
+  id: number;
+  name: string;
+  product: string;
+  url: string;
+  createdAt: string;
+  status: string;
+  views: number;
+  orders: number;
+}> = [];
 
 const MyApps = () => {
   const { toast } = useToast();
