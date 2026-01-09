@@ -60,6 +60,10 @@ const faqItems = [
     question: "Quels sont les moyens de paiement acceptés ?",
     answer: "Nous acceptons les cartes bancaires (Visa, Mastercard, American Express) via Stripe. Tous les paiements sont sécurisés.",
   },
+  {
+    question: "Comment annuler mon abonnement ?",
+    answer: "Pour annuler votre abonnement, envoyez-nous une demande par email à support@dropyfy.com en précisant l'adresse email associée à votre compte. Nous traiterons votre demande sous 48h ouvrées.",
+  },
 ];
 
 const Help = () => {
