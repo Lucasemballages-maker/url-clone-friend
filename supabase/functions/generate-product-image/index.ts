@@ -27,12 +27,14 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Define style prompts
+    // Define style prompts - focus on creating NEW images inspired by the product type
+    const productDescription = productName || 'household product';
+    
     const stylePrompts: Record<string, string> = {
-      lifestyle: `Create a professional lifestyle product photography image. Take the product shown in the reference image and place it in an elegant lifestyle setting - like a modern home, bathroom, or kitchen. The lighting should be warm and inviting. Make it look like a high-end e-commerce product photo. Product: ${productName || 'the product'}`,
-      studio: `Create a professional studio product photography image. Take the product shown in the reference image and photograph it on a clean white or gradient background with professional studio lighting. Add subtle shadows and reflections for depth. Make it look like a premium product catalog photo. Product: ${productName || 'the product'}`,
-      outdoor: `Create a professional outdoor product photography image. Take the product shown in the reference image and place it in a beautiful natural outdoor setting with soft natural lighting. The scene should complement the product and make it look appealing. Product: ${productName || 'the product'}`,
-      minimal: `Create a minimalist product photography image. Take the product shown in the reference image and photograph it with a clean, simple background. Use soft shadows and clean lines. The style should be modern and elegant. Product: ${productName || 'the product'}`,
+      lifestyle: `Generate a NEW professional product photography image for e-commerce. Create a similar type of product as shown (a ${productDescription}) in an elegant lifestyle setting - like a modern bathroom or kitchen. Use warm, inviting lighting. The product should look premium and desirable. Do NOT copy any logos or branding - create a generic clean product design. Make it look like a high-end e-commerce photo.`,
+      studio: `Generate a NEW professional studio product photography image. Create a similar type of product as shown (a ${productDescription}) on a clean white or soft gradient background with professional studio lighting. Add subtle shadows and reflections. The product should look premium and clean with no visible branding. Make it look like a catalog photo.`,
+      outdoor: `Generate a NEW professional outdoor product photography image. Create a similar type of product as shown (a ${productDescription}) in a beautiful natural outdoor setting with soft natural lighting. The scene should be aspirational and make the product look appealing. No logos or branding visible.`,
+      minimal: `Generate a NEW minimalist product photography image. Create a similar type of product as shown (a ${productDescription}) with a clean, simple background. Use soft shadows and clean lines. Modern and elegant style. No logos or text on the product.`,
     };
 
     const prompt = stylePrompts[style] || stylePrompts.lifestyle;
