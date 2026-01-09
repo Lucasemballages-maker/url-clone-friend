@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Sparkles, Check, Wand2, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
+import { Sparkles, Check, Wand2, ArrowLeft, ArrowRight, Loader2, Home, Camera, Sun, Minimize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ImageStyle } from "@/lib/api/aliexpress";
 
 interface ProductImage {
   id: string;
@@ -16,7 +17,7 @@ interface Step2SelectionnerProps {
   setStoreName: (name: string) => void;
   productImages: ProductImage[];
   toggleImageSelection: (id: string) => void;
-  onGenerateAiImage: () => void;
+  onGenerateAiImage: (style: ImageStyle) => void;
   isGeneratingImage: boolean;
   onBack: () => void;
   onNext: () => void;
@@ -33,6 +34,14 @@ export const Step2Selectionner = ({
   onNext,
 }: Step2SelectionnerProps) => {
   const selectedCount = productImages.filter((img) => img.isSelected).length;
+  const [selectedStyle, setSelectedStyle] = useState<ImageStyle>('lifestyle');
+
+  const imageStyles: { id: ImageStyle; label: string; icon: React.ReactNode; description: string }[] = [
+    { id: 'lifestyle', label: 'Lifestyle', icon: <Home className="w-4 h-4" />, description: 'Mise en scène réaliste' },
+    { id: 'studio', label: 'Studio', icon: <Camera className="w-4 h-4" />, description: 'Fond professionnel' },
+    { id: 'outdoor', label: 'Extérieur', icon: <Sun className="w-4 h-4" />, description: 'Décor naturel' },
+    { id: 'minimal', label: 'Minimal', icon: <Minimize2 className="w-4 h-4" />, description: 'Style épuré' },
+  ];
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -50,12 +59,37 @@ export const Step2Selectionner = ({
         />
       </div>
 
-      {/* AI Image Generation Button */}
+      {/* AI Image Generation */}
       <div className="mb-8">
+        <p className="text-sm font-medium mb-3">Générer une image avec l'IA</p>
+        
+        {/* Style Selection */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
+          {imageStyles.map((style) => (
+            <button
+              key={style.id}
+              onClick={() => setSelectedStyle(style.id)}
+              className={cn(
+                "p-3 rounded-xl border-2 transition-all text-left",
+                selectedStyle === style.id
+                  ? "border-primary bg-primary/10"
+                  : "border-border hover:border-primary/50"
+              )}
+            >
+              <div className="flex items-center gap-2 mb-1">
+                {style.icon}
+                <span className="font-medium text-sm">{style.label}</span>
+              </div>
+              <p className="text-xs text-muted-foreground">{style.description}</p>
+            </button>
+          ))}
+        </div>
+
+        {/* Generate Button */}
         <button
-          onClick={onGenerateAiImage}
-          disabled={isGeneratingImage}
-          className="w-full p-6 border-2 border-dashed border-primary/50 rounded-xl hover:bg-primary/5 transition-colors flex items-center justify-center gap-3 text-primary"
+          onClick={() => onGenerateAiImage(selectedStyle)}
+          disabled={isGeneratingImage || selectedCount === 0}
+          className="w-full p-4 border-2 border-dashed border-primary/50 rounded-xl hover:bg-primary/5 transition-colors flex items-center justify-center gap-3 text-primary disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isGeneratingImage ? (
             <>
@@ -65,10 +99,15 @@ export const Step2Selectionner = ({
           ) : (
             <>
               <Sparkles className="w-5 h-5" />
-              <span>Générer une image avec l'IA</span>
+              <span>Générer une image "{imageStyles.find(s => s.id === selectedStyle)?.label}"</span>
             </>
           )}
         </button>
+        {selectedCount === 0 && (
+          <p className="text-xs text-muted-foreground mt-2 text-center">
+            Sélectionnez au moins une image pour servir de référence
+          </p>
+        )}
       </div>
 
       {/* Images Selection */}
