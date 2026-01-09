@@ -20,6 +20,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
   const { signUp, signIn, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -118,6 +119,46 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email.trim()) {
+      toast({
+        title: "Email requis",
+        description: "Veuillez entrer votre adresse email.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const emailValidation = z.string().email().safeParse(email);
+    if (!emailValidation.success) {
+      toast({
+        title: "Email invalide",
+        description: "Veuillez entrer une adresse email valide.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setResetLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth`,
+    });
+    setResetLoading(false);
+
+    if (error) {
+      toast({
+        title: "Erreur",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Email envoyé !",
+        description: "Vérifiez votre boîte mail pour réinitialiser votre mot de passe.",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       {/* Background effects */}
@@ -169,7 +210,17 @@ const Auth = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="login-password">Mot de passe</Label>
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="login-password">Mot de passe</Label>
+                      <button
+                        type="button"
+                        onClick={handleForgotPassword}
+                        disabled={resetLoading}
+                        className="text-xs text-primary hover:underline disabled:opacity-50"
+                      >
+                        {resetLoading ? "Envoi..." : "Mot de passe oublié ?"}
+                      </button>
+                    </div>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
