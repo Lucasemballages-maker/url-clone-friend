@@ -117,7 +117,7 @@ const FeatureTabs = () => {
                   <div className="flex-1 flex justify-center">
                     <div className="bg-muted px-4 py-1.5 rounded-lg text-xs text-muted-foreground flex items-center gap-2">
                       <Smartphone className="w-3 h-3" />
-                      monapp.copyfy.app
+                      monapp.dropyfy.app
                     </div>
                   </div>
                 </div>

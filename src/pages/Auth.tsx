@@ -99,9 +99,9 @@ const Auth = () => {
         {/* Logo */}
         <div className="flex items-center justify-center gap-2 mb-8">
           <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-xl">C</span>
+            <span className="text-primary-foreground font-bold text-xl">D</span>
           </div>
-          <span className="font-semibold text-xl text-foreground">copyfy</span>
+          <span className="font-semibold text-xl text-foreground">DROPYFY</span>
         </div>
 
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm">

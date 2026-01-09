@@ -71,7 +71,7 @@ const GenerateStore = () => {
         price: "49.99",
         originalPrice: "89.99",
         discount: "44%",
-        appUrl: "https://smartwatch.copyfy.app",
+        appUrl: "https://smartwatch.dropyfy.app",
         theme: "Moderne",
         colors: ["#3B82F6", "#1E293B", "#FFFFFF"],
       });
