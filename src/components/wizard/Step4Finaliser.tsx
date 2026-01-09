@@ -5,6 +5,9 @@ import StorePreview from "./StorePreview";
 import PricingModal from "./PricingModal";
 import { StoreData } from "@/types/store";
 import { useSubscription } from "@/hooks/useSubscription";
+import { useShopifyExportStore } from "@/stores/shopifyExportStore";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 interface Step4FinaliserProps {
   storeData: StoreData;
@@ -17,23 +20,28 @@ export const Step4Finaliser = ({
   storeData,
   onBack,
 }: Step4FinaliserProps) => {
-  const { subscribed } = useSubscription();
+  const { subscribed, createCheckout } = useSubscription();
+  const { setStoreData } = useShopifyExportStore();
+  const navigate = useNavigate();
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleConnectShopify = () => {
+  const handleConnectShopify = async () => {
     if (!subscribed) {
-      // User doesn't have an active subscription, show pricing modal
+      // Store the data for after payment
+      setStoreData(storeData);
+      // Show pricing modal
       setShowPricingModal(true);
     } else {
-      // User has an active subscription, proceed with Shopify connection
-      // TODO: Implement Shopify connection
-      console.log("Connect to Shopify");
+      // User has subscription, go directly to export
+      setStoreData(storeData);
+      navigate("/payment-success");
     }
   };
 
-  const handleSelectPlan = (planId: string, isYearly: boolean) => {
-    // The PricingModal will handle checkout directly via useSubscription
-    console.log("Plan selected:", planId, isYearly);
+  const handleSelectPlan = async (planId: string, isYearly: boolean) => {
+    // Store the data before checkout
+    setStoreData(storeData);
   };
 
   return (
