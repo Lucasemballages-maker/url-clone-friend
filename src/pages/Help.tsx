@@ -3,7 +3,6 @@ import {
   HelpCircle, 
   Mail, 
   MessageCircle, 
-  FileText,
   ExternalLink
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,12 +14,6 @@ import {
 } from "@/components/ui/accordion";
 
 const helpItems = [
-  {
-    icon: FileText,
-    title: "Documentation",
-    description: "Guides et tutoriels pour bien démarrer",
-    link: "#",
-  },
   {
     icon: MessageCircle,
     title: "FAQ",
