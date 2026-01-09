@@ -57,8 +57,8 @@ export const useSubscription = () => {
 
     if (error) throw error;
     if (data?.url) {
-      // Open in new tab to avoid issues with iframe redirects
-      window.open(data.url, "_blank");
+      // Redirect directly to avoid popup blockers
+      window.location.href = data.url;
       return { url: data.url };
     }
     throw new Error("No checkout URL returned");

@@ -77,12 +77,17 @@ interface PricingModalProps {
 export const PricingModal = ({ open, onOpenChange, onSelectPlan }: PricingModalProps) => {
   const [isYearly, setIsYearly] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { createCheckout } = useSubscription();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleSelectPlan = async (planId: string) => {
+    // Wait for auth to finish loading
+    if (authLoading) {
+      return;
+    }
+
     // Call the parent callback to store data before checkout
     onSelectPlan(planId, isYearly);
     
@@ -98,10 +103,10 @@ export const PricingModal = ({ open, onOpenChange, onSelectPlan }: PricingModalP
     setLoadingPlan(planId);
     try {
       await createCheckout(planId, isYearly);
-      // Checkout opened in new tab, show confirmation
+      // Checkout opened in new tab, show confirmation and close modal
       toast({
         title: "Paiement en cours",
-        description: "La page de paiement Stripe s'est ouverte dans un nouvel onglet.",
+        description: "La page de paiement Stripe s'est ouverte dans un nouvel onglet. Après le paiement, revenez ici et rafraîchissez la page.",
       });
       onOpenChange(false);
     } catch (error) {
