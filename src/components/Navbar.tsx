@@ -38,11 +38,11 @@ const Navbar = () => {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-4">
-            <Button variant="ghost" size="sm">
-              Connexion
+            <Button variant="ghost" size="sm" asChild>
+              <Link to="/auth">Connexion</Link>
             </Button>
-            <Button variant="hero" size="sm">
-              Essai gratuit
+            <Button variant="hero" size="sm" asChild>
+              <Link to="/auth">Essai gratuit</Link>
             </Button>
           </div>
 
@@ -72,11 +72,11 @@ const Navbar = () => {
                 Affiliation
               </a>
               <div className="flex flex-col gap-2 pt-4 border-t border-border/50">
-                <Button variant="ghost" className="w-full justify-center">
-                  Connexion
+                <Button variant="ghost" className="w-full justify-center" asChild>
+                  <Link to="/auth">Connexion</Link>
                 </Button>
-                <Button variant="hero" className="w-full justify-center">
-                  Essai gratuit
+                <Button variant="hero" className="w-full justify-center" asChild>
+                  <Link to="/auth">Essai gratuit</Link>
                 </Button>
               </div>
             </div>
