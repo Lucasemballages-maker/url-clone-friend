@@ -7,7 +7,7 @@ import Step3Personnaliser from "@/components/wizard/Step3Personnaliser";
 import Step4Finaliser from "@/components/wizard/Step4Finaliser";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
-import { aliexpressApi, AliExpressProduct } from "@/lib/api/aliexpress";
+import { aliexpressApi, AliExpressProduct, ImageStyle } from "@/lib/api/aliexpress";
 interface ProductImage {
   id: string;
   url: string;
@@ -190,24 +190,60 @@ const Dashboard = () => {
   };
 
   // Generate AI image
-  const handleGenerateAiImage = async () => {
+  const handleGenerateAiImage = async (style: ImageStyle = 'lifestyle') => {
+    // Find the first selected image to use as reference
+    const referenceImage = productImages.find((img) => img.isSelected && !img.isAiGenerated);
+    if (!referenceImage) {
+      toast({
+        title: "Aucune image de référence",
+        description: "Sélectionnez d'abord une image du produit",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsGeneratingImage(true);
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-    
-    const newImage: ProductImage = {
-      id: Date.now().toString(),
-      url: `https://picsum.photos/400/400?random=${Date.now()}`,
-      isAiGenerated: true,
-      isSelected: true,
-    };
-    
-    setProductImages((prev) => [newImage, ...prev]);
-    setIsGeneratingImage(false);
-    
-    toast({
-      title: "Image générée !",
-      description: "Une nouvelle image IA a été ajoutée",
-    });
+
+    try {
+      const response = await aliexpressApi.generateProductImage(
+        referenceImage.url,
+        storeData.productName,
+        style
+      );
+
+      if (!response.success || !response.data) {
+        toast({
+          title: "Erreur",
+          description: response.error || "Impossible de générer l'image",
+          variant: "destructive",
+        });
+        setIsGeneratingImage(false);
+        return;
+      }
+
+      const newImage: ProductImage = {
+        id: `ai-${Date.now()}`,
+        url: response.data.imageUrl,
+        isAiGenerated: true,
+        isSelected: true,
+      };
+
+      setProductImages((prev) => [newImage, ...prev]);
+      
+      toast({
+        title: "Image générée !",
+        description: `Nouvelle image style "${style}" ajoutée`,
+      });
+    } catch (error) {
+      console.error('Error generating image:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de la génération",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingImage(false);
+    }
   };
 
   // Navigation

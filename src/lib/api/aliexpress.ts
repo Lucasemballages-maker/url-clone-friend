@@ -17,6 +17,17 @@ export interface ScrapeResponse {
   data?: AliExpressProduct;
 }
 
+export interface GenerateImageResponse {
+  success: boolean;
+  error?: string;
+  data?: {
+    imageUrl: string;
+    style: string;
+  };
+}
+
+export type ImageStyle = 'lifestyle' | 'studio' | 'outdoor' | 'minimal';
+
 export const aliexpressApi = {
   async scrapeProduct(url: string): Promise<ScrapeResponse> {
     try {
@@ -35,6 +46,31 @@ export const aliexpressApi = {
       return { 
         success: false, 
         error: error instanceof Error ? error.message : 'Failed to scrape product' 
+      };
+    }
+  },
+
+  async generateProductImage(
+    imageUrl: string,
+    productName: string,
+    style: ImageStyle = 'lifestyle'
+  ): Promise<GenerateImageResponse> {
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-product-image', {
+        body: { imageUrl, productName, style },
+      });
+
+      if (error) {
+        console.error('Supabase function error:', error);
+        return { success: false, error: error.message };
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error generating image:', error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'Failed to generate image',
       };
     }
   },
