@@ -9,6 +9,7 @@ import GenerateStore from "./pages/GenerateStore";
 import Products from "./pages/Products";
 import TopShops from "./pages/TopShops";
 import TopAds from "./pages/TopAds";
+import Pricing from "./pages/Pricing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
