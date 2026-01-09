@@ -122,34 +122,13 @@ const FeatureTabs = () => {
                   </div>
                 </div>
                 
-                <div className="p-6">
-                  {/* Product Preview */}
-                  <div className="space-y-4">
-                    <div className="aspect-video bg-white rounded-xl flex items-center justify-center overflow-hidden">
-                      <img 
-                        src="/src/assets/product-preview-headphones.png" 
-                        alt="Casque Audio Premium" 
-                        className="w-full h-full object-contain p-2"
-                      />
-                    </div>
-                    <div>
-                      <p className="text-xs text-primary font-medium mb-1">🔥 BEST-SELLER</p>
-                      <h4 className="font-semibold mb-2">Casque Audio Premium Sans Fil</h4>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        Son immersif, réduction de bruit active, 40h d'autonomie...
-                      </p>
-                      <div className="flex items-center gap-3 mb-4">
-                        <span className="text-2xl font-bold">€49,99</span>
-                        <span className="text-muted-foreground line-through">€89,99</span>
-                        <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-xs rounded-full font-medium">
-                          -44%
-                        </span>
-                      </div>
-                      <Button variant="hero" size="sm" className="w-full">
-                        Ajouter au panier
-                      </Button>
-                    </div>
-                  </div>
+                <div className="p-0">
+                  {/* Store Preview Mockup */}
+                  <img 
+                    src="/src/assets/store-mockup-preview.png" 
+                    alt="Aperçu de boutique générée" 
+                    className="w-full h-auto rounded-b-2xl"
+                  />
                 </div>
               </div>
             </div>
