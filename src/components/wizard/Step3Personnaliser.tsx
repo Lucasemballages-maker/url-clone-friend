@@ -25,18 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import StorePreview from "./StorePreview";
-
-interface StoreData {
-  storeName: string;
-  productName: string;
-  productPrice: string;
-  originalPrice: string;
-  rating: string;
-  reviews: string;
-  productImages: string[];
-  primaryColor: string;
-  announcementBar: string;
-}
+import { StoreData } from "@/types/store";
 
 interface Section {
   id: string;

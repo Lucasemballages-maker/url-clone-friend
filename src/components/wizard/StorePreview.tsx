@@ -1,16 +1,5 @@
 import { ShoppingCart, User, Star, Check } from "lucide-react";
-
-interface StoreData {
-  storeName: string;
-  productName: string;
-  productPrice: string;
-  originalPrice: string;
-  rating: string;
-  reviews: string;
-  productImages: string[];
-  primaryColor: string;
-  announcementBar: string;
-}
+import { StoreData } from "@/types/store";
 
 interface StorePreviewProps {
   storeData: StoreData;
@@ -67,30 +56,35 @@ export const StorePreview = ({ storeData }: StorePreviewProps) => {
             </span>
           </div>
 
-          {/* Title */}
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight">
-            {storeData.productName}
+          {/* Headline */}
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 leading-tight">
+            {storeData.headline || storeData.productName}
           </h1>
+
+          {/* Description */}
+          <p className="text-gray-600 mb-6">
+            {storeData.description}
+          </p>
 
           {/* Benefits */}
           <div className="flex flex-wrap gap-2 mb-6">
-            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm border" style={{ borderColor: storeData.primaryColor, color: storeData.primaryColor }}>
-              <Check className="w-3 h-3" /> Qualité premium
-            </span>
-            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm border" style={{ borderColor: storeData.primaryColor, color: storeData.primaryColor }}>
-              <Check className="w-3 h-3" /> Installation facile
-            </span>
-            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm border" style={{ borderColor: storeData.primaryColor, color: storeData.primaryColor }}>
-              <Check className="w-3 h-3" /> Garantie 1 an
-            </span>
+            {storeData.benefits.map((benefit, index) => (
+              <span 
+                key={index}
+                className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm border" 
+                style={{ borderColor: storeData.primaryColor, color: storeData.primaryColor }}
+              >
+                <Check className="w-3 h-3" /> {benefit}
+              </span>
+            ))}
           </div>
 
           {/* CTA Button */}
           <button 
-            className="w-full md:w-auto px-8 py-4 rounded-full text-white font-semibold text-lg mb-4"
+            className="w-full md:w-auto px-8 py-4 rounded-full text-white font-semibold text-lg mb-4 uppercase"
             style={{ backgroundColor: storeData.primaryColor }}
           >
-            ACHETER MAINTENANT
+            {storeData.cta}
           </button>
 
           {/* Trust badges */}
