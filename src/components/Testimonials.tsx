@@ -12,7 +12,7 @@ const testimonials = [
     role: "Dropshipper",
   },
   {
-    quote: "J'étais débutant complet. Je n'avais jamais créé de boutique avant. Avec Copyfy, ça m'a pris 5 minutes pour lancer mon shop.",
+    quote: "J'étais débutant complet. Je n'avais jamais créé de boutique avant. Avec DROPYFY, ça m'a pris 5 minutes pour lancer mon shop.",
     author: "Julien Blois",
     role: "Brand Owner",
   },

@@ -64,10 +64,10 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
         <div className="p-4 flex items-center justify-between border-b border-border">
           <Link to="/dashboard" className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shrink-0">
-              <span className="text-primary-foreground font-bold text-lg">C</span>
+              <span className="text-primary-foreground font-bold text-lg">D</span>
             </div>
             {!sidebarCollapsed && (
-              <span className="font-semibold text-lg">copyfy</span>
+              <span className="font-semibold text-lg">DROPYFY</span>
             )}
           </Link>
           <button

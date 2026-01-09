@@ -7,9 +7,9 @@ const Footer = () => {
           <div className="md:col-span-1">
             <a href="/" className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-lg">C</span>
+                <span className="text-primary-foreground font-bold text-lg">D</span>
               </div>
-              <span className="font-semibold text-lg">copyfy</span>
+              <span className="font-semibold text-lg">DROPYFY</span>
             </a>
             <p className="text-sm text-muted-foreground">
               La plateforme tout-en-un pour lancer ta boutique e-commerce avec l'IA.
@@ -51,7 +51,7 @@ const Footer = () => {
         {/* Bottom */}
         <div className="pt-8 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © 2024 Copyfy. Tous droits réservés.
+            © 2024 DROPYFY. Tous droits réservés.
           </p>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <a href="#" className="hover:text-foreground transition-colors">Confidentialité</a>

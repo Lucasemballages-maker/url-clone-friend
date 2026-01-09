@@ -49,7 +49,7 @@ export const Step1Charger = ({
       <div className="text-center mb-10">
         <h1 className="text-2xl md:text-3xl font-bold mb-3">
           Créez votre boutique en quelques secondes avec{" "}
-          <span className="text-primary">CopyfyAI</span>
+          <span className="text-primary">DROPYFY AI</span>
           <Sparkles className="inline-block w-5 h-5 ml-2 text-primary" />
         </h1>
         <p className="text-muted-foreground">
