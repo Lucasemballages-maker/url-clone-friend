@@ -19,9 +19,10 @@ export const StorePreview = ({ storeData }: StorePreviewProps) => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  // Primary color - blue like the template
-  const primaryColor = "#4A90E2";
-  const gradientBg = "linear-gradient(135deg, #667eea 0%, #764ba2 100%)";
+  // Use storeData colors with fallbacks
+  const primaryColor = storeData.primaryColor || "#4A90E2";
+  const accentColor = storeData.accentColor || "#764ba2";
+  const gradientBg = `linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 100%)`;
 
   return (
     <div className="relative mx-auto" style={{ maxWidth: "320px" }}>
@@ -62,7 +63,7 @@ export const StorePreview = ({ storeData }: StorePreviewProps) => {
             >
               {/* Badge */}
               <div className="inline-flex items-center gap-1 bg-white/20 px-2 py-1 rounded-full text-[8px] mb-2">
-                <span>⭐ 4.8 (21 883+ clients)</span>
+                <span>⭐ {storeData.rating || "4.8"} ({storeData.reviews || "21 883"}+ clients)</span>
               </div>
               
               <h1 className="text-lg font-bold mb-2 leading-tight">
@@ -86,8 +87,8 @@ export const StorePreview = ({ storeData }: StorePreviewProps) => {
               </div>
               
               {/* CTA */}
-              <button className="bg-white text-[10px] font-bold px-6 py-2 rounded-full shadow-lg mt-2" style={{ color: "#667eea" }}>
-                ACHETER MAINTENANT
+              <button className="bg-white text-[10px] font-bold px-6 py-2 rounded-full shadow-lg mt-2" style={{ color: primaryColor }}>
+                {storeData.cta || "ACHETER MAINTENANT"}
               </button>
               
               {/* Trust badges */}
@@ -153,7 +154,7 @@ export const StorePreview = ({ storeData }: StorePreviewProps) => {
               
               {/* Product Info */}
               <div className="inline-flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-full text-[8px] mb-2">
-                <span>⭐ 4.8 (21 883+ clients)</span>
+                <span>⭐ {storeData.rating || "4.8"} ({storeData.reviews || "21 883"}+ clients)</span>
               </div>
               
               <h2 className="text-base font-bold text-zinc-800 mb-1">
@@ -167,14 +168,18 @@ export const StorePreview = ({ storeData }: StorePreviewProps) => {
                     <Star key={i} className="w-3 h-3 fill-current" />
                   ))}
                 </div>
-                <span className="text-[9px] text-zinc-500">(21 883 avis)</span>
+                <span className="text-[9px] text-zinc-500">({storeData.reviews || "21 883"} avis)</span>
               </div>
               
               {/* Price */}
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-zinc-400 line-through text-sm">69,90€</span>
-                <span className="text-xl font-bold" style={{ color: primaryColor }}>49,90€</span>
-                <span className="bg-red-500 text-white text-[8px] px-2 py-0.5 rounded-full">-29%</span>
+                {storeData.originalPrice && (
+                  <span className="text-zinc-400 line-through text-sm">{storeData.originalPrice}</span>
+                )}
+                <span className="text-xl font-bold" style={{ color: primaryColor }}>{storeData.productPrice || "49,90€"}</span>
+                {storeData.originalPrice && storeData.productPrice && (
+                  <span className="bg-red-500 text-white text-[8px] px-2 py-0.5 rounded-full">PROMO</span>
+                )}
               </div>
               
               {/* Benefits List */}
@@ -197,7 +202,7 @@ export const StorePreview = ({ storeData }: StorePreviewProps) => {
                 className="w-full text-white text-[11px] font-bold py-3 rounded-full shadow-lg"
                 style={{ background: gradientBg }}
               >
-                ACHETER MAINTENANT
+                {storeData.cta || "ACHETER MAINTENANT"}
               </button>
               
               <div className="flex justify-center gap-3 mt-2 text-[8px] text-zinc-500">
@@ -267,8 +272,8 @@ export const StorePreview = ({ storeData }: StorePreviewProps) => {
             >
               <h2 className="text-base font-bold mb-2">Prêt à transformer votre douche ?</h2>
               <p className="text-[9px] opacity-90 mb-3">Profitez de -29% aujourd'hui seulement</p>
-              <button className="bg-white text-[10px] font-bold px-6 py-2 rounded-full shadow-lg" style={{ color: "#667eea" }}>
-                ACHETER MAINTENANT
+              <button className="bg-white text-[10px] font-bold px-6 py-2 rounded-full shadow-lg" style={{ color: primaryColor }}>
+                {storeData.cta || "ACHETER MAINTENANT"}
               </button>
             </section>
 
