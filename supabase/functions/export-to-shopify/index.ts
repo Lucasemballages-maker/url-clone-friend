@@ -33,14 +33,13 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } }
     });
     
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabaseUser.auth.getClaims(token);
+    const { data: userData, error: userError } = await supabaseUser.auth.getUser();
     
-    if (claimsError || !claimsData?.claims) {
+    if (userError || !userData.user) {
       throw new Error("Unauthorized - Invalid token");
     }
     
-    const userId = claimsData.claims.sub;
+    const userId = userData.user.id;
     logStep("User authenticated", { userId });
 
     const { storeData, shopDomain } = await req.json();
