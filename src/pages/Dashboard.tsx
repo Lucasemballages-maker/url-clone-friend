@@ -155,8 +155,19 @@ const Dashboard = () => {
             title: product.title,
             headline: product.title,
             description: product.description || 'Découvrez ce produit exceptionnel.',
-            benefits: ['Qualité premium', 'Livraison rapide', 'Satisfaction garantie'],
+            benefits: ['Qualité premium', 'Livraison rapide', 'Satisfaction garantie', 'Design élégant'],
             cta: 'Acheter maintenant',
+            customerReviews: [
+              { name: 'Marie C.', initials: 'MC', text: 'Excellent produit, je recommande !', rating: 5 },
+              { name: 'Jean D.', initials: 'JD', text: 'Très satisfait de mon achat.', rating: 5 },
+              { name: 'Sophie L.', initials: 'SL', text: 'Qualité au rendez-vous !', rating: 5 }
+            ],
+            benefitCards: [
+              { icon: '✨', title: 'Qualité Premium', description: 'Matériaux haut de gamme' },
+              { icon: '🚀', title: 'Livraison Rapide', description: 'Expédié en 24h' },
+              { icon: '🛡️', title: 'Garantie', description: 'Satisfait ou remboursé' },
+              { icon: '💯', title: 'Fiabilité', description: 'Testé et approuvé' }
+            ]
           };
       
       updateStep('images', 'loading');
@@ -240,6 +251,8 @@ const Dashboard = () => {
         textColor: "#FFFFFF",
         accentColor: "#F59E0B",
         announcementBar: "Livraison gratuite sur les commandes supérieures à 50 € | Livraison rapide dans le monde entier",
+        customerReviews: reformulated.customerReviews,
+        benefitCards: reformulated.benefitCards,
       };
       
       setStoreData(newStoreData);

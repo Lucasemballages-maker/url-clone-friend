@@ -1,3 +1,16 @@
+export interface ProductReview {
+  name: string;
+  initials: string;
+  text: string;
+  rating: number;
+}
+
+export interface BenefitCard {
+  icon: string;
+  title: string;
+  description: string;
+}
+
 export interface StoreData {
   storeName: string;
   productName: string;
@@ -15,4 +28,7 @@ export interface StoreData {
   textColor: string;
   accentColor: string;
   announcementBar: string;
+  // Nouveaux champs pour les avis et bienfaits personnalisés
+  customerReviews?: ProductReview[];
+  benefitCards?: BenefitCard[];
 }
