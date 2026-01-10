@@ -23,8 +23,13 @@ function extractDimensionsFromUrl(url: string): { width: number; height: number 
 }
 
 // Check if image is likely a product photo (not icon/badge/logo)
-function isLikelyProductPhoto(url: string): boolean {
+function isLikelyProductPhoto(url: string, relaxed: boolean = false): boolean {
   const lowerUrl = url.toLowerCase();
+  
+  // Skip data URIs and invalid URLs
+  if (url.startsWith('data:') || !url.startsWith('http')) {
+    return false;
+  }
   
   // STRICT exclusion patterns for non-product images
   const excludePatterns = [
@@ -34,8 +39,6 @@ function isLikelyProductPhoto(url: string): boolean {
     '/avatar', 'avatar.',
     '/logo', 'logo.', '_logo',
     '/badge', 'badge.', '_badge',
-    '/tag', '_tag.',
-    '/label', 'label.',
     '/btn', 'btn_', 'button',
     '/arrow', 'arrow.',
     '/star', 'star.', '_star',
@@ -48,35 +51,19 @@ function isLikelyProductPhoto(url: string): boolean {
     // Static assets domain (logos, icons)
     's.alicdn.com',
     'assets.alicdn.com',
-    'img.alicdn.com/tfs/', // Template file system
+    'img.alicdn.com/tfs/',
     
     // Template and placeholder images
     'tps-', 'template', 'placeholder', 'loading', 'sprite',
     'default', 'empty', 'blank', 'dummy',
     
-    // Tiny images patterns
-    '/16x16', '/20x20', '/24x24', '/32x32', '/40x40', '/48x48', '/50x50',
-    '/60x60', '/64x64', '/80x80', '/90x90', '/100x100', '/120x120',
-    '_16x16', '_20x20', '_24x24', '_32x32', '_40x40', '_48x48', '_50x50',
-    '_60x60', '_64x64', '_80x80', '_90x90', '_100x100', '_120x120',
-    
     // Seller/store images
     '/seller', 'seller.', '/shop', 'shop-logo', 'store-logo',
     '/user', 'user.', '/member',
     
-    // Promotional/banner patterns that aren't product images
-    '/coupon', 'coupon.', '/promo', '/banner', '/ad_', '/ads/',
-    '/promotion', '/discount-tag', '/sale-tag',
-    
     // Payment/shipping icons
     '/payment', '/shipping', '/delivery', '/return', '/warranty',
     '/visa', '/mastercard', '/paypal', '/alipay',
-    
-    // Rating/review elements
-    '/rating', '/review', '/feedback',
-    
-    // Country flags
-    '/country', 'country-flag',
     
     // Social icons
     '/facebook', '/twitter', '/instagram', '/youtube', '/tiktok',
@@ -93,9 +80,10 @@ function isLikelyProductPhoto(url: string): boolean {
   
   // Check dimensions from URL - reject small images
   const dims = extractDimensionsFromUrl(url);
+  const minSize = relaxed ? 100 : 200; // More relaxed size threshold
+  
   if (dims) {
-    // Reject images smaller than 400px on any side
-    if (dims.width < 400 || dims.height < 400) {
+    if (dims.width < minSize || dims.height < minSize) {
       return false;
     }
     // Reject extremely narrow/tall images (likely banners or icons)
@@ -105,7 +93,7 @@ function isLikelyProductPhoto(url: string): boolean {
     }
   }
   
-  // Must be from AliExpress product CDN domains
+  // Valid CDN domains for product images
   const validDomains = [
     'ae01.alicdn.com',
     'ae02.alicdn.com', 
@@ -115,29 +103,35 @@ function isLikelyProductPhoto(url: string): boolean {
     'cbu02.alicdn.com',
     'cbu03.alicdn.com',
     'cbu04.alicdn.com',
+    'img.alicdn.com', // Also allow general img domain in relaxed mode
   ];
   
   const isFromValidDomain = validDomains.some(domain => url.includes(domain));
+  
+  // In relaxed mode, accept any alicdn.com image
+  if (relaxed) {
+    return url.includes('alicdn.com');
+  }
+  
   if (!isFromValidDomain) {
     return false;
   }
   
-  // Additional positive signals for product images
+  // Positive signals for product images
   const productImagePatterns = [
-    '/kf/',          // Product image path
-    '/imgextra/',    // Extra product images
-    'O1CN',          // Common product image prefix
-    '/i1/', '/i2/', '/i3/', '/i4/', // Image server paths
+    '/kf/',
+    '/imgextra/',
+    'O1CN',
+    '/i1/', '/i2/', '/i3/', '/i4/',
   ];
   
-  const hasProductSignal = productImagePatterns.some(p => url.includes(p));
-  
-  // If no dimensions found, require positive product signal
-  if (!dims && !hasProductSignal) {
-    return false;
+  // If dimensions found and large enough, it's likely a product image
+  if (dims && dims.width >= 200 && dims.height >= 200) {
+    return true;
   }
   
-  return true;
+  // Otherwise require a positive signal
+  return productImagePatterns.some(p => url.includes(p));
 }
 
 // Helper to get high quality version of image (upgrade to 800x800 minimum)
@@ -339,13 +333,34 @@ Deno.serve(async (req) => {
     }
     console.log('============================');
 
-    // Limit to 7 high-quality product images
-    const finalImages = images.slice(0, 7);
+    // If no images found with strict filter, try relaxed mode
+    let finalImages = images.slice(0, 7);
+    
+    if (finalImages.length === 0) {
+      console.log('=== NO IMAGES WITH STRICT FILTER, TRYING RELAXED MODE ===');
+      
+      // Re-scan with relaxed filter
+      const relaxedImages: string[] = [];
+      for (const urlEntry of allFoundUrls) {
+        const urlMatch = urlEntry.match(/\[.*?\] (.+)/);
+        if (urlMatch) {
+          const imgUrl = urlMatch[1];
+          if (isLikelyProductPhoto(imgUrl, true)) {
+            const highQualityUrl = getHighQualityUrl(imgUrl);
+            if (!relaxedImages.includes(highQualityUrl)) {
+              relaxedImages.push(highQualityUrl);
+            }
+          }
+        }
+      }
+      finalImages = relaxedImages.slice(0, 7);
+      console.log('Relaxed mode found:', relaxedImages.length, 'images');
+    }
 
-    console.log('=== FILTERED PRODUCT IMAGES (max 7) ===');
+    console.log('=== FINAL PRODUCT IMAGES (max 7) ===');
     finalImages.forEach((url, i) => console.log(`${i + 1}. ${url}`));
-    console.log(`Total valid: ${images.length}, Using: ${finalImages.length}`);
-    console.log('========================================');
+    console.log(`Total valid: ${images.length}, Final: ${finalImages.length}`);
+    console.log('====================================');
 
     // Extract price - look for common AliExpress price patterns
     const priceRegex = /(?:€|EUR|US\s*\$|\$)\s*([\d,]+(?:\.\d{2})?)/gi;
