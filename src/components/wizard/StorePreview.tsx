@@ -339,7 +339,7 @@ export const StorePreview = ({ storeData }: StorePreviewProps) => {
               className="text-white px-4 py-6 text-center"
               style={{ background: gradientBg }}
             >
-              <h2 className="text-base font-bold mb-2">Prêt à transformer votre douche ?</h2>
+              <h2 className="text-base font-bold mb-2">{storeData.finalCtaTitle || `Prêt à découvrir ${storeData.productName || "ce produit"} ?`}</h2>
               <p className="text-[9px] opacity-90 mb-3">Profitez de -29% aujourd'hui seulement</p>
               <button className="bg-white text-[10px] font-bold px-6 py-2 rounded-full shadow-lg" style={{ color: primaryColor }}>
                 {storeData.cta || "ACHETER MAINTENANT"}

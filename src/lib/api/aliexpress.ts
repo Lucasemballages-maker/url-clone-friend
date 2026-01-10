@@ -45,6 +45,7 @@ export interface ReformulatedProduct {
   description: string;
   benefits: string[];
   cta: string;
+  finalCtaTitle?: string;
   customerReviews?: ProductReview[];
   homeReviews?: ProductReview[];
   benefitCards?: BenefitCard[];
