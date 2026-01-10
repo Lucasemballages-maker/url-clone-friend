@@ -5,6 +5,7 @@ import Step1Charger from "@/components/wizard/Step1Charger";
 import Step2Selectionner from "@/components/wizard/Step2Selectionner";
 import Step3Personnaliser from "@/components/wizard/Step3Personnaliser";
 import Step4Finaliser from "@/components/wizard/Step4Finaliser";
+import ShopifyStoreSection from "@/components/dashboard/ShopifyStoreSection";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Sparkles, Image, Wand2, Check } from "lucide-react";
 import { aliexpressApi, AliExpressProduct, ImageStyle } from "@/lib/api/aliexpress";
@@ -484,6 +485,13 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* Shopify Store Section - Show when on step 1 */}
+        {currentStep === 1 && (
+          <div className="px-6 pt-6">
+            <ShopifyStoreSection />
+          </div>
+        )}
 
         {/* Step Indicator */}
         <div className="pt-8 px-6">

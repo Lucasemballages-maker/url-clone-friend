@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ExternalLink, CheckCircle, Loader2 } from "lucide-react";
+import { ArrowLeft, ExternalLink, CheckCircle, Loader2, PartyPopper, Store, ShoppingBag, Copy } from "lucide-react";
 import StorePreview from "./StorePreview";
 import PricingModal from "./PricingModal";
 import { StoreData } from "@/types/store";
@@ -10,6 +10,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Step4FinaliserProps {
   storeData: StoreData;
@@ -24,9 +25,19 @@ interface ShopifyConnection {
   created_at: string;
 }
 
+interface ExportResult {
+  success: boolean;
+  pageUrl: string;
+  productUrl: string;
+  storeUrl: string;
+  checkoutUrl: string;
+  message: string;
+}
+
 export const Step4Finaliser = ({
   storeData,
   onBack,
+  onFinish,
 }: Step4FinaliserProps) => {
   const { subscribed, createCheckout } = useSubscription();
   const { setStoreData } = useShopifyExportStore();
@@ -38,6 +49,7 @@ export const Step4Finaliser = ({
   const [isExporting, setIsExporting] = useState(false);
   const [shopifyConnection, setShopifyConnection] = useState<ShopifyConnection | null>(null);
   const [checkingConnection, setCheckingConnection] = useState(true);
+  const [exportResult, setExportResult] = useState<ExportResult | null>(null);
 
   // Check for existing Shopify connection
   useEffect(() => {
@@ -213,13 +225,19 @@ export const Step4Finaliser = ({
         throw new Error(result.error || `Erreur serveur: ${response.status}`);
       }
 
+      // Store export result for display
+      setExportResult({
+        success: true,
+        pageUrl: result.pageUrl,
+        productUrl: result.productUrl,
+        storeUrl: result.storeUrl,
+        checkoutUrl: result.checkoutUrl,
+        message: result.message,
+      });
+
       toast.success("🎉 Boutique exportée vers Shopify !", {
         description: result.message || `Produit créé sur ${shopifyConnection.shop_domain}`,
         duration: 15000,
-        action: {
-          label: "Ouvrir ma boutique",
-          onClick: () => window.open(result.storeUrl || `https://${shopifyConnection.shop_domain}`, "_blank"),
-        },
       });
       
     } catch (error) {
@@ -236,6 +254,49 @@ export const Step4Finaliser = ({
   const handleSelectPlan = async (planId: string, isYearly: boolean) => {
     setStoreData(storeData);
   };
+
+  // Show success screen after export
+  if (exportResult) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] text-center p-6">
+        <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mb-6">
+          <PartyPopper className="w-10 h-10 text-green-500" />
+        </div>
+        <h2 className="text-2xl font-bold mb-2">✅ Votre boutique est prête !</h2>
+        <p className="text-muted-foreground mb-8 max-w-md">{exportResult.message}</p>
+        
+        <Card className="w-full max-w-md mb-6">
+          <CardContent className="p-4 space-y-3">
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-2">
+                <Store className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">Page de vente</span>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => window.open(exportResult.pageUrl, "_blank")}>
+                <ExternalLink className="w-3 h-3 mr-1" /> Ouvrir
+              </Button>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+              <div className="flex items-center gap-2">
+                <ShoppingBag className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">Produit Shopify</span>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => window.open(exportResult.productUrl, "_blank")}>
+                <ExternalLink className="w-3 h-3 mr-1" /> Voir
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={onFinish}>Créer une autre boutique</Button>
+          <Button variant="hero" onClick={() => window.open(exportResult.pageUrl, "_blank")}>
+            <ExternalLink className="w-4 h-4 mr-2" /> Ouvrir ma boutique
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-200px)]">
