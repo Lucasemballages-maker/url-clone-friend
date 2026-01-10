@@ -230,10 +230,10 @@ const Dashboard = () => {
       setProductImages(allImages);
       setStoreName(reformulated.title.split(' ').slice(0, 3).join(' ').toUpperCase());
       
-      // Calculate displayed price = 2x real price
+      // Calculate displayed price = 80% more than real price (1.8x)
       const realPrice = parseFloat(product.price) || 29.99;
-      const displayedPrice = (realPrice * 2).toFixed(2);
-      const displayedOriginalPrice = (realPrice * 3).toFixed(2); // Original = 3x for crossed out price
+      const displayedPrice = (realPrice * 1.8).toFixed(2);
+      const displayedOriginalPrice = (realPrice * 2.5).toFixed(2); // Original = 2.5x for crossed out price
       
       const newStoreData: StoreData = {
         storeName: reformulated.title.split(' ').slice(0, 3).join(' ').toUpperCase(),

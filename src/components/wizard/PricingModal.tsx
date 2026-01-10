@@ -20,8 +20,8 @@ const plans = [
     name: "Starter",
     description: "Parfait pour tester et lancer ta première app",
     icon: Zap,
-    monthlyPrice: 29,
-    yearlyPrice: 290,
+    monthlyPrice: 0,
+    yearlyPrice: 0,
     features: [
       "1 app e-commerce générée",
       "Design personnalisable",
@@ -30,7 +30,7 @@ const plans = [
       "Support par email",
     ],
     popular: false,
-    cta: "Choisir Starter",
+    cta: "Essayer gratuitement",
   },
   {
     id: "pro",
@@ -99,7 +99,20 @@ export const PricingModal = ({ open, onOpenChange, onSelectPlan }: PricingModalP
       return;
     }
 
-    // User is logged in, create checkout session
+    // Check if it's the free starter plan
+    const selectedPlan = plans.find(p => p.id === planId);
+    if (selectedPlan && selectedPlan.monthlyPrice === 0) {
+      // Free plan - skip payment and go directly to finalization
+      toast({
+        title: "Plan Starter activé !",
+        description: "Vous pouvez maintenant créer votre boutique.",
+      });
+      onOpenChange(false);
+      navigate("/shopify-finalization");
+      return;
+    }
+
+    // User is logged in, create checkout session for paid plans
     setLoadingPlan(planId);
     try {
       await createCheckout(planId, isYearly);
