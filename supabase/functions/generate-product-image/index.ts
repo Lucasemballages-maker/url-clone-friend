@@ -44,28 +44,30 @@ Deno.serve(async (req) => {
     }
 
     // Style prompts for TEXT-ONLY generation (no source image)
+    // Use generic product descriptions to avoid brand-related refusals
+    const genericProductName = productDescription
+      .replace(/DJI|Sony|Apple|Samsung|Nike|Adidas|LG|Bose|Canon|Nikon|GoPro|Dyson|Philips|Xiaomi/gi, '')
+      .replace(/™|®|©/g, '')
+      .replace(/\s+/g, ' ')
+      .trim() || 'premium electronic device';
+    
     const textOnlyStylePrompts: Record<string, string> = {
-      lifestyle: `Create a professional lifestyle product photograph of a "${productDescription}". 
-        Place the product in an elegant, modern home setting (living room, bathroom, or kitchen).
-        Use warm, inviting lighting with soft shadows. Premium aesthetic.
-        The image should look like a high-end e-commerce product photo.
-        Photorealistic, professional product photography, 4K quality.`,
-      studio: `Create a professional studio product photograph of a "${productDescription}".
-        Place the product on a clean white or soft gradient background.
-        Use professional studio lighting with subtle shadows and reflections.
-        Premium, clean, minimalist aesthetic.
-        The image should look like a high-end Amazon or Shopify product listing.
-        Photorealistic, professional product photography, 4K quality.`,
-      outdoor: `Create a professional outdoor product photograph of a "${productDescription}".
-        Place the product in a beautiful natural setting with soft natural lighting.
-        Aspirational and appealing outdoor environment.
-        The image should look like a lifestyle brand advertisement.
-        Photorealistic, professional product photography, 4K quality.`,
-      minimal: `Create a minimalist product photograph of a "${productDescription}".
-        Use a clean, simple background with soft shadows.
-        Modern, elegant, Scandinavian-inspired aesthetic.
-        The image should look like an Apple-style product showcase.
-        Photorealistic, professional product photography, 4K quality.`,
+      lifestyle: `Generate a photorealistic product image: A sleek, modern ${genericProductName} displayed in an elegant home interior setting. 
+        Professional e-commerce photography style with warm ambient lighting.
+        Clean composition, premium aesthetic, high-end lifestyle brand feel.
+        4K quality, no text or logos.`,
+      studio: `Generate a photorealistic product image: A ${genericProductName} on a clean white gradient background.
+        Professional studio lighting with soft shadows and subtle reflections.
+        Clean, minimalist, premium product photography for e-commerce.
+        4K quality, no text or logos.`,
+      outdoor: `Generate a photorealistic product image: A ${genericProductName} in a beautiful natural outdoor setting.
+        Soft golden hour lighting, aspirational lifestyle photography feel.
+        Professional quality for premium brand marketing.
+        4K quality, no text or logos.`,
+      minimal: `Generate a photorealistic product image: A ${genericProductName} on a minimal background with soft shadows.
+        Modern, elegant, Scandinavian-inspired minimalist aesthetic.
+        Apple-style product showcase photography.
+        4K quality, no text or logos.`,
     };
 
     // Style prompts for IMAGE EDITING (when we have a valid source image)
@@ -121,6 +123,7 @@ ${prompt}`,
     } else {
       // Generate image from text only (no source image available)
       console.log('Using text-only generation mode (no valid source image)');
+      console.log('Generic product name:', genericProductName);
       const prompt = textOnlyStylePrompts[style] || textOnlyStylePrompts.lifestyle;
       
       response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
@@ -134,7 +137,7 @@ ${prompt}`,
           messages: [
             {
               role: 'user',
-              content: prompt,
+              content: `You are a professional product photographer. Generate a beautiful product image based on this description. Output ONLY the image, no text explanation needed.\n\n${prompt}`,
             },
           ],
           modalities: ['image', 'text'],
