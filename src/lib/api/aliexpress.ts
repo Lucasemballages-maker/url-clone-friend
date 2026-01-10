@@ -54,6 +54,16 @@ export const aliexpressApi = {
         return { success: false, error: error.message };
       }
 
+      // Log extracted image URLs to browser console for debugging
+      if (data?.data?.images) {
+        console.log('=== EXTRACTED PRODUCT IMAGES ===');
+        console.log('Total images found:', data.data.images.length);
+        data.data.images.forEach((imgUrl: string, index: number) => {
+          console.log(`Image ${index + 1}:`, imgUrl);
+        });
+        console.log('================================');
+      }
+
       return data;
     } catch (error) {
       console.error('Error scraping AliExpress:', error);
