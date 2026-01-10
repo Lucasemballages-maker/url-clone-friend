@@ -418,6 +418,23 @@ const StoreProduct = () => {
           </div>
         </section>
 
+        {/* FAQ Section */}
+        {storeData.faq && storeData.faq.length > 0 && (
+          <section className="max-w-4xl mx-auto px-6 py-12">
+            <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-800 mb-8">
+              Questions fréquentes
+            </h2>
+            <div className="space-y-4">
+              {storeData.faq.map((item, i) => (
+                <div key={i} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                  <h3 className="font-semibold text-gray-800 mb-2">{item.question}</h3>
+                  <p className="text-gray-600 text-sm">{item.answer}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Footer */}
         <footer className="bg-gray-900 text-white py-8 px-6">
           <div className="max-w-6xl mx-auto text-center">
