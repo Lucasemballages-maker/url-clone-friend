@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ExternalLink, CheckCircle, Loader2 } from "lucide-react";
 import StorePreview from "./StorePreview";
 import PricingModal from "./PricingModal";
 import { StoreData } from "@/types/store";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useShopifyExportStore } from "@/stores/shopifyExportStore";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Step4FinaliserProps {
   storeData: StoreData;
@@ -16,31 +18,176 @@ interface Step4FinaliserProps {
   onFinish: () => void;
 }
 
+interface ShopifyConnection {
+  id: string;
+  shop_domain: string;
+  created_at: string;
+}
+
 export const Step4Finaliser = ({
   storeData,
   onBack,
 }: Step4FinaliserProps) => {
   const { subscribed, createCheckout } = useSubscription();
   const { setStoreData } = useShopifyExportStore();
+  const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [shopifyConnection, setShopifyConnection] = useState<ShopifyConnection | null>(null);
+  const [checkingConnection, setCheckingConnection] = useState(true);
 
-  const handleConnectShopify = async () => {
+  // Check for existing Shopify connection
+  useEffect(() => {
+    const checkConnection = async () => {
+      if (!user) {
+        setCheckingConnection(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from("shopify_connections")
+          .select("id, shop_domain, created_at")
+          .eq("user_id", user.id)
+          .limit(1)
+          .maybeSingle();
+
+        if (data && !error) {
+          setShopifyConnection(data as ShopifyConnection);
+        }
+      } catch (err) {
+        console.error("Error checking Shopify connection:", err);
+      } finally {
+        setCheckingConnection(false);
+      }
+    };
+
+    checkConnection();
+  }, [user]);
+
+  // Handle OAuth callback
+  useEffect(() => {
+    const shopifyConnected = searchParams.get("shopify_connected");
+    const shopifyError = searchParams.get("shopify_error");
+    const shop = searchParams.get("shop");
+    const tempToken = searchParams.get("temp_token");
+
+    if (shopifyConnected === "true" && shop) {
+      toast.success(`Boutique ${shop} connectée avec succès !`);
+      // Refresh connection status
+      if (user && tempToken) {
+        // Store the connection if we have a temp token
+        saveConnection(shop, tempToken);
+      }
+      // Clear URL params
+      navigate("/dashboard", { replace: true });
+    } else if (shopifyError) {
+      toast.error(`Erreur Shopify: ${shopifyError}`);
+      navigate("/dashboard", { replace: true });
+    }
+  }, [searchParams, user, navigate]);
+
+  const saveConnection = async (shop: string, accessToken: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from("shopify_connections")
+        .upsert({
+          user_id: user.id,
+          shop_domain: shop,
+          access_token: accessToken,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: "user_id,shop_domain",
+        });
+
+      if (!error) {
+        setShopifyConnection({
+          id: crypto.randomUUID(),
+          shop_domain: shop,
+          created_at: new Date().toISOString(),
+        });
+      }
+    } catch (err) {
+      console.error("Error saving connection:", err);
+    }
+  };
+
+  const handleConnectShopify = () => {
+    if (!user) {
+      toast.error("Veuillez vous connecter pour continuer");
+      navigate("/auth");
+      return;
+    }
+
+    // Redirect to Shopify OAuth
+    const shop = "haa590-xv.myshopify.com"; // Default shop or prompt user
+    const authUrl = `https://jwoofhbzypjzwjowffcr.supabase.co/functions/v1/shopify-auth?shop=${encodeURIComponent(shop)}`;
+    
+    window.location.href = authUrl;
+  };
+
+  const handleExportToShopify = async () => {
     if (!subscribed) {
-      // Store the data for after payment
       setStoreData(storeData);
-      // Show pricing modal
       setShowPricingModal(true);
-    } else {
-      // User has subscription, go directly to export
-      setStoreData(storeData);
-      navigate("/payment-success");
+      return;
+    }
+
+    if (!shopifyConnection) {
+      toast.error("Veuillez d'abord connecter votre boutique Shopify");
+      return;
+    }
+
+    setIsExporting(true);
+
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData.session?.access_token;
+
+      if (!token) {
+        throw new Error("Session expirée");
+      }
+
+      const response = await supabase.functions.invoke("export-to-shopify", {
+        body: { 
+          storeData,
+          shopDomain: shopifyConnection.shop_domain
+        },
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+
+      const result = response.data;
+
+      if (result.success) {
+        toast.success("Produit exporté vers Shopify !", {
+          description: `Voir sur ${shopifyConnection.shop_domain}`,
+          action: {
+            label: "Ouvrir",
+            onClick: () => window.open(result.productUrl, "_blank"),
+          },
+        });
+      } else {
+        throw new Error(result.error || "Erreur lors de l'export");
+      }
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Erreur lors de l'export", {
+        description: error instanceof Error ? error.message : "Veuillez réessayer",
+      });
+    } finally {
+      setIsExporting(false);
     }
   };
 
   const handleSelectPlan = async (planId: string, isYearly: boolean) => {
-    // Store the data before checkout
     setStoreData(storeData);
   };
 
@@ -58,19 +205,54 @@ export const Step4Finaliser = ({
           Retour
         </Button>
 
-        <Button variant="hero" size="xl" className="gap-3" onClick={handleConnectShopify}>
-          <svg 
-            className="w-5 h-5" 
-            viewBox="0 0 24 24" 
-            fill="currentColor"
-          >
-            <path d="M15.337 3.415c-.193-.016-.233.296-.233.296l-.318 2.033-.022-.007A4.667 4.667 0 0 0 13.119 5c-1.736-.011-3.075.84-3.583 2.136-.507 1.296.012 2.755.862 3.675.851.92 2.088 1.447 3.295 2.135 1.207.688 2.422 1.54 2.764 3.073.342 1.533-.344 3.285-1.838 4.246-1.493.96-3.744.95-5.545-.158a7.357 7.357 0 0 1-2.217-2.1l1.263-2.1c.41.544.923 1.016 1.517 1.39 1.13.716 2.534.878 3.522.287.988-.59 1.342-1.82.91-2.757-.432-.937-1.523-1.583-2.597-2.197-1.074-.614-2.193-1.304-2.907-2.411-.714-1.107-.984-2.674-.394-4.017.59-1.343 2.064-2.423 3.893-2.564 1.828-.14 3.8.545 5.065 1.935l-1.292 2.009z"/>
-          </svg>
-          Connecter votre Shopify
-        </Button>
+        <div className="flex items-center gap-3">
+          {checkingConnection ? (
+            <Button disabled variant="outline">
+              <Loader2 className="w-4 h-4 animate-spin mr-2" />
+              Vérification...
+            </Button>
+          ) : shopifyConnection ? (
+            <>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <CheckCircle className="w-4 h-4 text-green-500" />
+                <span>{shopifyConnection.shop_domain}</span>
+              </div>
+              <Button 
+                variant="hero" 
+                size="xl" 
+                className="gap-3" 
+                onClick={handleExportToShopify}
+                disabled={isExporting}
+              >
+                {isExporting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Export en cours...
+                  </>
+                ) : (
+                  <>
+                    <ExternalLink className="w-5 h-5" />
+                    Exporter vers Shopify
+                  </>
+                )}
+              </Button>
+            </>
+          ) : (
+            <Button variant="hero" size="xl" className="gap-3" onClick={handleConnectShopify}>
+              <svg 
+                className="w-5 h-5" 
+                viewBox="0 0 24 24" 
+                fill="currentColor"
+              >
+                <path d="M15.337 3.415c-.193-.016-.233.296-.233.296l-.318 2.033-.022-.007A4.667 4.667 0 0 0 13.119 5c-1.736-.011-3.075.84-3.583 2.136-.507 1.296.012 2.755.862 3.675.851.92 2.088 1.447 3.295 2.135 1.207.688 2.422 1.54 2.764 3.073.342 1.533-.344 3.285-1.838 4.246-1.493.96-3.744.95-5.545-.158a7.357 7.357 0 0 1-2.217-2.1l1.263-2.1c.41.544.923 1.016 1.517 1.39 1.13.716 2.534.878 3.522.287.988-.59 1.342-1.82.91-2.757-.432-.937-1.523-1.583-2.597-2.197-1.074-.614-2.193-1.304-2.907-2.411-.714-1.107-.984-2.674-.394-4.017.59-1.343 2.064-2.423 3.893-2.564 1.828-.14 3.8.545 5.065 1.935l-1.292 2.009z"/>
+              </svg>
+              Connecter Shopify
+            </Button>
+          )}
+        </div>
       </div>
 
-      {/* Pricing Modal for non-authenticated users */}
+      {/* Pricing Modal for non-subscribed users */}
       <PricingModal
         open={showPricingModal}
         onOpenChange={setShowPricingModal}
