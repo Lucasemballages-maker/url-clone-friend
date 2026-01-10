@@ -28,7 +28,8 @@ export interface StoreData {
   textColor: string;
   accentColor: string;
   announcementBar: string;
-  // Nouveaux champs pour les avis et bienfaits personnalisés
-  customerReviews?: ProductReview[];
+  // Avis et bienfaits personnalisés
+  customerReviews?: ProductReview[];  // Avis page produit
+  homeReviews?: ProductReview[];      // Avis page d'accueil
   benefitCards?: BenefitCard[];
 }
