@@ -117,6 +117,13 @@ const PublicStore = () => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
+  const scrollToProduct = () => {
+    const productSection = document.getElementById('product-section');
+    if (productSection) {
+      productSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   const handleOrder = async () => {
     if (!store) return;
 
@@ -200,7 +207,7 @@ const PublicStore = () => {
               {storeData.storeName || "Votre Marque"}
             </span>
             <button 
-              onClick={handleOrder}
+              onClick={scrollToProduct}
               className="text-white text-sm font-semibold px-6 py-2 rounded-full transition-transform hover:scale-105"
               style={{ backgroundColor: primaryColor }}
             >
@@ -239,7 +246,7 @@ const PublicStore = () => {
             </div>
             
             <button 
-              onClick={handleOrder}
+              onClick={scrollToProduct}
               className="bg-white text-base font-bold px-8 py-3 rounded-full shadow-lg transition-transform hover:scale-105 mt-4"
               style={{ color: primaryColor }}
             >
@@ -254,7 +261,7 @@ const PublicStore = () => {
         </section>
 
         {/* Product Section */}
-        <section className="px-6 py-12 max-w-6xl mx-auto">
+        <section id="product-section" className="px-6 py-12 max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12">
             {/* Product Gallery */}
             <div>
