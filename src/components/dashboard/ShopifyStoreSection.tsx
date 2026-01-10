@@ -215,6 +215,6 @@ export const ShopifyStoreSection = () => {
       </CardContent>
     </Card>
   );
-};
+}
 
 export default ShopifyStoreSection;
