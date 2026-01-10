@@ -3,27 +3,104 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Helper function to check if URL is a valid product image
-function isValidProductImage(url: string): boolean {
-  // Exclude logos, icons, flags, avatars, and small UI elements
-  const excludePatterns = [
-    '/icon', 'icon.', '_icon',
-    '/flag', 'flag.',
-    '/avatar', 'avatar.',
-    '/logo', 'logo.',
-    '/s.alicdn.com',  // This is for static assets, not product images
-    'tps-', // Template images
-    '/O1CN01', // Often used for UI elements with small dimensions
-    'placeholder',
-    'loading',
-    'sprite',
-    'btn_',
-    'button',
+// Extract dimensions from AliExpress image URL
+function extractDimensionsFromUrl(url: string): { width: number; height: number } | null {
+  // Pattern: _640x640.jpg or .jpg_640x640 or similar
+  const patterns = [
+    /_(\d+)x(\d+)\./i,
+    /\.(?:jpg|png|webp)_(\d+)x(\d+)/i,
+    /-(\d+)x(\d+)\./i,
+    /\/(\d+)x(\d+)\//i,
   ];
   
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) {
+      return { width: parseInt(match[1], 10), height: parseInt(match[2], 10) };
+    }
+  }
+  return null;
+}
+
+// Check if image is likely a product photo (not icon/badge/logo)
+function isLikelyProductPhoto(url: string): boolean {
   const lowerUrl = url.toLowerCase();
+  
+  // STRICT exclusion patterns for non-product images
+  const excludePatterns = [
+    // Icons and UI elements
+    '/icon', 'icon.', '_icon', 'icon_', 'icons/',
+    '/flag', 'flag.', '_flag',
+    '/avatar', 'avatar.',
+    '/logo', 'logo.', '_logo',
+    '/badge', 'badge.', '_badge',
+    '/tag', '_tag.',
+    '/label', 'label.',
+    '/btn', 'btn_', 'button',
+    '/arrow', 'arrow.',
+    '/star', 'star.', '_star',
+    '/check', 'check.',
+    '/close', 'close.',
+    '/cart', 'cart.',
+    '/heart', 'heart.',
+    '/share', 'share.',
+    
+    // Static assets domain (logos, icons)
+    's.alicdn.com',
+    'assets.alicdn.com',
+    'img.alicdn.com/tfs/', // Template file system
+    
+    // Template and placeholder images
+    'tps-', 'template', 'placeholder', 'loading', 'sprite',
+    'default', 'empty', 'blank', 'dummy',
+    
+    // Tiny images patterns
+    '/16x16', '/20x20', '/24x24', '/32x32', '/40x40', '/48x48', '/50x50',
+    '/60x60', '/64x64', '/80x80', '/90x90', '/100x100', '/120x120',
+    '_16x16', '_20x20', '_24x24', '_32x32', '_40x40', '_48x48', '_50x50',
+    '_60x60', '_64x64', '_80x80', '_90x90', '_100x100', '_120x120',
+    
+    // Seller/store images
+    '/seller', 'seller.', '/shop', 'shop-logo', 'store-logo',
+    '/user', 'user.', '/member',
+    
+    // Promotional/banner patterns that aren't product images
+    '/coupon', 'coupon.', '/promo', '/banner', '/ad_', '/ads/',
+    '/promotion', '/discount-tag', '/sale-tag',
+    
+    // Payment/shipping icons
+    '/payment', '/shipping', '/delivery', '/return', '/warranty',
+    '/visa', '/mastercard', '/paypal', '/alipay',
+    
+    // Rating/review elements
+    '/rating', '/review', '/feedback',
+    
+    // Country flags
+    '/country', 'country-flag',
+    
+    // Social icons
+    '/facebook', '/twitter', '/instagram', '/youtube', '/tiktok',
+    
+    // Navigation elements
+    '/nav', '/menu', '/header', '/footer',
+  ];
+  
   for (const pattern of excludePatterns) {
-    if (lowerUrl.includes(pattern.toLowerCase())) {
+    if (lowerUrl.includes(pattern)) {
+      return false;
+    }
+  }
+  
+  // Check dimensions from URL - reject small images
+  const dims = extractDimensionsFromUrl(url);
+  if (dims) {
+    // Reject images smaller than 400px on any side
+    if (dims.width < 400 || dims.height < 400) {
+      return false;
+    }
+    // Reject extremely narrow/tall images (likely banners or icons)
+    const ratio = dims.width / dims.height;
+    if (ratio < 0.3 || ratio > 3.5) {
       return false;
     }
   }
@@ -40,18 +117,47 @@ function isValidProductImage(url: string): boolean {
     'cbu04.alicdn.com',
   ];
   
-  return validDomains.some(domain => url.includes(domain));
+  const isFromValidDomain = validDomains.some(domain => url.includes(domain));
+  if (!isFromValidDomain) {
+    return false;
+  }
+  
+  // Additional positive signals for product images
+  const productImagePatterns = [
+    '/kf/',          // Product image path
+    '/imgextra/',    // Extra product images
+    'O1CN',          // Common product image prefix
+    '/i1/', '/i2/', '/i3/', '/i4/', // Image server paths
+  ];
+  
+  const hasProductSignal = productImagePatterns.some(p => url.includes(p));
+  
+  // If no dimensions found, require positive product signal
+  if (!dims && !hasProductSignal) {
+    return false;
+  }
+  
+  return true;
 }
 
-// Helper to get high quality version of image
+// Helper to get high quality version of image (upgrade to 800x800 minimum)
 function getHighQualityUrl(url: string): string {
-  return url
-    .replace(/_\d+x\d+\.[a-z]+/gi, '.jpg')
-    .replace(/\.jpg_\d+x\d+.*$/i, '.jpg')
-    .replace(/\.png_\d+x\d+.*$/i, '.png')
-    .replace(/\.webp_\d+x\d+.*$/i, '.webp')
-    .replace(/_\d+x\d+_/g, '_')
+  let cleanUrl = url
+    .replace(/\\\//g, '/') // Unescape JSON slashes
     .replace(/\?.*$/, ''); // Remove query params
+  
+  // Upgrade small dimensions to 800x800
+  cleanUrl = cleanUrl
+    .replace(/_\d+x\d+\.(jpg|jpeg|png|webp)/gi, '_800x800.$1')
+    .replace(/\.(jpg|jpeg|png|webp)_\d+x\d+[^"'\s]*/gi, '.$1_800x800')
+    .replace(/-\d+x\d+\.(jpg|jpeg|png|webp)/gi, '-800x800.$1');
+  
+  // Ensure proper extension
+  if (!cleanUrl.match(/\.(jpg|jpeg|png|webp)(_|$)/i)) {
+    cleanUrl = cleanUrl.replace(/\.(jpg|jpeg|png|webp)[^"'\s]*/i, '.jpg');
+  }
+  
+  return cleanUrl;
 }
 
 Deno.serve(async (req) => {
@@ -129,7 +235,7 @@ Deno.serve(async (req) => {
     const imgSrcRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
     while ((match = imgSrcRegex.exec(html)) !== null) {
       allFoundUrls.push(`[img src] ${match[1]}`);
-      if (isValidProductImage(match[1])) {
+      if (isLikelyProductPhoto(match[1])) {
         const highQualityUrl = getHighQualityUrl(match[1]);
         if (!images.includes(highQualityUrl)) {
           images.push(highQualityUrl);
@@ -141,7 +247,7 @@ Deno.serve(async (req) => {
     const dataSrcRegex = /data-src=["']([^"']+alicdn\.com[^"']+)["']/gi;
     while ((match = dataSrcRegex.exec(html)) !== null) {
       allFoundUrls.push(`[data-src] ${match[1]}`);
-      if (isValidProductImage(match[1])) {
+      if (isLikelyProductPhoto(match[1])) {
         const highQualityUrl = getHighQualityUrl(match[1]);
         if (!images.includes(highQualityUrl)) {
           images.push(highQualityUrl);
@@ -157,7 +263,7 @@ Deno.serve(async (req) => {
       for (const srcUrl of srcsetUrls) {
         if (srcUrl.includes('alicdn.com')) {
           allFoundUrls.push(`[srcset] ${srcUrl}`);
-          if (isValidProductImage(srcUrl)) {
+          if (isLikelyProductPhoto(srcUrl)) {
             const highQualityUrl = getHighQualityUrl(srcUrl);
             if (!images.includes(highQualityUrl)) {
               images.push(highQualityUrl);
@@ -171,7 +277,7 @@ Deno.serve(async (req) => {
     const bgImageRegex = /background(?:-image)?:\s*url\(['"]?([^'")\s]+alicdn\.com[^'")\s]+)['"]?\)/gi;
     while ((match = bgImageRegex.exec(html)) !== null) {
       allFoundUrls.push(`[bg-image] ${match[1]}`);
-      if (isValidProductImage(match[1])) {
+      if (isLikelyProductPhoto(match[1])) {
         const highQualityUrl = getHighQualityUrl(match[1]);
         if (!images.includes(highQualityUrl)) {
           images.push(highQualityUrl);
@@ -184,7 +290,7 @@ Deno.serve(async (req) => {
     while ((match = jsonImageRegex.exec(html)) !== null) {
       const imgUrl = match[1].replace(/\\\//g, '/');
       allFoundUrls.push(`[json] ${imgUrl}`);
-      if (isValidProductImage(imgUrl)) {
+      if (isLikelyProductPhoto(imgUrl)) {
         const highQualityUrl = getHighQualityUrl(imgUrl);
         if (!images.includes(highQualityUrl)) {
           images.push(highQualityUrl);
@@ -201,7 +307,7 @@ Deno.serve(async (req) => {
         for (const urlMatch of urlMatches) {
           const imgUrl = urlMatch.replace(/"/g, '').replace(/\\\//g, '/');
           allFoundUrls.push(`[json-array] ${imgUrl}`);
-          if (isValidProductImage(imgUrl)) {
+          if (isLikelyProductPhoto(imgUrl)) {
             const highQualityUrl = getHighQualityUrl(imgUrl);
             if (!images.includes(highQualityUrl)) {
               images.push(highQualityUrl);
@@ -216,7 +322,7 @@ Deno.serve(async (req) => {
     while ((match = genericAlicdnRegex.exec(html)) !== null) {
       const imgUrl = match[0];
       allFoundUrls.push(`[generic] ${imgUrl}`);
-      if (isValidProductImage(imgUrl)) {
+      if (isLikelyProductPhoto(imgUrl)) {
         const highQualityUrl = getHighQualityUrl(imgUrl);
         if (!images.includes(highQualityUrl)) {
           images.push(highQualityUrl);
@@ -226,12 +332,20 @@ Deno.serve(async (req) => {
 
     // Log all found URLs for debugging
     console.log('=== ALL FOUND IMAGE URLS ===');
-    allFoundUrls.forEach((url, i) => console.log(`${i + 1}. ${url}`));
+    console.log('Total URLs found:', allFoundUrls.length);
+    allFoundUrls.slice(0, 30).forEach((url, i) => console.log(`${i + 1}. ${url}`));
+    if (allFoundUrls.length > 30) {
+      console.log(`... and ${allFoundUrls.length - 30} more`);
+    }
     console.log('============================');
 
-    console.log('=== VALID PRODUCT IMAGES ===');
-    images.forEach((url, i) => console.log(`${i + 1}. ${url}`));
-    console.log('============================');
+    // Limit to 7 high-quality product images
+    const finalImages = images.slice(0, 7);
+
+    console.log('=== FILTERED PRODUCT IMAGES (max 7) ===');
+    finalImages.forEach((url, i) => console.log(`${i + 1}. ${url}`));
+    console.log(`Total valid: ${images.length}, Using: ${finalImages.length}`);
+    console.log('========================================');
 
     // Extract price - look for common AliExpress price patterns
     const priceRegex = /(?:€|EUR|US\s*\$|\$)\s*([\d,]+(?:\.\d{2})?)/gi;
@@ -289,7 +403,7 @@ Deno.serve(async (req) => {
       data: {
         title: title || 'Produit AliExpress',
         description,
-        images: images.slice(0, 10), // Limit to 10 images
+        images: finalImages, // Maximum 7 high-quality product images
         price: prices[0] || '29.90',
         originalPrice: prices[1] || prices[0] ? (parseFloat(prices[0] || '29.90') * 1.5).toFixed(2) : '49.90',
         rating,
