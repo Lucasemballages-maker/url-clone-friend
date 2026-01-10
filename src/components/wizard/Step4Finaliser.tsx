@@ -124,9 +124,9 @@ export const Step4Finaliser = ({
       return;
     }
 
-    // Redirect to Shopify OAuth
+    // Redirect to Shopify OAuth with user_id
     const shop = "haa590-xv.myshopify.com"; // Default shop or prompt user
-    const authUrl = `https://jwoofhbzypjzwjowffcr.supabase.co/functions/v1/shopify-auth?shop=${encodeURIComponent(shop)}`;
+    const authUrl = `https://jwoofhbzypjzwjowffcr.supabase.co/functions/v1/shopify-auth?shop=${encodeURIComponent(shop)}&user_id=${encodeURIComponent(user.id)}`;
     
     window.location.href = authUrl;
   };

@@ -92,26 +92,24 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get user from auth header if present, otherwise use a default user ID for now
-    const authHeader = req.headers.get("Authorization");
+    // Extract user_id from state parameter
     let userId: string | null = null;
-
-    if (authHeader) {
-      const token = authHeader.replace("Bearer ", "");
-      const { data: userData } = await supabase.auth.getUser(token);
-      userId = userData.user?.id || null;
+    
+    if (state) {
+      try {
+        const stateData = JSON.parse(atob(state));
+        userId = stateData.user_id || null;
+        logStep("Extracted user from state", { userId: userId ? "found" : "not found" });
+      } catch (e) {
+        logStep("Failed to parse state", { error: e });
+      }
     }
 
-    // For OAuth flow, we need to handle the case where user isn't authenticated in the callback
-    // We'll store with a placeholder and update later, or use a query param
-    const userIdParam = url.searchParams.get("user_id");
-    const finalUserId = userId || userIdParam;
-
-    if (!finalUserId) {
-      // Redirect to app with success but need to link account
+    if (!userId) {
+      // Redirect to app with temp token for manual linking
       const appRedirectUrl = `https://url-clone-friend.lovable.app/dashboard?shopify_connected=true&shop=${encodeURIComponent(shop)}&temp_token=${encodeURIComponent(accessToken)}`;
       
-      logStep("Redirecting to app for user linking", { shop });
+      logStep("Redirecting to app for user linking (no user_id in state)", { shop });
       
       return new Response(null, {
         status: 302,
@@ -125,7 +123,7 @@ serve(async (req) => {
     const { error: upsertError } = await supabase
       .from("shopify_connections")
       .upsert({
-        user_id: finalUserId,
+        user_id: userId,
         shop_domain: shop,
         access_token: accessToken,
         scopes: scopes,
