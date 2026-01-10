@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ShoppingCart, Check, Star, ChevronLeft, ChevronRight, Clock, Shield, Truck, RefreshCw, Loader2 } from "lucide-react";
 import { StoreData } from "@/types/store";
@@ -17,6 +17,7 @@ interface DeployedStore {
 
 const PublicStore = () => {
   const { subdomain } = useParams<{ subdomain: string }>();
+  const navigate = useNavigate();
   const [store, setStore] = useState<DeployedStore | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -117,11 +118,8 @@ const PublicStore = () => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  const scrollToProduct = () => {
-    const productSection = document.getElementById('product-section');
-    if (productSection) {
-      productSection.scrollIntoView({ behavior: 'smooth' });
-    }
+  const goToProductPage = () => {
+    navigate(`/store/${subdomain}/product`);
   };
 
   const handleOrder = async () => {
@@ -207,7 +205,7 @@ const PublicStore = () => {
               {storeData.storeName || "Votre Marque"}
             </span>
             <button 
-              onClick={scrollToProduct}
+              onClick={goToProductPage}
               className="text-white text-sm font-semibold px-6 py-2 rounded-full transition-transform hover:scale-105"
               style={{ backgroundColor: primaryColor }}
             >
@@ -246,7 +244,7 @@ const PublicStore = () => {
             </div>
             
             <button 
-              onClick={scrollToProduct}
+              onClick={goToProductPage}
               className="bg-white text-base font-bold px-8 py-3 rounded-full shadow-lg transition-transform hover:scale-105 mt-4"
               style={{ color: primaryColor }}
             >
@@ -371,7 +369,7 @@ const PublicStore = () => {
               
               {/* CTA Button */}
               <button 
-                onClick={handleOrder}
+                onClick={goToProductPage}
                 className="w-full text-white text-lg font-bold py-4 rounded-full shadow-lg transition-transform hover:scale-105"
                 style={{ background: gradientBg }}
               >

@@ -14,6 +14,7 @@ import PaymentSuccess from "./pages/PaymentSuccess";
 import DeploymentSuccess from "./pages/DeploymentSuccess";
 import PublicStore from "./pages/PublicStore";
 import StoreEditor from "./pages/StoreEditor";
+import StoreProduct from "./pages/StoreProduct";
 import Help from "./pages/Help";
 import Settings from "./pages/Settings";
 import ShopifyApp from "./pages/ShopifyApp";
@@ -42,6 +43,7 @@ const App = () => (
               <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route path="/deployment-success" element={<DeploymentSuccess />} />
               <Route path="/store/:subdomain" element={<PublicStore />} />
+              <Route path="/store/:subdomain/product" element={<StoreProduct />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
