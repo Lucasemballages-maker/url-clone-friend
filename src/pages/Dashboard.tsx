@@ -169,49 +169,20 @@ const Dashboard = () => {
       }));
       updateStep('images', 'done');
 
-      // Auto-generate AI images for different styles (only if we have a source image)
-      const sourceImageUrl = scrapedImages[0]?.url || product.images[0];
-      const styles: { style: ImageStyle; stepId: string }[] = [
-        { style: 'lifestyle', stepId: 'ai-lifestyle' },
-        { style: 'studio', stepId: 'ai-studio' },
-      ];
-      const aiImages: ProductImage[] = [];
-      
-      // Only attempt AI generation if we have a valid source image
-      if (sourceImageUrl && sourceImageUrl.startsWith('http')) {
-        for (const { style, stepId } of styles) {
-          updateStep(stepId, 'loading');
-          setLoadingMessage(`Génération de l'image ${style === 'lifestyle' ? 'Lifestyle' : 'Studio'}...`);
-          try {
-            const aiResponse = await aliexpressApi.generateProductImage(
-              sourceImageUrl,
-              reformulated.title,
-              style
-            );
-            
-            if (aiResponse.success && aiResponse.data?.imageUrl) {
-              aiImages.push({
-                id: `ai-${style}-${Date.now()}`,
-                url: aiResponse.data.imageUrl,
-                isAiGenerated: true,
-                isSelected: true,
-              });
-            }
-            updateStep(stepId, 'done');
-          } catch (err) {
-            console.error(`Error generating ${style} image:`, err);
-            updateStep(stepId, 'done');
-          }
-        }
-      } else {
-        // Skip AI generation steps if no source image
-        console.log('No valid source image found, skipping AI generation');
-        styles.forEach(({ stepId }) => updateStep(stepId, 'done'));
-      }
+      // Skip AI image generation - use only real scraped images
+      // Mark AI steps as done without generating
+      updateStep('ai-lifestyle', 'done');
+      updateStep('ai-studio', 'done');
 
-      const allImages = [...aiImages, ...scrapedImages];
+      // Use only scraped images (no AI modifications)
+      const allImages = scrapedImages;
       setProductImages(allImages);
       setStoreName(reformulated.title.split(' ').slice(0, 3).join(' ').toUpperCase());
+      
+      // Calculate displayed price = 2x real price
+      const realPrice = parseFloat(product.price) || 29.99;
+      const displayedPrice = (realPrice * 2).toFixed(2);
+      const displayedOriginalPrice = (realPrice * 3).toFixed(2); // Original = 3x for crossed out price
       
       const newStoreData: StoreData = {
         storeName: reformulated.title.split(' ').slice(0, 3).join(' ').toUpperCase(),
@@ -220,8 +191,8 @@ const Dashboard = () => {
         description: reformulated.description,
         benefits: reformulated.benefits,
         cta: reformulated.cta,
-        productPrice: product.price,
-        originalPrice: product.originalPrice,
+        productPrice: displayedPrice,
+        originalPrice: displayedOriginalPrice,
         rating: product.rating.replace('.', ','),
         reviews: product.reviews,
         productImages: allImages.filter((img) => img.isSelected).map((img) => img.url),
