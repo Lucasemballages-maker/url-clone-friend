@@ -225,6 +225,52 @@ Deno.serve(async (req) => {
     const allFoundUrls: string[] = [];
     let match;
 
+    // PRIORITY: Check for OG image in metadata (most reliable on AliExpress)
+    const ogImage = metadata.ogImage || metadata['og:image'];
+    if (ogImage && typeof ogImage === 'string' && ogImage.includes('alicdn.com')) {
+      console.log('Found OG image:', ogImage);
+      const cleanOgImage = getHighQualityUrl(ogImage);
+      if (!images.includes(cleanOgImage)) {
+        images.push(cleanOgImage);
+        allFoundUrls.push(`[og:image] ${ogImage}`);
+      }
+    }
+
+    // Also check for twitter:image
+    const twitterImage = metadata.twitterImage || metadata['twitter:image'];
+    if (twitterImage && typeof twitterImage === 'string' && twitterImage.includes('alicdn.com')) {
+      console.log('Found Twitter image:', twitterImage);
+      const cleanTwitterImage = getHighQualityUrl(twitterImage);
+      if (!images.includes(cleanTwitterImage)) {
+        images.push(cleanTwitterImage);
+        allFoundUrls.push(`[twitter:image] ${twitterImage}`);
+      }
+    }
+
+    // Extract og:image from HTML meta tags
+    const ogImageHtmlRegex = /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/gi;
+    while ((match = ogImageHtmlRegex.exec(html)) !== null) {
+      const imgUrl = match[1];
+      if (imgUrl.includes('alicdn.com')) {
+        allFoundUrls.push(`[meta og:image] ${imgUrl}`);
+        const cleanUrl = getHighQualityUrl(imgUrl);
+        if (!images.includes(cleanUrl)) {
+          images.push(cleanUrl);
+        }
+      }
+    }
+
+    // Alternative og:image pattern
+    const ogImageAltRegex = /<meta[^>]+content=["']([^"']+alicdn[^"']+)["'][^>]+property=["']og:image["']/gi;
+    while ((match = ogImageAltRegex.exec(html)) !== null) {
+      const imgUrl = match[1];
+      allFoundUrls.push(`[meta og:image alt] ${imgUrl}`);
+      const cleanUrl = getHighQualityUrl(imgUrl);
+      if (!images.includes(cleanUrl)) {
+        images.push(cleanUrl);
+      }
+    }
+
     // Method 1: Extract from <img src="...">
     const imgSrcRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
     while ((match = imgSrcRegex.exec(html)) !== null) {
