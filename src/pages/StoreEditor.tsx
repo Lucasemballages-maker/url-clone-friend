@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Save, Loader2, Star, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Loader2, Star, Trash2, CreditCard, ExternalLink } from "lucide-react";
 import DashboardLayout from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -19,6 +19,7 @@ interface DeployedStore {
   subdomain: string;
   store_data: StoreData;
   status: string;
+  payment_url: string | null;
 }
 
 const StoreEditor = () => {
@@ -44,6 +45,7 @@ const StoreEditor = () => {
   const [showCountdown, setShowCountdown] = useState(true);
   const [showReviews, setShowReviews] = useState(true);
   const [showBadges, setShowBadges] = useState(true);
+  const [paymentUrl, setPaymentUrl] = useState("");
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -75,7 +77,9 @@ const StoreEditor = () => {
       setStore({
         ...data,
         store_data: storeData,
+        payment_url: data.payment_url,
       });
+      setPaymentUrl(data.payment_url || "");
 
       // Populate form
       setProductName(storeData.productName || "");
@@ -123,6 +127,7 @@ const StoreEditor = () => {
         .from("deployed_stores")
         .update({ 
           store_data: JSON.parse(JSON.stringify(updatedStoreData)),
+          payment_url: paymentUrl || null,
           updated_at: new Date().toISOString(),
         })
         .eq("id", store.id);
@@ -354,6 +359,71 @@ const StoreEditor = () => {
                   </div>
                 </div>
               ))}
+            </CardContent>
+          </Card>
+
+          {/* Payments Section */}
+          <Card className="border-2 border-primary/20">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-primary" />
+                <CardTitle className="text-lg">💳 Paiements de vos clients</CardTitle>
+              </div>
+              <CardDescription>
+                Pour que vos visiteurs puissent acheter votre produit et que VOUS receviez l'argent directement, ajoutez le lien de votre page de paiement personnelle.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="paymentUrl">Lien de paiement (Stripe, PayPal, etc.)</Label>
+                <Input 
+                  id="paymentUrl" 
+                  value={paymentUrl} 
+                  onChange={(e) => setPaymentUrl(e.target.value)}
+                  placeholder="https://buy.stripe.com/... ou https://paypal.me/votrenom"
+                />
+              </div>
+              
+              <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                <p className="text-sm font-medium">💡 Exemples de liens acceptés :</p>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• Stripe Payment Link : https://buy.stripe.com/test_xxxxx</li>
+                  <li>• PayPal.me : https://paypal.me/monpseudo</li>
+                  <li>• Lien de checkout personnalisé</li>
+                </ul>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-2">
+                <a 
+                  href="https://dashboard.stripe.com/payment-links" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline flex items-center gap-1"
+                >
+                  📚 Créer un Stripe Payment Link <ExternalLink className="h-3 w-3" />
+                </a>
+                <a 
+                  href="https://www.paypal.com/paypalme" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary hover:underline flex items-center gap-1"
+                >
+                  📚 Créer un lien PayPal.me <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+              
+              <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-4 rounded-lg">
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  ⚠️ <strong>Important :</strong> C'est VOTRE lien de paiement personnel, pas celui de Dropyfy. L'argent de vos ventes ira directement sur VOTRE compte.
+                </p>
+              </div>
+              
+              {paymentUrl && (
+                <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-lg">
+                  <span className="text-green-600">✅</span>
+                  <span className="text-sm text-green-700 dark:text-green-300">Lien de paiement configuré</span>
+                </div>
+              )}
             </CardContent>
           </Card>
 

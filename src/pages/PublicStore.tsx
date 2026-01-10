@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ShoppingCart, Check, Star, ChevronLeft, ChevronRight, Clock, Shield, Truck, RefreshCw } from "lucide-react";
 import { StoreData } from "@/types/store";
+import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
 
 interface DeployedStore {
@@ -10,6 +11,7 @@ interface DeployedStore {
   subdomain: string;
   store_data: StoreData;
   status: string;
+  payment_url: string | null;
 }
 
 const PublicStore = () => {
@@ -47,6 +49,7 @@ const PublicStore = () => {
           setStore({
             ...data,
             store_data: storeData,
+            payment_url: data.payment_url,
           });
         }
       } catch (err) {
@@ -112,8 +115,11 @@ const PublicStore = () => {
   };
 
   const handleOrder = () => {
-    // For now, just show an alert - Stripe Connect will be added later
-    alert("La connexion Stripe sera bientôt disponible. Contactez le vendeur pour commander.");
+    if (store?.payment_url) {
+      window.open(store.payment_url, '_blank');
+    } else {
+      toast.error("Cette boutique n'a pas encore configuré les paiements");
+    }
   };
 
   return (

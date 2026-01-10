@@ -20,6 +20,7 @@ export type Database = {
           custom_domain: string | null
           id: string
           orders: number | null
+          payment_url: string | null
           status: string | null
           store_data: Json
           stripe_account_id: string | null
@@ -34,6 +35,7 @@ export type Database = {
           custom_domain?: string | null
           id?: string
           orders?: number | null
+          payment_url?: string | null
           status?: string | null
           store_data: Json
           stripe_account_id?: string | null
@@ -48,6 +50,7 @@ export type Database = {
           custom_domain?: string | null
           id?: string
           orders?: number | null
+          payment_url?: string | null
           status?: string | null
           store_data?: Json
           stripe_account_id?: string | null
