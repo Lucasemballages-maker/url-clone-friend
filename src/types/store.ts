@@ -11,6 +11,11 @@ export interface BenefitCard {
   description: string;
 }
 
+export interface FAQItem {
+  question: string;
+  answer: string;
+}
+
 export interface StoreData {
   storeName: string;
   productName: string;
@@ -32,6 +37,8 @@ export interface StoreData {
   customerReviews?: ProductReview[];  // Avis page produit
   homeReviews?: ProductReview[];      // Avis page d'accueil
   benefitCards?: BenefitCard[];
+  // FAQ personnalisée par produit
+  faq?: FAQItem[];
   // Texte CTA final personnalisé
   finalCtaTitle?: string;  // Ex: "Prêt à découvrir votre nouveau style ?"
 }

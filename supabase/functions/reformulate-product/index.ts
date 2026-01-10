@@ -38,6 +38,7 @@ Règles:
 - Génère DEUX sets d'avis clients différents: un pour la page d'accueil (plus généraux sur la marque/service) et un pour la page produit (spécifiques au produit)
 - Les avis doivent être réalistes, crédibles et variés (pas tous 5 étoiles, mettre quelques 4 étoiles)
 - Génère des cartes de bienfaits avec des emojis appropriés au produit
+- Génère une FAQ pertinente et spécifique au produit avec des questions que les clients poseraient vraiment
 - Langue: ${language === 'fr' ? 'Français' : 'English'}`;
 
     const userPrompt = `Reformule ce produit pour une boutique e-commerce premium:
@@ -69,6 +70,12 @@ Réponds UNIQUEMENT avec un JSON valide dans ce format exact:
     {"icon": "emoji approprié", "title": "Titre court du bienfait 2", "description": "Description courte"},
     {"icon": "emoji approprié", "title": "Titre court du bienfait 3", "description": "Description courte"},
     {"icon": "emoji approprié", "title": "Titre court du bienfait 4", "description": "Description courte"}
+  ],
+  "faq": [
+    {"question": "Question fréquente 1 spécifique au produit ?", "answer": "Réponse claire et rassurante"},
+    {"question": "Question sur la livraison/utilisation ?", "answer": "Réponse informative"},
+    {"question": "Question sur la garantie/retour ?", "answer": "Réponse positive sur le SAV"},
+    {"question": "Question technique ou pratique ?", "answer": "Réponse détaillée et utile"}
   ]
 }`;
 
@@ -167,6 +174,12 @@ Réponds UNIQUEMENT avec un JSON valide dans ce format exact:
               { icon: '🚀', title: 'Livraison Rapide', description: 'Expédié en 24h' },
               { icon: '🛡️', title: 'Garantie', description: 'Satisfait ou remboursé' },
               { icon: '💯', title: 'Fiabilité', description: 'Testé et approuvé' }
+            ],
+            faq: [
+              { question: 'Quel est le délai de livraison ?', answer: 'Votre commande est expédiée sous 24-48h et livrée en 3-5 jours ouvrés.' },
+              { question: 'Puis-je retourner le produit ?', answer: 'Oui, vous bénéficiez de 30 jours pour retourner le produit si vous n\'êtes pas satisfait.' },
+              { question: 'Le produit est-il garanti ?', answer: 'Tous nos produits sont garantis 1 an contre les défauts de fabrication.' },
+              { question: 'Comment contacter le service client ?', answer: 'Notre équipe est disponible 7j/7 par email pour répondre à toutes vos questions.' }
             ]
           },
         }),
