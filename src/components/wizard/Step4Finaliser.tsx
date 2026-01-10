@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CreditCard, Loader2, Sparkles } from "lucide-react";
 import StorePreview from "./StorePreview";
+import PricingModal from "./PricingModal";
 import { StoreData } from "@/types/store";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useShopifyExportStore } from "@/stores/shopifyExportStore";
@@ -23,11 +24,11 @@ export const Step4Finaliser = ({
 }: Step4FinaliserProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { subscribed, createCheckout, loading: subscriptionLoading } = useSubscription();
+  const { subscribed, loading: subscriptionLoading } = useSubscription();
   const { setStoreData } = useShopifyExportStore();
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [showPricingModal, setShowPricingModal] = useState(false);
 
-  const handleProceedToPayment = async () => {
+  const handleProceedToPayment = () => {
     if (!user) {
       toast.error("Vous devez être connecté pour continuer");
       navigate("/auth");
@@ -43,17 +44,13 @@ export const Step4Finaliser = ({
       return;
     }
 
-    // Otherwise, proceed to payment
-    setIsProcessing(true);
-    
-    try {
-      toast.info("Redirection vers le paiement...");
-      await createCheckout("dropyfy_pro", false);
-    } catch (error) {
-      console.error("Checkout error:", error);
-      toast.error("Erreur lors de la création du paiement");
-      setIsProcessing(false);
-    }
+    // Otherwise, show pricing modal
+    setShowPricingModal(true);
+  };
+
+  const handleSelectPlan = () => {
+    // Store data is already saved, just let the modal handle the checkout
+    setStoreData(storeData);
   };
 
   return (
@@ -74,7 +71,7 @@ export const Step4Finaliser = ({
           <div className="text-right text-sm text-muted-foreground hidden sm:block">
             <p className="font-medium text-foreground">Votre site est prêt !</p>
             <p className="text-xs">
-              {subscribed ? "Passez à la création automatique" : "Finalisez pour publier sur Shopify"}
+              {subscribed ? "Passez à la création automatique" : "Choisissez votre formule pour publier"}
             </p>
           </div>
           
@@ -83,9 +80,9 @@ export const Step4Finaliser = ({
             size="xl" 
             className="gap-3" 
             onClick={handleProceedToPayment}
-            disabled={isProcessing || subscriptionLoading}
+            disabled={subscriptionLoading}
           >
-            {isProcessing || subscriptionLoading ? (
+            {subscriptionLoading ? (
               <>
                 <Loader2 className="w-5 h-5 animate-spin" />
                 Chargement...
@@ -98,12 +95,19 @@ export const Step4Finaliser = ({
             ) : (
               <>
                 <CreditCard className="w-5 h-5" />
-                Passer au paiement
+                Choisir ma formule
               </>
             )}
           </Button>
         </div>
       </div>
+
+      {/* Pricing Modal */}
+      <PricingModal 
+        open={showPricingModal} 
+        onOpenChange={setShowPricingModal}
+        onSelectPlan={handleSelectPlan}
+      />
     </div>
   );
 };
