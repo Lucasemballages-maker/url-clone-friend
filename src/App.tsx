@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Help from "./pages/Help";
 import Settings from "./pages/Settings";
+import ShopifyApp from "./pages/ShopifyApp";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/apps" element={<MyApps />} />
+            <Route path="/dashboard/shopify" element={<ShopifyApp />} />
             <Route path="/dashboard/help" element={<Help />} />
             <Route path="/dashboard/settings" element={<Settings />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
