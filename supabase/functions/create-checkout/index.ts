@@ -11,7 +11,7 @@ const corsHeaders = {
 const PLANS = {
   starter: {
     monthly: "price_1SnljfRwdkDlimtDqq5aJY0N",
-    yearly: "price_1SnljfRwdkDlimtDqq5aJY0N", // À remplacer par les prix annuels
+    yearly: "price_1SnljfRwdkDlimtDqq5aJY0N",
   },
   pro: {
     monthly: "price_1Snlk9RwdkDlimtDekiakUgC",
@@ -20,6 +20,10 @@ const PLANS = {
   business: {
     monthly: "price_1SnlkURwdkDlimtDAlq06SmU",
     yearly: "price_1SnlkURwdkDlimtDAlq06SmU",
+  },
+  dropyfy_pro: {
+    monthly: "price_1Snlk9RwdkDlimtDekiakUgC",
+    yearly: "price_1Snlk9RwdkDlimtDekiakUgC",
   },
 };
 
