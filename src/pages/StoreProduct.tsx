@@ -425,7 +425,7 @@ const StoreProduct = () => {
           </h2>
           <div className="space-y-4">
             {(storeData.faq && storeData.faq.length > 0 ? storeData.faq : [
-              { question: "Quel est le délai de livraison ?", answer: "Votre commande est expédiée sous 24-48h et livrée en 3-5 jours ouvrés." },
+              { question: "Comment utiliser ce produit ?", answer: "L'utilisation est très simple et intuitive. Suivez les instructions incluses dans l'emballage pour une prise en main rapide." },
               { question: "Puis-je retourner le produit ?", answer: "Oui, vous bénéficiez de 30 jours pour retourner le produit si vous n'êtes pas satisfait." },
               { question: "Le produit est-il garanti ?", answer: "Tous nos produits sont garantis 1 an contre les défauts de fabrication." },
               { question: "Comment contacter le service client ?", answer: "Notre équipe est disponible 7j/7 par email pour répondre à toutes vos questions." }
