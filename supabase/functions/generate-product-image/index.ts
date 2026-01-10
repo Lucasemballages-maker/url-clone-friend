@@ -42,6 +42,9 @@ Deno.serve(async (req) => {
     console.log('Generating image with style:', style);
     console.log('Source image URL:', imageUrl);
 
+    // Try with the image editing prompt
+    const fullPrompt = `You are a professional product photographer. ${prompt} You MUST generate a new image as output. Do not refuse - transform the background while keeping the product exactly as shown.`;
+    
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -56,7 +59,7 @@ Deno.serve(async (req) => {
             content: [
               {
                 type: 'text',
-                text: prompt,
+                text: fullPrompt,
               },
               {
                 type: 'image_url',
@@ -95,10 +98,28 @@ Deno.serve(async (req) => {
     const data = await response.json();
     console.log('AI response received');
 
-    // Extract the generated image from the response
-    const generatedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    // Extract the generated image from the response - check multiple possible locations
+    let generatedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+    
+    // Also check for inline_data format (base64)
+    if (!generatedImageUrl) {
+      const inlineData = data.choices?.[0]?.message?.images?.[0]?.inline_data;
+      if (inlineData?.data && inlineData?.mime_type) {
+        generatedImageUrl = `data:${inlineData.mime_type};base64,${inlineData.data}`;
+      }
+    }
 
     if (!generatedImageUrl) {
+      // Check if model refused and returned text instead
+      const textContent = data.choices?.[0]?.message?.content;
+      if (textContent && typeof textContent === 'string') {
+        console.error('Model refused to generate image:', textContent);
+        return new Response(
+          JSON.stringify({ success: false, error: 'Could not transform this image. Try a different product photo.' }),
+          { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
       console.error('No image in response:', JSON.stringify(data));
       return new Response(
         JSON.stringify({ success: false, error: 'No image generated' }),
