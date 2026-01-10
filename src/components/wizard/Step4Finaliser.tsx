@@ -152,7 +152,9 @@ export const Step4Finaliser = ({
       
       if (sessionError) {
         console.error("Session error:", sessionError);
-        throw new Error("Erreur de session");
+        toast.error("Erreur de session", { description: sessionError.message });
+        setIsExporting(false);
+        return;
       }
 
       const session = sessionData.session;
@@ -160,19 +162,30 @@ export const Step4Finaliser = ({
       if (!session?.access_token) {
         toast.error("Session expirée, veuillez vous reconnecter");
         navigate("/auth");
+        setIsExporting(false);
         return;
       }
 
-      console.log("Calling export-to-shopify with session token...");
-      
-      // Appel direct avec fetch pour plus de contrôle sur les headers
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const response = await fetch(`${supabaseUrl}/functions/v1/export-to-shopify`, {
+      const apiKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+      
+      console.log("=== EXPORT TO SHOPIFY ===");
+      console.log("Supabase URL:", supabaseUrl);
+      console.log("Shop domain:", shopifyConnection.shop_domain);
+      console.log("Store data:", JSON.stringify(storeData, null, 2));
+      console.log("Token preview:", session.access_token.substring(0, 30) + "...");
+      
+      toast.info("Export en cours...", { description: "Création du produit et du thème..." });
+
+      const exportUrl = `${supabaseUrl}/functions/v1/export-to-shopify`;
+      console.log("Calling:", exportUrl);
+      
+      const response = await fetch(exportUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${session.access_token}`,
-          "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          "apikey": apiKey,
         },
         body: JSON.stringify({ 
           storeData,
@@ -180,25 +193,40 @@ export const Step4Finaliser = ({
         }),
       });
 
-      const result = await response.json();
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+      
+      const responseText = await response.text();
+      console.log("Response text:", responseText);
+      
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch {
+        console.error("Failed to parse response as JSON");
+        throw new Error(`Réponse invalide du serveur: ${responseText.substring(0, 200)}`);
+      }
+
       console.log("Export result:", result);
 
       if (!response.ok || !result.success) {
-        throw new Error(result.error || "Erreur lors de l'export");
+        throw new Error(result.error || `Erreur serveur: ${response.status}`);
       }
 
       toast.success("🎉 Boutique exportée vers Shopify !", {
-        description: result.message || `Voir sur ${shopifyConnection.shop_domain}`,
-        duration: 10000,
+        description: result.message || `Produit créé sur ${shopifyConnection.shop_domain}`,
+        duration: 15000,
         action: {
           label: "Ouvrir ma boutique",
-          onClick: () => window.open(result.storeUrl || result.productUrl, "_blank"),
+          onClick: () => window.open(result.storeUrl || `https://${shopifyConnection.shop_domain}`, "_blank"),
         },
       });
+      
     } catch (error) {
       console.error("Export error:", error);
       toast.error("Erreur lors de l'export", {
         description: error instanceof Error ? error.message : "Veuillez réessayer",
+        duration: 10000,
       });
     } finally {
       setIsExporting(false);
