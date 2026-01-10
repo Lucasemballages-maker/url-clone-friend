@@ -419,21 +419,24 @@ const StoreProduct = () => {
         </section>
 
         {/* FAQ Section */}
-        {storeData.faq && storeData.faq.length > 0 && (
-          <section className="max-w-4xl mx-auto px-6 py-12">
-            <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-800 mb-8">
-              Questions fréquentes
-            </h2>
-            <div className="space-y-4">
-              {storeData.faq.map((item, i) => (
-                <div key={i} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                  <h3 className="font-semibold text-gray-800 mb-2">{item.question}</h3>
-                  <p className="text-gray-600 text-sm">{item.answer}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
+        <section className="max-w-4xl mx-auto px-6 py-12">
+          <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-800 mb-8">
+            Questions fréquentes
+          </h2>
+          <div className="space-y-4">
+            {(storeData.faq && storeData.faq.length > 0 ? storeData.faq : [
+              { question: "Quel est le délai de livraison ?", answer: "Votre commande est expédiée sous 24-48h et livrée en 3-5 jours ouvrés." },
+              { question: "Puis-je retourner le produit ?", answer: "Oui, vous bénéficiez de 30 jours pour retourner le produit si vous n'êtes pas satisfait." },
+              { question: "Le produit est-il garanti ?", answer: "Tous nos produits sont garantis 1 an contre les défauts de fabrication." },
+              { question: "Comment contacter le service client ?", answer: "Notre équipe est disponible 7j/7 par email pour répondre à toutes vos questions." }
+            ]).map((item, i) => (
+              <div key={i} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <h3 className="font-semibold text-gray-800 mb-2">{item.question}</h3>
+                <p className="text-gray-600 text-sm">{item.answer}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
         {/* Footer */}
         <footer className="bg-gray-900 text-white py-8 px-6">
