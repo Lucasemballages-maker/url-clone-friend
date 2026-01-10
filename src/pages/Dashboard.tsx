@@ -252,6 +252,7 @@ const Dashboard = () => {
         accentColor: "#F59E0B",
         announcementBar: "Livraison gratuite sur les commandes supérieures à 50 € | Livraison rapide dans le monde entier",
         customerReviews: reformulated.customerReviews,
+        homeReviews: reformulated.homeReviews,
         benefitCards: reformulated.benefitCards,
       };
       

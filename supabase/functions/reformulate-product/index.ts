@@ -35,7 +35,8 @@ Règles:
 - Crée un sentiment d'urgence subtil
 - Utilise des mots puissants et émotionnels
 - Garde le texte concis et percutant
-- Génère des avis clients réalistes et crédibles en rapport avec le produit
+- Génère DEUX sets d'avis clients différents: un pour la page d'accueil (plus généraux sur la marque/service) et un pour la page produit (spécifiques au produit)
+- Les avis doivent être réalistes, crédibles et variés (pas tous 5 étoiles, mettre quelques 4 étoiles)
 - Génère des cartes de bienfaits avec des emojis appropriés au produit
 - Langue: ${language === 'fr' ? 'Français' : 'English'}`;
 
@@ -53,9 +54,14 @@ Réponds UNIQUEMENT avec un JSON valide dans ce format exact:
   "benefits": ["Bénéfice 1", "Bénéfice 2", "Bénéfice 3", "Bénéfice 4"],
   "cta": "Texte du bouton d'achat",
   "customerReviews": [
-    {"name": "Prénom + initiale nom", "initials": "XX", "text": "Avis positif réaliste et spécifique au produit (max 100 caractères)", "rating": 5},
-    {"name": "Prénom + initiale nom", "initials": "XX", "text": "Avis positif différent et crédible (max 100 caractères)", "rating": 5},
-    {"name": "Prénom + initiale nom", "initials": "XX", "text": "Avis positif mentionnant un bénéfice concret (max 100 caractères)", "rating": 5}
+    {"name": "Prénom + initiale nom", "initials": "XX", "text": "Avis SPÉCIFIQUE AU PRODUIT, mentionnant une fonctionnalité ou qualité précise", "rating": 5},
+    {"name": "Prénom + initiale nom", "initials": "XX", "text": "Avis technique sur le produit avec détail concret", "rating": 5},
+    {"name": "Prénom + initiale nom", "initials": "XX", "text": "Avis sur l'utilisation quotidienne du produit", "rating": 4}
+  ],
+  "homeReviews": [
+    {"name": "Prénom + initiale nom", "initials": "XX", "text": "Avis GÉNÉRAL sur la boutique/marque: service client, livraison, qualité globale", "rating": 5},
+    {"name": "Prénom + initiale nom", "initials": "XX", "text": "Avis sur l'expérience d'achat et la satisfaction générale", "rating": 5},
+    {"name": "Prénom + initiale nom", "initials": "XX", "text": "Avis mentionnant la confiance en la marque et le service", "rating": 4}
   ],
   "benefitCards": [
     {"icon": "emoji approprié", "title": "Titre court du bienfait 1", "description": "Description courte"},
@@ -145,9 +151,14 @@ Réponds UNIQUEMENT avec un JSON valide dans ce format exact:
             benefits: ['Qualité premium', 'Livraison rapide', 'Satisfaction garantie', 'Design élégant'],
             cta: 'Acheter maintenant',
             customerReviews: [
-              { name: 'Marie C.', initials: 'MC', text: 'Excellent produit, je recommande !', rating: 5 },
-              { name: 'Jean D.', initials: 'JD', text: 'Très satisfait de mon achat.', rating: 5 },
-              { name: 'Sophie L.', initials: 'SL', text: 'Qualité au rendez-vous !', rating: 5 }
+              { name: 'Marie C.', initials: 'MC', text: 'Excellent produit, la qualité est au rendez-vous !', rating: 5 },
+              { name: 'Jean D.', initials: 'JD', text: 'Fonctionne parfaitement, très satisfait.', rating: 5 },
+              { name: 'Sophie L.', initials: 'SL', text: 'Bon rapport qualité-prix, je recommande.', rating: 4 }
+            ],
+            homeReviews: [
+              { name: 'Lucas M.', initials: 'LM', text: 'Service client réactif et livraison rapide !', rating: 5 },
+              { name: 'Emma R.', initials: 'ER', text: 'Boutique sérieuse, je recommande vivement.', rating: 5 },
+              { name: 'Thomas B.', initials: 'TB', text: 'Très bonne expérience d\'achat.', rating: 4 }
             ],
             benefitCards: [
               { icon: '✨', title: 'Qualité Premium', description: 'Matériaux haut de gamme' },

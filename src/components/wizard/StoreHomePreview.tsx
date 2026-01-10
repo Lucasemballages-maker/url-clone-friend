@@ -226,10 +226,10 @@ export const StoreHomePreview = ({ storeData }: StoreHomePreviewProps) => {
                 Ce que disent nos clients
               </h2>
               <div className="space-y-3">
-                {(storeData.customerReviews || [
-                  { initials: "MC", name: "Marie C.", text: "Résultats visibles dès la première semaine !", rating: 5 },
-                  { initials: "JD", name: "Jean D.", text: "Installation super simple. Je recommande !", rating: 5 },
-                  { initials: "SL", name: "Sophie L.", text: "Mes cheveux sont plus brillants.", rating: 5 },
+                {(storeData.homeReviews || storeData.customerReviews || [
+                  { initials: "LM", name: "Lucas M.", text: "Service client réactif et livraison rapide !", rating: 5 },
+                  { initials: "ER", name: "Emma R.", text: "Boutique sérieuse, je recommande vivement.", rating: 5 },
+                  { initials: "TB", name: "Thomas B.", text: "Très bonne expérience d'achat.", rating: 4 },
                 ]).map((review, i) => (
                   <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
                     <div 
