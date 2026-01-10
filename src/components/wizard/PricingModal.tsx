@@ -20,8 +20,8 @@ const plans = [
     name: "Starter",
     description: "Parfait pour tester et lancer ta première app",
     icon: Zap,
-    monthlyPrice: 0,
-    yearlyPrice: 0,
+    monthlyPrice: 29,
+    yearlyPrice: Math.round(29 * 12 * 0.83),
     features: [
       "1 app e-commerce générée",
       "Design personnalisable",
@@ -30,7 +30,7 @@ const plans = [
       "Support par email",
     ],
     popular: false,
-    cta: "Essayer gratuitement",
+    cta: "Commencer à 29€/mois",
   },
   {
     id: "pro",
