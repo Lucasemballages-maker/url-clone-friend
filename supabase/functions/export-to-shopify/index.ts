@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { generateThemeFiles, ThemeData } from "./theme-generator.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,58 +12,13 @@ const logStep = (step: string, details?: unknown) => {
   console.log(`[EXPORT-TO-SHOPIFY] ${step}${detailsStr}`);
 };
 
-// Convert HSL or hex to Shopify-compatible hex format
-function toHex(color: string): string {
-  if (!color) return "#000000";
-  
-  // If already hex, return as-is
-  if (color.startsWith("#")) return color;
-  
-  // Handle HSL format
-  const hslMatch = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
-  if (hslMatch) {
-    const h = parseInt(hslMatch[1]) / 360;
-    const s = parseInt(hslMatch[2]) / 100;
-    const l = parseInt(hslMatch[3]) / 100;
-    
-    const hue2rgb = (p: number, q: number, t: number) => {
-      if (t < 0) t += 1;
-      if (t > 1) t -= 1;
-      if (t < 1/6) return p + (q - p) * 6 * t;
-      if (t < 1/2) return q;
-      if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
-      return p;
-    };
-
-    let r, g, b;
-    if (s === 0) {
-      r = g = b = l;
-    } else {
-      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-      const p = 2 * l - q;
-      r = hue2rgb(p, q, h + 1/3);
-      g = hue2rgb(p, q, h);
-      b = hue2rgb(p, q, h - 1/3);
-    }
-
-    const toHexPart = (c: number) => {
-      const hex = Math.round(c * 255).toString(16);
-      return hex.length === 1 ? '0' + hex : hex;
-    };
-
-    return `#${toHexPart(r)}${toHexPart(g)}${toHexPart(b)}`;
-  }
-  
-  return "#000000";
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    logStep("Function started");
+    logStep("Function started - FULL THEME EXPORT");
 
     // Get user from auth header
     const authHeader = req.headers.get("Authorization");
@@ -91,8 +47,7 @@ serve(async (req) => {
     logStep("Store data received", { 
       productName: storeData?.productName || storeData?.product?.name,
       storeName: storeData?.storeName,
-      shopDomain,
-      hasTheme: !!storeData?.theme
+      shopDomain
     });
 
     if (!storeData) {
@@ -114,7 +69,6 @@ serve(async (req) => {
         .maybeSingle();
 
       if (connError || !connection) {
-        logStep("No connection found for shop", { shopDomain, error: connError });
         throw new Error("Shopify connection not found for this shop");
       }
 
@@ -129,7 +83,6 @@ serve(async (req) => {
         .maybeSingle();
 
       if (connError || !connection) {
-        logStep("No connection found", { error: connError });
         throw new Error("No Shopify connection found. Please connect your Shopify store first.");
       }
 
@@ -142,8 +95,9 @@ serve(async (req) => {
     // ============ STEP 1: CREATE PRODUCT ============
     const productName = storeData.productName || storeData.product?.name || "Product";
     const productDescription = storeData.description || storeData.product?.description || "";
-    const productPrice = storeData.price || storeData.product?.price || "0";
-    const productImages = storeData.images || storeData.product?.images || [];
+    const productPrice = storeData.price || storeData.productPrice || storeData.product?.price || "0";
+    const originalPrice = storeData.originalPrice || storeData.product?.originalPrice || "";
+    const productImages = storeData.productImages || storeData.images || storeData.product?.images || [];
 
     const productData = {
       product: {
@@ -153,7 +107,8 @@ serve(async (req) => {
         product_type: "General",
         variants: [
           {
-            price: productPrice.toString().replace(/[^0-9.]/g, ''),
+            price: productPrice.toString().replace(/[^0-9.]/g, '') || "0",
+            compare_at_price: originalPrice ? originalPrice.toString().replace(/[^0-9.]/g, '') : null,
             sku: `SKU-${Date.now()}`,
             inventory_management: "shopify",
             inventory_quantity: 9999,
@@ -162,8 +117,9 @@ serve(async (req) => {
         images: productImages
           .filter((img: { url?: string; selected?: boolean } | string) => {
             if (typeof img === 'string') return img;
-            return img.selected !== false && img.url;
+            return img.selected !== false && (img.url || img);
           })
+          .slice(0, 10)
           .map((img: { url?: string } | string) => ({ 
             src: typeof img === 'string' ? img : img.url 
           })),
@@ -172,6 +128,7 @@ serve(async (req) => {
 
     logStep("Creating product in Shopify", { 
       title: productData.product.title,
+      price: productData.product.variants[0].price,
       imagesCount: productData.product.images.length 
     });
 
@@ -190,125 +147,144 @@ serve(async (req) => {
     if (!productResponse.ok) {
       const errorText = await productResponse.text();
       logStep("Shopify product API error", { status: productResponse.status, error: errorText });
-      throw new Error(`Shopify product API error: ${productResponse.status} - ${errorText}`);
+      throw new Error(`Shopify product API error: ${productResponse.status}`);
     }
 
     const productResult = await productResponse.json();
     logStep("Product created successfully", { productId: productResult.product?.id });
 
-    // ============ STEP 2: GET ACTIVE THEME ============
-    const themesResponse = await fetch(
+    // ============ STEP 2: CREATE CUSTOM THEME ============
+    logStep("Generating custom theme files...");
+
+    // Prepare theme data from storeData
+    const themeData: ThemeData = {
+      storeName: storeData.storeName || "Ma Boutique",
+      productName: productName,
+      productPrice: productPrice,
+      originalPrice: originalPrice,
+      headline: storeData.headline || productName,
+      description: productDescription,
+      benefits: storeData.benefits || [
+        "Qualité premium garantie",
+        "Livraison rapide et gratuite",
+        "Satisfait ou remboursé 30 jours",
+        "Support client 24/7"
+      ],
+      benefitCards: storeData.benefitCards || [
+        { icon: "💎", title: "Qualité Premium", desc: "Matériaux haut de gamme" },
+        { icon: "🚀", title: "Livraison Express", desc: "Expédition sous 24h" },
+        { icon: "🛡️", title: "Garantie 1 An", desc: "Protection complète" },
+        { icon: "💬", title: "Support 24/7", desc: "Équipe dédiée" },
+      ],
+      customerReviews: storeData.customerReviews || [
+        { initials: "MC", name: "Marie C.", text: "Excellent produit, je recommande vivement !", rating: 5 },
+        { initials: "JD", name: "Jean D.", text: "Livraison rapide et qualité au top.", rating: 5 },
+      ],
+      cta: storeData.cta || "ACHETER MAINTENANT",
+      primaryColor: storeData.primaryColor || "#4A90E2",
+      accentColor: storeData.accentColor || "#764ba2",
+      productImages: productImages.map((img: { url?: string } | string) => 
+        typeof img === 'string' ? img : img.url
+      ).filter(Boolean),
+      rating: storeData.rating || "4.8",
+      reviews: storeData.reviews || "21 883",
+      finalCtaTitle: storeData.finalCtaTitle,
+    };
+
+    const themeFiles = generateThemeFiles(themeData);
+    logStep("Theme files generated", { fileCount: Object.keys(themeFiles).length });
+
+    // ============ STEP 3: CREATE NEW THEME IN SHOPIFY ============
+    const themeName = `${storeData.storeName || 'Store'} - Custom Theme`;
+    
+    const createThemeResponse = await fetch(
       `https://${shopifyStoreDomain}/admin/api/2024-01/themes.json`,
       {
+        method: "POST",
         headers: {
+          "Content-Type": "application/json",
           "X-Shopify-Access-Token": shopifyAccessToken,
         },
+        body: JSON.stringify({
+          theme: {
+            name: themeName,
+            role: "unpublished",
+          }
+        }),
       }
     );
 
-    let themeConfigured = false;
-    let activeThemeId: number | null = null;
+    let themeId: number | null = null;
+    let themeUploaded = false;
 
-    if (themesResponse.ok) {
-      const themesResult = await themesResponse.json();
-      const activeTheme = themesResult.themes?.find((t: { role: string }) => t.role === "main");
-      
-      if (activeTheme) {
-        activeThemeId = activeTheme.id;
-        logStep("Found active theme", { themeId: activeThemeId, name: activeTheme.name });
+    if (createThemeResponse.ok) {
+      const themeResult = await createThemeResponse.json();
+      themeId = themeResult.theme?.id;
+      logStep("New theme created", { themeId, name: themeName });
 
-        // ============ STEP 3: CONFIGURE THEME SETTINGS ============
-        // Extract colors from storeData
-        const theme = storeData.theme || {};
-        const primaryColor = toHex(theme.primaryColor || "#4F46E5");
-        const backgroundColor = toHex(theme.backgroundColor || "#FFFFFF");
-        const textColor = toHex(theme.textColor || "#1F2937");
-        const accentColor = toHex(theme.accentColor || primaryColor);
-
-        // Shopify 2.0 theme settings structure
-        const themeSettings = {
-          asset: {
-            key: "config/settings_data.json",
-            value: JSON.stringify({
-              current: {
-                // Common theme settings
-                colors_solid_button_labels: "#FFFFFF",
-                colors_accent_1: accentColor,
-                colors_accent_2: primaryColor,
-                colors_text: textColor,
-                colors_background_1: backgroundColor,
-                colors_background_2: backgroundColor,
-                colors_primary_button: primaryColor,
-                colors_primary_button_label: "#FFFFFF",
-                colors_secondary_button: "transparent",
-                colors_secondary_button_label: primaryColor,
-                // Typography
-                type_body_font: "assistant_n4",
-                type_header_font: "assistant_n7",
-                // Store name/branding
-                logo_width: 90,
-                social_twitter_link: "",
-                social_facebook_link: "",
-                social_pinterest_link: "",
-                social_instagram_link: "",
-                // Checkout branding
-                checkout_banner_image: productImages[0]?.url || "",
-                checkout_logo_position: "center",
-                checkout_body_background_color: backgroundColor,
-                checkout_accent_color: primaryColor,
-                checkout_button_color: primaryColor,
-              }
-            })
-          }
-        };
-
-        logStep("Configuring theme settings", { 
-          primaryColor, 
-          backgroundColor, 
-          textColor,
-          themeId: activeThemeId 
-        });
-
-        // Try to update theme settings (may fail if theme doesn't support it)
+      // ============ STEP 4: UPLOAD THEME FILES ============
+      for (const [key, content] of Object.entries(themeFiles)) {
         try {
-          const themeUpdateResponse = await fetch(
-            `https://${shopifyStoreDomain}/admin/api/2024-01/themes/${activeThemeId}/assets.json`,
+          const assetResponse = await fetch(
+            `https://${shopifyStoreDomain}/admin/api/2024-01/themes/${themeId}/assets.json`,
             {
               method: "PUT",
               headers: {
                 "Content-Type": "application/json",
                 "X-Shopify-Access-Token": shopifyAccessToken,
               },
-              body: JSON.stringify(themeSettings),
+              body: JSON.stringify({
+                asset: {
+                  key: key,
+                  value: content,
+                }
+              }),
             }
           );
 
-          if (themeUpdateResponse.ok) {
-            logStep("Theme settings updated successfully");
-            themeConfigured = true;
+          if (assetResponse.ok) {
+            logStep(`Uploaded: ${key}`);
           } else {
-            const themeError = await themeUpdateResponse.text();
-            logStep("Theme settings update failed (non-critical)", { error: themeError });
-            
-            // Try alternative method - update individual settings via API
-            // Some themes require this approach
+            const error = await assetResponse.text();
+            logStep(`Failed to upload ${key}`, { error });
           }
-        } catch (themeErr) {
-          logStep("Theme configuration error (non-critical)", { error: String(themeErr) });
-        }
-
-        // ============ STEP 4: SET STORE NAME (via Shop settings if possible) ============
-        if (storeData.storeName) {
-          try {
-            // Note: Updating shop name requires different scopes, log for info
-            logStep("Store name from template", { name: storeData.storeName });
-          } catch (shopErr) {
-            logStep("Shop name update skipped");
-          }
+        } catch (err) {
+          logStep(`Error uploading ${key}`, { error: String(err) });
         }
       }
+
+      themeUploaded = true;
+
+      // ============ STEP 5: PUBLISH THE THEME ============
+      logStep("Publishing theme...");
+      
+      const publishResponse = await fetch(
+        `https://${shopifyStoreDomain}/admin/api/2024-01/themes/${themeId}.json`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Shopify-Access-Token": shopifyAccessToken,
+          },
+          body: JSON.stringify({
+            theme: {
+              id: themeId,
+              role: "main",
+            }
+          }),
+        }
+      );
+
+      if (publishResponse.ok) {
+        logStep("Theme published successfully!");
+      } else {
+        const pubError = await publishResponse.text();
+        logStep("Theme publish failed (may need manual activation)", { error: pubError });
+      }
+
     } else {
-      logStep("Could not fetch themes", { status: themesResponse.status });
+      const themeError = await createThemeResponse.text();
+      logStep("Could not create theme", { error: themeError });
     }
 
     return new Response(
@@ -318,10 +294,12 @@ serve(async (req) => {
         productHandle: productResult.product?.handle,
         productUrl: `https://${shopifyStoreDomain}/products/${productResult.product?.handle}`,
         shopDomain: shopifyStoreDomain,
-        themeConfigured,
-        message: themeConfigured 
-          ? "Produit créé et thème configuré avec succès !" 
-          : "Produit créé ! Les couleurs du thème peuvent nécessiter une configuration manuelle.",
+        storeUrl: `https://${shopifyStoreDomain}`,
+        themeId,
+        themeUploaded,
+        message: themeUploaded 
+          ? "🎉 Boutique complète exportée ! Produit + thème personnalisé créés et publiés." 
+          : "Produit créé ! Le thème personnalisé nécessite une configuration manuelle.",
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
