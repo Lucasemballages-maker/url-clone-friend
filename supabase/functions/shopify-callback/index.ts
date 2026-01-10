@@ -139,8 +139,8 @@ serve(async (req) => {
 
     logStep("Connection stored successfully");
 
-    // Redirect back to app
-    const appRedirectUrl = `https://url-clone-friend.lovable.app/dashboard?shopify_connected=true&shop=${encodeURIComponent(shop)}`;
+    // Redirect back to app - go to Shopify App page
+    const appRedirectUrl = `https://url-clone-friend.lovable.app/dashboard/shopify?shopify_connected=true&shop=${encodeURIComponent(shop)}`;
     
     return new Response(null, {
       status: 302,
