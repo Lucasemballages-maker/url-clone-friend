@@ -201,11 +201,9 @@ Deno.serve(async (req) => {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
           'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.5',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'DNT': '1',
-          'Connection': 'keep-alive',
-          'Upgrade-Insecure-Requests': '1',
+          'Accept-Language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
         },
       });
       
@@ -213,7 +211,148 @@ Deno.serve(async (req) => {
         html = await response.text();
         console.log('Direct fetch HTML length:', html.length);
         
-        // Extract title from HTML
+        // === PRIORITY 1: Extract from window.runParams JSON ===
+        const runParamsMatch = html.match(/window\.runParams\s*=\s*(\{[\s\S]*?\});\s*(?:window\.|var\s|<\/script>)/);
+        if (runParamsMatch) {
+          console.log('Found window.runParams');
+          try {
+            const jsonStr = runParamsMatch[1];
+            // Extract imagePathList from runParams
+            const imageListMatch = jsonStr.match(/"imagePathList"\s*:\s*\[([\s\S]*?)\]/);
+            if (imageListMatch) {
+              const urlMatches = imageListMatch[1].match(/"([^"]+)"/g);
+              if (urlMatches) {
+                for (let urlMatch of urlMatches) {
+                  let imgUrl = urlMatch.replace(/"/g, '').replace(/\\\//g, '/');
+                  if (imgUrl.startsWith('//')) imgUrl = 'https:' + imgUrl;
+                  if (imgUrl.includes('alicdn.com')) {
+                    const cleanUrl = getHighQualityUrl(imgUrl);
+                    if (!images.includes(cleanUrl)) {
+                      images.push(cleanUrl);
+                      console.log('[runParams imagePathList]', cleanUrl);
+                    }
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            console.log('Error parsing runParams:', e);
+          }
+        }
+
+        // === PRIORITY 2: Extract from window.__INIT_DATA__ ===
+        const initDataMatch = html.match(/window\.__INIT_DATA__\s*=\s*(\{[\s\S]*?\});\s*(?:window\.|<\/script>)/);
+        if (initDataMatch) {
+          console.log('Found window.__INIT_DATA__');
+          try {
+            const jsonStr = initDataMatch[1];
+            // Look for image URLs in the data
+            const imgMatches = jsonStr.match(/https?:\/\/[^"'\s]+alicdn\.com\/[^"'\s]+\.(?:jpg|jpeg|png|webp)/gi);
+            if (imgMatches) {
+              for (const imgUrl of imgMatches) {
+                if (isLikelyProductPhoto(imgUrl)) {
+                  const cleanUrl = getHighQualityUrl(imgUrl);
+                  if (!images.includes(cleanUrl)) {
+                    images.push(cleanUrl);
+                    console.log('[__INIT_DATA__]', cleanUrl);
+                  }
+                }
+              }
+            }
+          } catch (e) {
+            console.log('Error parsing __INIT_DATA__:', e);
+          }
+        }
+
+        // === PRIORITY 3: Extract from data JSON blocks ===
+        const dataJsonPatterns = [
+          /data\s*:\s*(\{[\s\S]*?"imagePathList"[\s\S]*?\})/g,
+          /"data"\s*:\s*(\{[\s\S]*?"imagePathList"[\s\S]*?\})/g,
+        ];
+        
+        for (const pattern of dataJsonPatterns) {
+          let match;
+          while ((match = pattern.exec(html)) !== null) {
+            const imageListMatch = match[1].match(/"imagePathList"\s*:\s*\[([\s\S]*?)\]/);
+            if (imageListMatch) {
+              const urlMatches = imageListMatch[1].match(/"([^"]+)"/g);
+              if (urlMatches) {
+                for (let urlMatch of urlMatches) {
+                  let imgUrl = urlMatch.replace(/"/g, '').replace(/\\\//g, '/');
+                  if (imgUrl.startsWith('//')) imgUrl = 'https:' + imgUrl;
+                  if (imgUrl.includes('alicdn.com')) {
+                    const cleanUrl = getHighQualityUrl(imgUrl);
+                    if (!images.includes(cleanUrl)) {
+                      images.push(cleanUrl);
+                      console.log('[data JSON imagePathList]', cleanUrl);
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        // === PRIORITY 4: Extract og:image meta tags ===
+        const ogPatterns = [
+          /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/gi,
+          /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/gi,
+        ];
+        
+        for (const pattern of ogPatterns) {
+          let match;
+          while ((match = pattern.exec(html)) !== null) {
+            let imgUrl = match[1].replace(/\\\//g, '/');
+            if (imgUrl.startsWith('//')) imgUrl = 'https:' + imgUrl;
+            if (imgUrl.includes('alicdn.com')) {
+              const cleanUrl = getHighQualityUrl(imgUrl);
+              if (!images.includes(cleanUrl)) {
+                images.push(cleanUrl);
+                console.log('[og:image]', cleanUrl);
+              }
+            }
+          }
+        }
+
+        // === PRIORITY 5: Extract all alicdn product images from HTML ===
+        const allAlicdnImages = html.match(/https?:\/\/(?:ae0[1-4]|cbu0[1-4])\.alicdn\.com\/kf\/[^\s"'<>]+\.(?:jpg|jpeg|png|webp)/gi);
+        if (allAlicdnImages) {
+          for (const imgUrl of allAlicdnImages) {
+            if (isLikelyProductPhoto(imgUrl)) {
+              const cleanUrl = getHighQualityUrl(imgUrl);
+              if (!images.includes(cleanUrl)) {
+                images.push(cleanUrl);
+                console.log('[alicdn kf]', cleanUrl);
+              }
+            }
+          }
+        }
+
+        // === PRIORITY 6: Extract from JSON fields ===
+        const jsonImagePatterns = [
+          /"imageUrl"\s*:\s*"([^"]+)"/gi,
+          /"imgUrl"\s*:\s*"([^"]+)"/gi,
+          /"pic_url"\s*:\s*"([^"]+)"/gi,
+          /"mainImageUrl"\s*:\s*"([^"]+)"/gi,
+          /"productImage"\s*:\s*"([^"]+)"/gi,
+        ];
+        
+        for (const pattern of jsonImagePatterns) {
+          let match;
+          while ((match = pattern.exec(html)) !== null) {
+            let imgUrl = match[1].replace(/\\\//g, '/');
+            if (imgUrl.startsWith('//')) imgUrl = 'https:' + imgUrl;
+            if (imgUrl.includes('alicdn.com') && isLikelyProductPhoto(imgUrl)) {
+              const cleanUrl = getHighQualityUrl(imgUrl);
+              if (!images.includes(cleanUrl)) {
+                images.push(cleanUrl);
+                console.log('[JSON field]', cleanUrl);
+              }
+            }
+          }
+        }
+
+        // === Extract title ===
         const titleMatch = html.match(/<title>([^<]+)<\/title>/i);
         if (titleMatch) {
           title = titleMatch[1]
@@ -225,104 +364,30 @@ Deno.serve(async (req) => {
         // Try to extract title from JSON data
         if (!title) {
           const jsonTitleMatch = html.match(/"subject"\s*:\s*"([^"]+)"/i) ||
-                                  html.match(/"title"\s*:\s*"([^"]+)"/i);
+                                  html.match(/"title"\s*:\s*"([^"]+)"/i) ||
+                                  html.match(/"productTitle"\s*:\s*"([^"]+)"/i);
           if (jsonTitleMatch) {
             title = jsonTitleMatch[1];
           }
         }
-        
-        // Extract images from various sources
-        const imagePatterns = [
-          // OG image
-          /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/gi,
-          /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/gi,
-          // JSON embedded images
-          /"imageUrl"\s*:\s*"([^"]+alicdn[^"]+)"/gi,
-          /"imgUrl"\s*:\s*"([^"]+alicdn[^"]+)"/gi,
-          /"pic_url"\s*:\s*"([^"]+alicdn[^"]+)"/gi,
-          // imagePathList
-          /"imagePathList"\s*:\s*\[([^\]]+)\]/gi,
-        ];
-        
-        for (const pattern of imagePatterns) {
-          let match;
-          while ((match = pattern.exec(html)) !== null) {
-            let imgUrl = match[1];
-            // Handle array content
-            if (imgUrl.includes(',')) {
-              const urls = imgUrl.match(/"([^"]+)"/g);
-              if (urls) {
-                for (let u of urls) {
-                  u = u.replace(/"/g, '').replace(/\\\//g, '/');
-                  if (u.startsWith('//')) u = 'https:' + u;
-                  if (u.includes('alicdn.com') && isLikelyProductPhoto(u)) {
-                    const cleanUrl = getHighQualityUrl(u);
-                    if (!images.includes(cleanUrl)) {
-                      images.push(cleanUrl);
-                      console.log('Found image:', cleanUrl);
-                    }
-                  }
-                }
-                continue;
-              }
-            }
-            
-            imgUrl = imgUrl.replace(/\\\//g, '/');
-            if (imgUrl.startsWith('//')) imgUrl = 'https:' + imgUrl;
-            
-            if (imgUrl.includes('alicdn.com') && isLikelyProductPhoto(imgUrl)) {
-              const cleanUrl = getHighQualityUrl(imgUrl);
-              if (!images.includes(cleanUrl)) {
-                images.push(cleanUrl);
-                console.log('Found image:', cleanUrl);
-              }
-            }
-          }
-        }
-        
-        // Extract from srcset and data-src
-        const srcPatterns = [
-          /data-src=["']([^"']+alicdn\.com[^"']+)["']/gi,
-          /srcset=["']([^"']+alicdn\.com[^"'\s]+)/gi,
-        ];
-        
-        for (const pattern of srcPatterns) {
-          let match;
-          while ((match = pattern.exec(html)) !== null) {
-            let imgUrl = match[1].split(' ')[0].split(',')[0];
-            if (imgUrl.startsWith('//')) imgUrl = 'https:' + imgUrl;
-            if (isLikelyProductPhoto(imgUrl)) {
-              const cleanUrl = getHighQualityUrl(imgUrl);
-              if (!images.includes(cleanUrl)) {
-                images.push(cleanUrl);
-                console.log('Found image from src:', cleanUrl);
-              }
-            }
-          }
+
+        // Extract description
+        const descMatch = html.match(/"description"\s*:\s*"([^"]{20,500})"/i);
+        if (descMatch) {
+          description = descMatch[1].replace(/\\n/g, ' ').replace(/\s+/g, ' ').trim();
         }
       }
     } catch (fetchError) {
       console.log('Direct fetch failed:', fetchError);
     }
 
-    // If no images found, generate placeholder URLs based on common AliExpress patterns
-    // These are example product images that we'll use as fallback
-    if (images.length === 0) {
-      console.log('No images found, using placeholder product images');
-      
-      // Use high-quality stock product images as placeholders
-      const placeholderImages = [
-        'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1560343090-f0409e92791a?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1491553895911-0055uj8a1b85?w=800&h=800&fit=crop',
-        'https://images.unsplash.com/photo-1583394838336-acd977736f90?w=800&h=800&fit=crop',
-      ];
-      
-      images.push(...placeholderImages);
-    }
+    console.log('=== IMAGES EXTRACTION SUMMARY ===');
+    console.log('Total images found:', images.length);
+    images.slice(0, 10).forEach((url, i) => console.log(`${i + 1}. ${url}`));
+    console.log('=================================');
+
+    // NO PLACEHOLDER - return empty array if no images found
+    // The frontend will handle this gracefully
 
     // Extract price from HTML
     let price = '29.90';
