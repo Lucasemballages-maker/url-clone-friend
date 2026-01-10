@@ -43,21 +43,27 @@ export const StorePreview = ({ storeData }: StorePreviewProps) => {
   const gradientBg = `linear-gradient(135deg, ${primaryColor} 0%, ${accentColor} 100%)`;
 
   return (
-    <div className="relative mx-auto" style={{ maxWidth: "320px" }}>
-      {/* Phone Frame */}
-      <div className="relative bg-gradient-to-b from-zinc-800 to-zinc-900 rounded-[3rem] p-2 shadow-2xl ring-1 ring-white/10">
-        {/* Phone Notch */}
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-28 h-7 bg-black rounded-b-2xl z-20 flex items-center justify-center">
-          <div className="w-16 h-4 bg-zinc-900 rounded-full flex items-center justify-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-zinc-700" />
-            <div className="w-8 h-1.5 rounded-full bg-zinc-700" />
+    <div className="relative mx-auto w-full max-w-[420px]">
+      {/* Browser Frame */}
+      <div className="relative bg-zinc-800 rounded-xl shadow-2xl ring-1 ring-white/10 overflow-hidden">
+        {/* Browser Top Bar */}
+        <div className="bg-zinc-900 px-3 py-2 flex items-center gap-2">
+          <div className="flex gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
+            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+            <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
+          </div>
+          <div className="flex-1 bg-zinc-700 rounded-md px-3 py-1 mx-2">
+            <span className="text-[10px] text-zinc-400 truncate">
+              {storeData.storeName ? `${storeData.storeName.toLowerCase().replace(/\s+/g, '-')}.myshopify.com/products` : 'votre-boutique.myshopify.com/products'}
+            </span>
           </div>
         </div>
         
-        {/* Phone Screen */}
-        <div className="bg-white rounded-[2.5rem] overflow-hidden relative">
+        {/* Site Content */}
+        <div className="bg-white overflow-hidden">
           {/* Scrollable Content */}
-          <div className="h-[580px] overflow-y-auto scrollbar-hide">
+          <div className="h-[520px] overflow-y-auto scrollbar-hide">
             
             {/* Promo Banner with Countdown */}
             <div className="bg-red-600 py-2 px-3">
@@ -347,9 +353,6 @@ export const StorePreview = ({ storeData }: StorePreviewProps) => {
           </div>
         </div>
       </div>
-
-      {/* Phone Home Indicator */}
-      <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 w-28 h-1 bg-zinc-600 rounded-full" />
     </div>
   );
 };
