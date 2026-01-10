@@ -23,11 +23,9 @@ async function fetchWithBrightData(url: string): Promise<string | null> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        zone: 'web_unlocker',
+        zone: 'web_unlocker1',
         url: url,
         format: 'raw',
-        method: 'GET',
-        country: 'fr',
       }),
     });
 
