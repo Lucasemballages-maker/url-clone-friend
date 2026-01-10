@@ -37,28 +37,52 @@ serve(async (req) => {
       throw new Error("Shopify credentials not configured");
     }
 
-    // Exchange code for access token
+    logStep("Exchanging code for access token", { 
+      shop, 
+      hasClientId: !!clientId, 
+      hasClientSecret: !!clientSecret,
+      codeLength: code.length 
+    });
+
+    // Exchange code for access token using application/x-www-form-urlencoded
+    const tokenBody = new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      code: code,
+    });
+
     const tokenResponse = await fetch(`https://${shop}/admin/oauth/access_token`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Accept": "application/json",
       },
-      body: JSON.stringify({
-        client_id: clientId,
-        client_secret: clientSecret,
-        code: code,
-      }),
+      body: tokenBody.toString(),
     });
 
+    const responseText = await tokenResponse.text();
+    logStep("Token response received", { status: tokenResponse.status, bodyLength: responseText.length });
+
     if (!tokenResponse.ok) {
-      const errorText = await tokenResponse.text();
-      logStep("Token exchange failed", { status: tokenResponse.status, error: errorText });
+      logStep("Token exchange failed", { status: tokenResponse.status, error: responseText });
       throw new Error(`Failed to exchange code for token: ${tokenResponse.status}`);
     }
 
-    const tokenData = await tokenResponse.json();
+    let tokenData;
+    try {
+      tokenData = JSON.parse(responseText);
+    } catch (e) {
+      logStep("Failed to parse token response", { error: e, responseText });
+      throw new Error("Invalid response from Shopify");
+    }
+
     const accessToken = tokenData.access_token;
     const scopes = tokenData.scope;
+
+    if (!accessToken) {
+      logStep("No access token in response", { tokenData });
+      throw new Error("No access token received from Shopify");
+    }
 
     logStep("Token exchange successful", { scopes });
 
