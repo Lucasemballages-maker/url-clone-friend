@@ -41,6 +41,20 @@ export const StorePreview = ({ storeData }: StorePreviewProps) => {
           {/* Scrollable Content */}
           <div className="h-[580px] overflow-y-auto scrollbar-hide">
             
+            {/* Marquee Banner */}
+            <div 
+              className="py-1.5 overflow-hidden whitespace-nowrap"
+              style={{ background: gradientBg }}
+            >
+              <div className="animate-marquee inline-flex gap-8">
+                {[...Array(8)].map((_, i) => (
+                  <span key={i} className="text-white text-[10px] font-semibold uppercase tracking-widest">
+                    ✦ {storeData.storeName || "Votre Marque"}
+                  </span>
+                ))}
+              </div>
+            </div>
+
             {/* Header */}
             <header className="bg-white px-4 py-3 shadow-sm sticky top-0 z-10">
               <div className="flex justify-between items-center">
@@ -97,6 +111,20 @@ export const StorePreview = ({ storeData }: StorePreviewProps) => {
                 <span>✓ Livraison OFFERTE</span>
               </div>
             </section>
+
+            {/* Marquee Banner - Product Page */}
+            <div 
+              className="py-1.5 overflow-hidden whitespace-nowrap"
+              style={{ backgroundColor: primaryColor }}
+            >
+              <div className="animate-marquee inline-flex gap-8">
+                {[...Array(8)].map((_, i) => (
+                  <span key={i} className="text-white text-[10px] font-semibold uppercase tracking-widest">
+                    ★ {storeData.storeName || "Votre Marque"} ★
+                  </span>
+                ))}
+              </div>
+            </div>
 
             {/* Product Section */}
             <section className="px-4 py-5">
