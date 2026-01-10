@@ -15,6 +15,7 @@ import {
   Pause,
   Play
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +35,8 @@ interface DeployedStore {
   visits: number;
   orders: number;
   created_at: string;
+  stripe_api_key: string | null;
+  payment_url: string | null;
 }
 
 const MyApps = () => {
@@ -179,6 +182,19 @@ const MyApps = () => {
                       {store.status === "active" ? "Active" : "Pause"}
                     </span>
                   </div>
+                </div>
+
+                {/* Payment Status Badge */}
+                <div className="mb-3">
+                  {store.stripe_api_key || store.payment_url ? (
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                      💳 Paiements activés
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                      ⚠️ Paiements non configurés
+                    </Badge>
+                  )}
                 </div>
 
                 {/* Info */}
