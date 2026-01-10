@@ -102,13 +102,13 @@ export const PricingModal = ({ open, onOpenChange, onSelectPlan }: PricingModalP
     // Check if it's the free starter plan
     const selectedPlan = plans.find(p => p.id === planId);
     if (selectedPlan && selectedPlan.monthlyPrice === 0) {
-      // Free plan - skip payment and go directly to finalization
+      // Free plan - skip payment and go directly to deployment
       toast({
         title: "Plan Starter activé !",
-        description: "Vous pouvez maintenant créer votre boutique.",
+        description: "Déploiement de votre boutique...",
       });
       onOpenChange(false);
-      navigate("/shopify-finalization");
+      navigate("/deployment-success");
       return;
     }
 
