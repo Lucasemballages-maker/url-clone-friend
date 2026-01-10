@@ -72,10 +72,10 @@ Réponds UNIQUEMENT avec un JSON valide dans ce format exact:
     {"icon": "emoji approprié", "title": "Titre court du bienfait 4", "description": "Description courte"}
   ],
   "faq": [
-    {"question": "Question fréquente 1 spécifique au produit ?", "answer": "Réponse claire et rassurante"},
-    {"question": "Question sur la livraison/utilisation ?", "answer": "Réponse informative"},
-    {"question": "Question sur la garantie/retour ?", "answer": "Réponse positive sur le SAV"},
-    {"question": "Question technique ou pratique ?", "answer": "Réponse détaillée et utile"}
+    {"question": "Comment utiliser ce produit ?", "answer": "Réponse claire sur l'utilisation"},
+    {"question": "Quels sont les matériaux/ingrédients ?", "answer": "Réponse sur la qualité et composition"},
+    {"question": "Puis-je retourner le produit si je ne suis pas satisfait ?", "answer": "Réponse positive sur la politique de retour"},
+    {"question": "Le produit est-il garanti ?", "answer": "Réponse détaillée sur la garantie"}
   ]
 }`;
 
@@ -176,7 +176,7 @@ Réponds UNIQUEMENT avec un JSON valide dans ce format exact:
               { icon: '💯', title: 'Fiabilité', description: 'Testé et approuvé' }
             ],
             faq: [
-              { question: 'Quel est le délai de livraison ?', answer: 'Votre commande est expédiée sous 24-48h et livrée en 3-5 jours ouvrés.' },
+              { question: 'Comment utiliser ce produit ?', answer: 'L\'utilisation est très simple et intuitive. Suivez les instructions incluses.' },
               { question: 'Puis-je retourner le produit ?', answer: 'Oui, vous bénéficiez de 30 jours pour retourner le produit si vous n\'êtes pas satisfait.' },
               { question: 'Le produit est-il garanti ?', answer: 'Tous nos produits sont garantis 1 an contre les défauts de fabrication.' },
               { question: 'Comment contacter le service client ?', answer: 'Notre équipe est disponible 7j/7 par email pour répondre à toutes vos questions.' }
