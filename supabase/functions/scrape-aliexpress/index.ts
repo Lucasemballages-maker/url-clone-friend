@@ -45,6 +45,44 @@ async function fetchWithBrightData(url: string): Promise<string | null> {
   }
 }
 
+// Normalize image URL: add https, upgrade to 800x800, remove duplicates
+function normalizeImageUrl(url: string): string {
+  let cleanUrl = url.replace(/['"]/g, '').replace(/\\\//g, '/').trim();
+  
+  // Add https if missing
+  if (cleanUrl.startsWith('//')) cleanUrl = 'https:' + cleanUrl;
+  
+  // Remove any existing size suffix and add 800x800
+  cleanUrl = cleanUrl.replace(/_\d+x\d+\./gi, '.');
+  
+  // Add 800x800 before extension
+  if (!cleanUrl.includes('_800x800.')) {
+    cleanUrl = cleanUrl.replace(/\.(jpg|jpeg|png|webp)$/i, '_800x800.$1');
+  }
+  
+  return cleanUrl;
+}
+
+// Get base URL without size suffix for deduplication
+function getImageBaseUrl(url: string): string {
+  return url.replace(/_\d+x\d+\./gi, '.').replace(/\.(jpg|jpeg|png|webp)$/i, '');
+}
+
+// Check if image is a valid product image (not icon, logo, etc.)
+function isValidProductImage(url: string): boolean {
+  // Must be from alicdn.com
+  if (!url.includes('alicdn.com')) return false;
+  
+  // Must be in product image folders
+  if (!url.includes('/kf/') && !url.includes('/imgextra/') && !url.includes('/item/')) return false;
+  
+  // Exclude small images, icons, avatars
+  if (url.includes('avatar') || url.includes('icon') || url.includes('logo')) return false;
+  if (url.includes('_50x50') || url.includes('_100x100') || url.includes('_200x200')) return false;
+  
+  return true;
+}
+
 // Parse product data from HTML
 function parseProductData(html: string, productId: string): {
   title: string;
@@ -55,96 +93,95 @@ function parseProductData(html: string, productId: string): {
   rating: string;
   reviews: string;
 } {
+  const imageSet = new Set<string>(); // Use Set with base URLs for deduplication
   const images: string[] = [];
+  
+  const addImage = (url: string) => {
+    if (!isValidProductImage(url)) return false;
+    
+    const normalized = normalizeImageUrl(url);
+    const baseUrl = getImageBaseUrl(normalized);
+    
+    if (!imageSet.has(baseUrl) && images.length < 10) {
+      imageSet.add(baseUrl);
+      images.push(normalized);
+      return true;
+    }
+    return false;
+  };
   
   console.log('=== PARSING HTML ===');
   console.log('HTML length:', html.length);
 
-  // === PRIORITY 1: window.runParams JSON data ===
-  const runParamsMatch = html.match(/window\.runParams\s*=\s*(\{[\s\S]*?\});?\s*(?:var|const|let|window|<\/script>)/);
-  if (runParamsMatch) {
-    try {
-      // Clean the JSON string
-      let jsonStr = runParamsMatch[1]
-        .replace(/,\s*}/g, '}')
-        .replace(/,\s*]/g, ']')
-        .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?\s*:/g, '"$2":')
-        .replace(/:\s*'([^']*)'/g, ':"$1"');
-      
-      console.log('[runParams] Found, attempting parse...');
-      
-      // Extract imagePathList directly with regex (safer than full JSON parse)
-      const imageListMatch = html.match(/"imagePathList"\s*:\s*\[([\s\S]*?)\]/);
-      if (imageListMatch) {
-        const urls = imageListMatch[1].match(/["']([^"']+)["']/g);
-        if (urls) {
-          for (const url of urls) {
-            let cleanUrl = url.replace(/['"]/g, '').replace(/\\\//g, '/');
-            if (cleanUrl.startsWith('//')) cleanUrl = 'https:' + cleanUrl;
-            if (cleanUrl.includes('alicdn.com') || cleanUrl.includes('aliexpress.com')) {
-              // Upgrade to high resolution
-              cleanUrl = cleanUrl.replace(/_\d+x\d+\./gi, '_800x800.');
-              if (!cleanUrl.includes('_800x800')) {
-                cleanUrl = cleanUrl.replace(/\.(jpg|jpeg|png|webp)$/i, '_800x800.$1');
-              }
-              if (!images.includes(cleanUrl) && images.length < 7) {
-                images.push(cleanUrl);
-                console.log('[runParams imagePathList]', cleanUrl);
-              }
-            }
-          }
+  // === PRIORITY 1: window.runParams JSON data - imagePathList ===
+  const imageListMatch = html.match(/"imagePathList"\s*:\s*\[([\s\S]*?)\]/);
+  if (imageListMatch) {
+    console.log('[runParams] Found imagePathList');
+    const urls = imageListMatch[1].match(/["']([^"']+)["']/g);
+    if (urls) {
+      for (const url of urls) {
+        if (addImage(url)) {
+          console.log('[imagePathList]', images[images.length - 1]);
         }
       }
-    } catch (e) {
-      console.log('[runParams] Parse error:', e);
+    }
+  }
+  
+  // === PRIORITY 2: skuImages in runParams ===
+  const skuImagesMatch = html.match(/"skuImages"\s*:\s*\{([^}]+)\}/);
+  if (skuImagesMatch && images.length < 10) {
+    const skuUrls = skuImagesMatch[1].match(/["'](https?:\/\/[^"'\s]+alicdn[^"'\s]+\.(?:jpg|jpeg|png|webp))["']/gi);
+    if (skuUrls) {
+      for (const url of skuUrls) {
+        if (addImage(url)) {
+          console.log('[skuImages]', images[images.length - 1]);
+        }
+      }
     }
   }
 
-  // === PRIORITY 2: window.__INIT_DATA__ JSON ===
+  // === PRIORITY 3: window.__INIT_DATA__ JSON ===
   const initDataMatch = html.match(/window\.__INIT_DATA__\s*=\s*(\{[\s\S]*?\});?\s*(?:var|const|let|window|<\/script>)/);
-  if (initDataMatch && images.length < 7) {
+  if (initDataMatch && images.length < 10) {
     console.log('[__INIT_DATA__] Found, extracting images...');
-    
-    // Extract all image URLs from this JSON block
-    const imgMatches = initDataMatch[1].match(/["'](https?:\/\/[^"'\s]+(?:alicdn|aliexpress)[^"'\s]+\.(?:jpg|jpeg|png|webp))["']/gi);
+    const imgMatches = initDataMatch[1].match(/["'](https?:\/\/[^"'\s]+alicdn[^"'\s]+\.(?:jpg|jpeg|png|webp))["']/gi);
     if (imgMatches) {
       for (const match of imgMatches) {
-        let cleanUrl = match.replace(/['"]/g, '').replace(/\\\//g, '/');
-        cleanUrl = cleanUrl.replace(/_\d+x\d+\./gi, '_800x800.');
-        if (!images.includes(cleanUrl) && images.length < 7) {
-          images.push(cleanUrl);
-          console.log('[__INIT_DATA__]', cleanUrl);
+        if (addImage(match)) {
+          console.log('[__INIT_DATA__]', images[images.length - 1]);
         }
       }
     }
   }
 
-  // === PRIORITY 3: og:image meta tag ===
+  // === PRIORITY 4: og:image meta tag ===
   const ogImageMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) ||
                        html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
-  if (ogImageMatch && images.length < 7) {
-    let imgUrl = ogImageMatch[1].replace(/\\\//g, '/');
-    if (imgUrl.startsWith('//')) imgUrl = 'https:' + imgUrl;
-    if (imgUrl.includes('alicdn.com') || imgUrl.includes('aliexpress.com')) {
-      imgUrl = imgUrl.replace(/_\d+x\d+\./gi, '_800x800.');
-      if (!images.includes(imgUrl)) {
-        images.unshift(imgUrl); // Add as first image
-        console.log('[og:image]', imgUrl);
-      }
+  if (ogImageMatch && images.length < 10) {
+    if (addImage(ogImageMatch[1])) {
+      // Move og:image to first position if added
+      const lastImg = images.pop()!;
+      images.unshift(lastImg);
+      console.log('[og:image]', lastImg);
     }
   }
 
-  // === PRIORITY 4: All alicdn product images in HTML ===
-  const allAlicdnImages = html.match(/https?:\/\/[^"'\s<>]+alicdn\.com\/[^"'\s<>]+\.(jpg|jpeg|png|webp)/gi);
-  if (allAlicdnImages && images.length < 7) {
+  // === PRIORITY 5: All alicdn product images in HTML ===
+  const allAlicdnImages = html.match(/https?:\/\/[^"'\s<>]+alicdn\.com\/kf\/[^"'\s<>]+\.(jpg|jpeg|png|webp)/gi);
+  if (allAlicdnImages && images.length < 10) {
     for (const imgUrl of allAlicdnImages) {
-      // Only include product images (from /kf/ or /imgextra/ folders)
-      if (imgUrl.includes('/kf/') || imgUrl.includes('/imgextra/') || imgUrl.includes('/item/')) {
-        let cleanUrl = imgUrl.replace(/_\d+x\d+\./gi, '_800x800.');
-        if (!images.includes(cleanUrl) && images.length < 7) {
-          images.push(cleanUrl);
-          console.log('[alicdn.com]', cleanUrl);
-        }
+      if (addImage(imgUrl)) {
+        console.log('[alicdn.com]', images[images.length - 1]);
+      }
+    }
+  }
+  
+  // === PRIORITY 6: Description images ===
+  const descImages = html.match(/https?:\/\/[^"'\s<>]+alicdn\.com\/imgextra\/[^"'\s<>]+\.(jpg|jpeg|png|webp)/gi);
+  if (descImages && images.length < 10) {
+    for (const imgUrl of descImages) {
+      if (addImage(imgUrl)) {
+        console.log('[imgextra]', images[images.length - 1]);
       }
     }
   }
