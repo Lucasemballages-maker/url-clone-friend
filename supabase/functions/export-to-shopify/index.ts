@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Shopify from "https://esm.sh/@shopify/shopify-api@11.0.1";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,48 +19,121 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const { storeData } = await req.json();
+    // Get user from auth header
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      throw new Error("Unauthorized - No auth token provided");
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    
+    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } }
+    });
+    
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await supabaseUser.auth.getClaims(token);
+    
+    if (claimsError || !claimsData?.claims) {
+      throw new Error("Unauthorized - Invalid token");
+    }
+    
+    const userId = claimsData.claims.sub;
+    logStep("User authenticated", { userId });
+
+    const { storeData, shopDomain } = await req.json();
     logStep("Store data received", { 
-      productName: storeData?.product?.name,
-      storeName: storeData?.storeName 
+      productName: storeData?.productName || storeData?.product?.name,
+      storeName: storeData?.storeName,
+      shopDomain
     });
 
-    if (!storeData || !storeData.product) {
+    if (!storeData) {
       throw new Error("No store data provided");
     }
 
-    const shopifyAccessToken = Deno.env.get("SHOPIFY_ADMIN_ACCESS_TOKEN");
-    const shopifyStoreDomain = Deno.env.get("SHOPIFY_STORE_PERMANENT_DOMAIN");
+    // Get Shopify connection from database
+    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+    
+    let shopifyAccessToken: string;
+    let shopifyStoreDomain: string;
 
-    if (!shopifyAccessToken || !shopifyStoreDomain) {
-      throw new Error("Shopify credentials not configured");
+    if (shopDomain) {
+      // Use provided shop domain
+      const { data: connection, error: connError } = await supabaseAdmin
+        .from("shopify_connections")
+        .select("access_token, shop_domain")
+        .eq("user_id", userId)
+        .eq("shop_domain", shopDomain)
+        .maybeSingle();
+
+      if (connError || !connection) {
+        logStep("No connection found for shop", { shopDomain, error: connError });
+        throw new Error("Shopify connection not found for this shop");
+      }
+
+      shopifyAccessToken = connection.access_token;
+      shopifyStoreDomain = connection.shop_domain;
+    } else {
+      // Get first available connection for user
+      const { data: connection, error: connError } = await supabaseAdmin
+        .from("shopify_connections")
+        .select("access_token, shop_domain")
+        .eq("user_id", userId)
+        .limit(1)
+        .maybeSingle();
+
+      if (connError || !connection) {
+        logStep("No connection found", { error: connError });
+        throw new Error("No Shopify connection found. Please connect your Shopify store first.");
+      }
+
+      shopifyAccessToken = connection.access_token;
+      shopifyStoreDomain = connection.shop_domain;
     }
 
-    logStep("Creating product in Shopify");
+    logStep("Using Shopify connection", { shop: shopifyStoreDomain });
 
-    // Create product via Shopify Admin API
+    // Prepare product data
+    const productName = storeData.productName || storeData.product?.name || "Product";
+    const productDescription = storeData.description || storeData.product?.description || "";
+    const productPrice = storeData.price || storeData.product?.price || "0";
+    const productImages = storeData.images || storeData.product?.images || [];
+
     const productData = {
       product: {
-        title: storeData.product.name,
-        body_html: `<p>${storeData.product.description}</p>`,
+        title: productName,
+        body_html: `<p>${productDescription}</p>`,
         vendor: storeData.storeName || "Mon Store",
         product_type: "General",
         variants: [
           {
-            price: storeData.product.price?.toString() || "0",
+            price: productPrice.toString().replace(/[^0-9.]/g, ''),
             sku: `SKU-${Date.now()}`,
             inventory_management: "shopify",
-            inventory_quantity: 100,
+            inventory_quantity: 9999,
           },
         ],
-        images: storeData.product.images
-          ?.filter((img: { url: string; selected: boolean }) => img.selected && img.url)
-          .map((img: { url: string }) => ({ src: img.url })) || [],
+        images: productImages
+          .filter((img: { url?: string; selected?: boolean } | string) => {
+            if (typeof img === 'string') return img;
+            return img.selected !== false && img.url;
+          })
+          .map((img: { url?: string } | string) => ({ 
+            src: typeof img === 'string' ? img : img.url 
+          })),
       },
     };
 
+    logStep("Creating product in Shopify", { 
+      title: productData.product.title,
+      imagesCount: productData.product.images.length 
+    });
+
     const response = await fetch(
-      `https://${shopifyStoreDomain}/admin/api/2025-01/products.json`,
+      `https://${shopifyStoreDomain}/admin/api/2024-01/products.json`,
       {
         method: "POST",
         headers: {
@@ -74,7 +147,7 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       logStep("Shopify API error", { status: response.status, error: errorText });
-      throw new Error(`Shopify API error: ${response.status}`);
+      throw new Error(`Shopify API error: ${response.status} - ${errorText}`);
     }
 
     const result = await response.json();
@@ -86,6 +159,7 @@ serve(async (req) => {
         productId: result.product?.id,
         productHandle: result.product?.handle,
         productUrl: `https://${shopifyStoreDomain}/products/${result.product?.handle}`,
+        shopDomain: shopifyStoreDomain,
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
