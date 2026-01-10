@@ -10,6 +10,7 @@ import MyApps from "./pages/MyApps";
 import Pricing from "./pages/Pricing";
 import Auth from "./pages/Auth";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import ShopifyFinalization from "./pages/ShopifyFinalization";
 import Help from "./pages/Help";
 import Settings from "./pages/Settings";
 import ShopifyApp from "./pages/ShopifyApp";
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/dashboard/help" element={<Help />} />
             <Route path="/dashboard/settings" element={<Settings />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/shopify-finalization" element={<ShopifyFinalization />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
