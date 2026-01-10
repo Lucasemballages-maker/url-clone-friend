@@ -12,17 +12,23 @@ async function fetchWithBrightData(url: string): Promise<string | null> {
     return null;
   }
 
-  const brightDataUrl = `https://api.brightdata.com/request?zone=web_unlocker&url=${encodeURIComponent(url)}`;
-  
-  console.log('Fetching via Bright Data:', brightDataUrl);
+  console.log('Fetching via Bright Data POST API...');
+  console.log('Target URL:', url);
   
   try {
-    const response = await fetch(brightDataUrl, {
-      method: 'GET',
+    const response = await fetch('https://api.brightdata.com/request', {
+      method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
+      body: JSON.stringify({
+        zone: 'web_unlocker',
+        url: url,
+        format: 'raw',
+        method: 'GET',
+        country: 'fr',
+      }),
     });
 
     if (!response.ok) {
