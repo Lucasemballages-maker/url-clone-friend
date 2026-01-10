@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,6 +26,7 @@ serve(async (req) => {
 
     const url = new URL(req.url);
     const shop = url.searchParams.get("shop");
+    const userId = url.searchParams.get("user_id");
     
     if (!shop) {
       throw new Error("Shop parameter is required");
@@ -36,17 +38,25 @@ serve(async (req) => {
       throw new Error("Invalid shop domain format");
     }
 
+    logStep("Received params", { shop, hasUserId: !!userId });
+
     const redirectUri = "https://jwoofhbzypjzwjowffcr.supabase.co/functions/v1/shopify-callback";
     const scopes = "write_products,read_products,write_themes";
-    const state = crypto.randomUUID(); // CSRF protection
+    
+    // Include user_id in state for callback to retrieve
+    const stateData = {
+      nonce: crypto.randomUUID(),
+      user_id: userId || null,
+    };
+    const state = btoa(JSON.stringify(stateData));
 
     const authUrl = `https://${shop}/admin/oauth/authorize?` +
       `client_id=${clientId}` +
       `&scope=${scopes}` +
       `&redirect_uri=${encodeURIComponent(redirectUri)}` +
-      `&state=${state}`;
+      `&state=${encodeURIComponent(state)}`;
 
-    logStep("Redirecting to Shopify", { shop, authUrl });
+    logStep("Redirecting to Shopify", { shop, hasUserId: !!userId });
 
     return new Response(null, {
       status: 302,
