@@ -35,6 +35,8 @@ Règles:
 - Crée un sentiment d'urgence subtil
 - Utilise des mots puissants et émotionnels
 - Garde le texte concis et percutant
+- Génère des avis clients réalistes et crédibles en rapport avec le produit
+- Génère des cartes de bienfaits avec des emojis appropriés au produit
 - Langue: ${language === 'fr' ? 'Français' : 'English'}`;
 
     const userPrompt = `Reformule ce produit pour une boutique e-commerce premium:
@@ -48,8 +50,19 @@ Réponds UNIQUEMENT avec un JSON valide dans ce format exact:
   "title": "Titre reformulé court et accrocheur (max 60 caractères)",
   "headline": "Phrase d'accroche principale percutante (max 80 caractères)",
   "description": "Description marketing de 2-3 phrases mettant en avant les bénéfices",
-  "benefits": ["Bénéfice 1", "Bénéfice 2", "Bénéfice 3"],
-  "cta": "Texte du bouton d'achat"
+  "benefits": ["Bénéfice 1", "Bénéfice 2", "Bénéfice 3", "Bénéfice 4"],
+  "cta": "Texte du bouton d'achat",
+  "customerReviews": [
+    {"name": "Prénom + initiale nom", "initials": "XX", "text": "Avis positif réaliste et spécifique au produit (max 100 caractères)", "rating": 5},
+    {"name": "Prénom + initiale nom", "initials": "XX", "text": "Avis positif différent et crédible (max 100 caractères)", "rating": 5},
+    {"name": "Prénom + initiale nom", "initials": "XX", "text": "Avis positif mentionnant un bénéfice concret (max 100 caractères)", "rating": 5}
+  ],
+  "benefitCards": [
+    {"icon": "emoji approprié", "title": "Titre court du bienfait 1", "description": "Description courte"},
+    {"icon": "emoji approprié", "title": "Titre court du bienfait 2", "description": "Description courte"},
+    {"icon": "emoji approprié", "title": "Titre court du bienfait 3", "description": "Description courte"},
+    {"icon": "emoji approprié", "title": "Titre court du bienfait 4", "description": "Description courte"}
+  ]
 }`;
 
     console.log('Reformulating product text...');
@@ -129,8 +142,19 @@ Réponds UNIQUEMENT avec un JSON valide dans ce format exact:
             title: title.slice(0, 60),
             headline: title,
             description: description || 'Découvrez ce produit exceptionnel.',
-            benefits: ['Qualité premium', 'Livraison rapide', 'Satisfaction garantie'],
+            benefits: ['Qualité premium', 'Livraison rapide', 'Satisfaction garantie', 'Design élégant'],
             cta: 'Acheter maintenant',
+            customerReviews: [
+              { name: 'Marie C.', initials: 'MC', text: 'Excellent produit, je recommande !', rating: 5 },
+              { name: 'Jean D.', initials: 'JD', text: 'Très satisfait de mon achat.', rating: 5 },
+              { name: 'Sophie L.', initials: 'SL', text: 'Qualité au rendez-vous !', rating: 5 }
+            ],
+            benefitCards: [
+              { icon: '✨', title: 'Qualité Premium', description: 'Matériaux haut de gamme' },
+              { icon: '🚀', title: 'Livraison Rapide', description: 'Expédié en 24h' },
+              { icon: '🛡️', title: 'Garantie', description: 'Satisfait ou remboursé' },
+              { icon: '💯', title: 'Fiabilité', description: 'Testé et approuvé' }
+            ]
           },
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

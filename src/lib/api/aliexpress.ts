@@ -26,12 +26,27 @@ export interface GenerateImageResponse {
   };
 }
 
+export interface ProductReview {
+  name: string;
+  initials: string;
+  text: string;
+  rating: number;
+}
+
+export interface BenefitCard {
+  icon: string;
+  title: string;
+  description: string;
+}
+
 export interface ReformulatedProduct {
   title: string;
   headline: string;
   description: string;
   benefits: string[];
   cta: string;
+  customerReviews?: ProductReview[];
+  benefitCards?: BenefitCard[];
 }
 
 export interface ReformulateResponse {
