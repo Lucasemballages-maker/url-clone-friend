@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ShoppingCart, Check, Star, ChevronLeft, ChevronRight, Clock, Shield, Truck, RefreshCw } from "lucide-react";
+import { ShoppingCart, Check, Star, ChevronLeft, ChevronRight, Clock, Shield, Truck, RefreshCw, Loader2 } from "lucide-react";
 import { StoreData } from "@/types/store";
 import { toast } from "sonner";
 import { Helmet } from "react-helmet-async";
@@ -12,6 +12,7 @@ interface DeployedStore {
   store_data: StoreData;
   status: string;
   payment_url: string | null;
+  stripe_api_key: string | null;
 }
 
 const PublicStore = () => {
@@ -21,6 +22,7 @@ const PublicStore = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [countdown, setCountdown] = useState({ hours: 2, minutes: 47, seconds: 33 });
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   useEffect(() => {
     const fetchStore = async () => {
@@ -50,6 +52,7 @@ const PublicStore = () => {
             ...data,
             store_data: storeData,
             payment_url: data.payment_url,
+            stripe_api_key: data.stripe_api_key ? "configured" : null, // Don't expose actual key
           });
         }
       } catch (err) {
@@ -114,8 +117,37 @@ const PublicStore = () => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
-  const handleOrder = () => {
-    if (store?.payment_url) {
+  const handleOrder = async () => {
+    if (!store) return;
+
+    // If store has Stripe API key configured, use dynamic checkout
+    if (store.stripe_api_key) {
+      setProcessingPayment(true);
+      try {
+        const { data, error } = await supabase.functions.invoke('create-store-checkout', {
+          body: { store_id: store.id }
+        });
+
+        if (error) throw error;
+
+        if (data?.url) {
+          window.location.href = data.url;
+        } else if (data?.redirect_url) {
+          window.open(data.redirect_url, '_blank');
+        } else {
+          throw new Error("No checkout URL received");
+        }
+      } catch (err) {
+        console.error("Checkout error:", err);
+        toast.error("Erreur lors du paiement. Veuillez réessayer.");
+      } finally {
+        setProcessingPayment(false);
+      }
+      return;
+    }
+
+    // Fallback to payment URL
+    if (store.payment_url) {
       window.open(store.payment_url, '_blank');
     } else {
       toast.error("Cette boutique n'a pas encore configuré les paiements");

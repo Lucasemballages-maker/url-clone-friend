@@ -24,6 +24,7 @@ export type Database = {
           status: string | null
           store_data: Json
           stripe_account_id: string | null
+          stripe_api_key: string | null
           stripe_connected: boolean | null
           subdomain: string
           updated_at: string | null
@@ -39,6 +40,7 @@ export type Database = {
           status?: string | null
           store_data: Json
           stripe_account_id?: string | null
+          stripe_api_key?: string | null
           stripe_connected?: boolean | null
           subdomain: string
           updated_at?: string | null
@@ -54,6 +56,7 @@ export type Database = {
           status?: string | null
           store_data?: Json
           stripe_account_id?: string | null
+          stripe_api_key?: string | null
           stripe_connected?: boolean | null
           subdomain?: string
           updated_at?: string | null
