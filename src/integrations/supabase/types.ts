@@ -14,6 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
+      deployed_stores: {
+        Row: {
+          created_at: string | null
+          custom_domain: string | null
+          id: string
+          orders: number | null
+          status: string | null
+          store_data: Json
+          stripe_account_id: string | null
+          stripe_connected: boolean | null
+          subdomain: string
+          updated_at: string | null
+          user_id: string
+          visits: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          custom_domain?: string | null
+          id?: string
+          orders?: number | null
+          status?: string | null
+          store_data: Json
+          stripe_account_id?: string | null
+          stripe_connected?: boolean | null
+          subdomain: string
+          updated_at?: string | null
+          user_id: string
+          visits?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          custom_domain?: string | null
+          id?: string
+          orders?: number | null
+          status?: string | null
+          store_data?: Json
+          stripe_account_id?: string | null
+          stripe_connected?: boolean | null
+          subdomain?: string
+          updated_at?: string | null
+          user_id?: string
+          visits?: number | null
+        }
+        Relationships: []
+      }
       shopify_connections: {
         Row: {
           access_token: string
