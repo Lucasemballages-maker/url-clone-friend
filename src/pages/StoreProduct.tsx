@@ -309,7 +309,7 @@ const StoreProduct = () => {
                     >
                       <Minus className="w-5 h-5 text-gray-600" />
                     </button>
-                    <span className="w-16 text-center text-lg font-semibold">{quantity}</span>
+                    <span className="w-16 text-center text-lg font-semibold text-gray-800">{quantity}</span>
                     <button 
                       onClick={incrementQuantity}
                       className="w-12 h-12 flex items-center justify-center hover:bg-gray-100 transition"
@@ -360,6 +360,75 @@ const StoreProduct = () => {
             </div>
           </div>
         </div>
+
+        {/* Reviews Section */}
+        <section className="max-w-6xl mx-auto px-6 py-12">
+          <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-800 mb-8">
+            Ce que disent nos clients
+          </h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {(storeData.customerReviews || [
+              { initials: "MC", name: "Marie C.", text: "Résultats visibles dès la première semaine. Ma peau n'a jamais été aussi douce !", rating: 5 },
+              { initials: "JD", name: "Jean D.", text: "Installation super simple. Je recommande à 100% ce produit.", rating: 5 },
+              { initials: "SL", name: "Sophie L.", text: "Qualité exceptionnelle, je suis ravie de mon achat. Livraison rapide en plus !", rating: 5 },
+            ]).map((review, i) => (
+              <div key={i} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <div 
+                    className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold"
+                    style={{ background: gradientBg }}
+                  >
+                    {review.initials || review.name?.substring(0, 2).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-800">{review.name}</p>
+                    <div className="flex text-yellow-400">
+                      {[...Array(review.rating || 5)].map((_, j) => (
+                        <Star key={j} className="w-4 h-4 fill-current" />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm">{review.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Benefits Section */}
+        <section className="bg-white px-6 py-12">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-center text-2xl md:text-3xl font-bold text-gray-800 mb-8">
+              Pourquoi choisir ce produit ?
+            </h2>
+            <div className="grid md:grid-cols-4 gap-6">
+              {(storeData.benefitCards || [
+                { icon: "💧", title: "Qualité Premium", description: "Matériaux haut de gamme" },
+                { icon: "✨", title: "Design Élégant", description: "Style moderne et raffiné" },
+                { icon: "🚿", title: "Facile d'Utilisation", description: "Prêt en 2 minutes" },
+                { icon: "🛡️", title: "Garantie 1 An", description: "Protection complète" },
+              ]).map((item, i) => (
+                <div key={i} className="bg-gray-50 p-6 rounded-2xl text-center">
+                  <div className="text-4xl mb-3">{item.icon}</div>
+                  <h3 className="text-lg font-bold text-gray-800 mb-1">{item.title}</h3>
+                  <p className="text-sm text-gray-500">{item.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Footer */}
+        <footer className="bg-gray-900 text-white py-8 px-6">
+          <div className="max-w-6xl mx-auto text-center">
+            <p className="text-xl font-bold mb-2" style={{ color: primaryColor }}>
+              {storeData.storeName || "Votre Marque"}
+            </p>
+            <p className="text-gray-400 text-sm">
+              © {new Date().getFullYear()} Tous droits réservés
+            </p>
+          </div>
+        </footer>
       </div>
     </>
   );
