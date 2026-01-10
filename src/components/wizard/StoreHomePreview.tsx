@@ -265,7 +265,7 @@ export const StoreHomePreview = ({ storeData }: StoreHomePreviewProps) => {
               className="text-white px-4 py-8 text-center"
               style={{ background: gradientBg }}
             >
-              <h2 className="text-lg font-bold mb-2">Prêt à transformer votre douche ?</h2>
+              <h2 className="text-lg font-bold mb-2">{storeData.finalCtaTitle || `Prêt à découvrir ${storeData.productName || "ce produit"} ?`}</h2>
               <p className="text-[10px] opacity-90 mb-4">Rejoignez plus de {storeData.reviews || "21 000"} clients satisfaits</p>
               <button className="bg-white text-[11px] font-bold px-8 py-3 rounded-full shadow-lg" style={{ color: primaryColor }}>
                 {storeData.cta || "COMMANDER MAINTENANT"}

@@ -32,4 +32,6 @@ export interface StoreData {
   customerReviews?: ProductReview[];  // Avis page produit
   homeReviews?: ProductReview[];      // Avis page d'accueil
   benefitCards?: BenefitCard[];
+  // Texte CTA final personnalisé
+  finalCtaTitle?: string;  // Ex: "Prêt à découvrir votre nouveau style ?"
 }

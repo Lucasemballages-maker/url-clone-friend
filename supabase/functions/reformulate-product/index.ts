@@ -53,6 +53,7 @@ Réponds UNIQUEMENT avec un JSON valide dans ce format exact:
   "description": "Description marketing de 2-3 phrases mettant en avant les bénéfices",
   "benefits": ["Bénéfice 1", "Bénéfice 2", "Bénéfice 3", "Bénéfice 4"],
   "cta": "Texte du bouton d'achat",
+  "finalCtaTitle": "Question d'accroche personnalisée basée sur le produit, ex: 'Prêt à révolutionner votre routine ?' ou 'Prêt à découvrir le confort ultime ?' (max 50 caractères)",
   "customerReviews": [
     {"name": "Prénom + initiale nom", "initials": "XX", "text": "Avis SPÉCIFIQUE AU PRODUIT, mentionnant une fonctionnalité ou qualité précise", "rating": 5},
     {"name": "Prénom + initiale nom", "initials": "XX", "text": "Avis technique sur le produit avec détail concret", "rating": 5},
@@ -150,6 +151,7 @@ Réponds UNIQUEMENT avec un JSON valide dans ce format exact:
             description: description || 'Découvrez ce produit exceptionnel.',
             benefits: ['Qualité premium', 'Livraison rapide', 'Satisfaction garantie', 'Design élégant'],
             cta: 'Acheter maintenant',
+            finalCtaTitle: 'Prêt à découvrir ce produit ?',
             customerReviews: [
               { name: 'Marie C.', initials: 'MC', text: 'Excellent produit, la qualité est au rendez-vous !', rating: 5 },
               { name: 'Jean D.', initials: 'JD', text: 'Fonctionne parfaitement, très satisfait.', rating: 5 },
