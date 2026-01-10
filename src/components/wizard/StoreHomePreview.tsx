@@ -205,16 +205,16 @@ export const StoreHomePreview = ({ storeData }: StoreHomePreviewProps) => {
                 Pourquoi nous choisir ?
               </h2>
               <div className="grid grid-cols-2 gap-2">
-                {[
+                {(storeData.benefitCards || [
                   { icon: "💧", title: "Eau Purifiée", desc: "Filtre 99% du chlore et des impuretés" },
                   { icon: "✨", title: "Peau Éclatante", desc: "Peau plus douce et éclatante" },
                   { icon: "🚿", title: "Installation Simple", desc: "Se fixe en 2 minutes" },
                   { icon: "🛡️", title: "Garantie 1 An", desc: "Protection complète" },
-                ].map((item, i) => (
+                ]).map((item, i) => (
                   <div key={i} className="bg-white p-3 rounded-xl shadow-sm text-center">
                     <div className="text-2xl mb-2">{item.icon}</div>
                     <h3 className="text-[10px] font-bold text-zinc-800 mb-1">{item.title}</h3>
-                    <p className="text-[8px] text-zinc-500 leading-tight">{item.desc}</p>
+                    <p className="text-[8px] text-zinc-500 leading-tight">{'description' in item ? item.description : item.desc}</p>
                   </div>
                 ))}
               </div>
@@ -226,11 +226,11 @@ export const StoreHomePreview = ({ storeData }: StoreHomePreviewProps) => {
                 Ce que disent nos clients
               </h2>
               <div className="space-y-3">
-                {[
-                  { initials: "MC", name: "Marie C.", text: "Résultats visibles dès la première semaine !" },
-                  { initials: "JD", name: "Jean D.", text: "Installation super simple. Je recommande !" },
-                  { initials: "SL", name: "Sophie L.", text: "Mes cheveux sont plus brillants." },
-                ].map((review, i) => (
+                {(storeData.customerReviews || [
+                  { initials: "MC", name: "Marie C.", text: "Résultats visibles dès la première semaine !", rating: 5 },
+                  { initials: "JD", name: "Jean D.", text: "Installation super simple. Je recommande !", rating: 5 },
+                  { initials: "SL", name: "Sophie L.", text: "Mes cheveux sont plus brillants.", rating: 5 },
+                ]).map((review, i) => (
                   <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
                     <div 
                       className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
@@ -242,7 +242,7 @@ export const StoreHomePreview = ({ storeData }: StoreHomePreviewProps) => {
                       <div className="flex items-center gap-2 mb-0.5">
                         <span className="text-[10px] font-bold text-zinc-800">{review.name}</span>
                         <div className="flex text-yellow-400">
-                          {[...Array(5)].map((_, j) => (
+                          {[...Array(review.rating || 5)].map((_, j) => (
                             <Star key={j} className="w-2 h-2 fill-current" />
                           ))}
                         </div>
