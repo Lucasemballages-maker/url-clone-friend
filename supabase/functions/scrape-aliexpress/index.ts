@@ -225,7 +225,12 @@ Deno.serve(async (req) => {
     const allFoundUrls: string[] = [];
     let match;
 
-    // PRIORITY: Check for OG image in metadata (most reliable on AliExpress)
+    // Extract product ID from URL for fallback image construction
+    const productIdMatch = formattedUrl.match(/item\/(\d+)\.html/);
+    const productId = productIdMatch ? productIdMatch[1] : null;
+    console.log('Product ID:', productId);
+
+    // PRIORITY 1: Check for OG image in metadata (most reliable on AliExpress)
     const ogImage = metadata.ogImage || metadata['og:image'];
     if (ogImage && typeof ogImage === 'string' && ogImage.includes('alicdn.com')) {
       console.log('Found OG image:', ogImage);
@@ -260,7 +265,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Alternative og:image pattern
+    // Alternative og:image pattern  
     const ogImageAltRegex = /<meta[^>]+content=["']([^"']+alicdn[^"']+)["'][^>]+property=["']og:image["']/gi;
     while ((match = ogImageAltRegex.exec(html)) !== null) {
       const imgUrl = match[1];
@@ -268,6 +273,52 @@ Deno.serve(async (req) => {
       const cleanUrl = getHighQualityUrl(imgUrl);
       if (!images.includes(cleanUrl)) {
         images.push(cleanUrl);
+      }
+    }
+
+    // PRIORITY 2: Extract from window.runParams or pageData JSON (AliExpress embeds product data)
+    const runParamsRegex = /window\.runParams\s*=\s*(\{[\s\S]*?\});/g;
+    while ((match = runParamsRegex.exec(html)) !== null) {
+      try {
+        // Extract image URLs from the JSON-like structure
+        const jsonStr = match[1];
+        const imageMatches = jsonStr.match(/https?:\/\/[^"'\s]+alicdn\.com\/[^"'\s]+\.(?:jpg|jpeg|png|webp)/gi);
+        if (imageMatches) {
+          for (const imgUrl of imageMatches) {
+            allFoundUrls.push(`[runParams] ${imgUrl}`);
+            if (isLikelyProductPhoto(imgUrl)) {
+              const cleanUrl = getHighQualityUrl(imgUrl);
+              if (!images.includes(cleanUrl)) {
+                images.push(cleanUrl);
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.log('Error parsing runParams:', e);
+      }
+    }
+
+    // PRIORITY 3: Extract from data.imagePathList or similar JSON structures
+    const imagePathListRegex = /"imagePathList":\s*\[([^\]]*)\]/gi;
+    while ((match = imagePathListRegex.exec(html)) !== null) {
+      const arrayContent = match[1];
+      const urlMatches = arrayContent.match(/"([^"]+)"/g);
+      if (urlMatches) {
+        for (const urlMatch of urlMatches) {
+          let imgUrl = urlMatch.replace(/"/g, '').replace(/\\\//g, '/');
+          // Add protocol if missing
+          if (imgUrl.startsWith('//')) {
+            imgUrl = 'https:' + imgUrl;
+          }
+          if (imgUrl.includes('alicdn.com')) {
+            allFoundUrls.push(`[imagePathList] ${imgUrl}`);
+            const cleanUrl = getHighQualityUrl(imgUrl);
+            if (!images.includes(cleanUrl)) {
+              images.push(cleanUrl);
+            }
+          }
+        }
       }
     }
 
