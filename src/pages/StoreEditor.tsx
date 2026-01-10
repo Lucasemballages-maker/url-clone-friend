@@ -186,7 +186,7 @@ const StoreEditor = () => {
           </Button>
           <div className="flex-1">
             <h1 className="text-2xl font-bold">Modifier la boutique</h1>
-            <p className="text-muted-foreground text-sm">{store.subdomain}.dropyfy.app</p>
+            <p className="text-muted-foreground text-sm">{store.subdomain}.dropyfy.io</p>
           </div>
           <Button onClick={handleSave} disabled={saving} className="gap-2">
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}

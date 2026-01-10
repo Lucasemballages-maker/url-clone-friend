@@ -93,7 +93,7 @@ const Dashboard = () => {
     accentColor: "#F59E0B",
     announcementBar: "Livraison gratuite sur les commandes supérieures à 50 € | Livraison rapide dans le monde entier",
   });
-  const [storeUrl] = useState("https://votre-boutique.lovable.app");
+  const [storeUrl] = useState("https://votre-boutique.dropyfy.io");
 
   // Step 1: Generate (extract product data)
   const handleGenerate = async () => {

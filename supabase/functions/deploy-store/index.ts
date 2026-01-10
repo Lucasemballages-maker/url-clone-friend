@@ -100,7 +100,7 @@ serve(async (req) => {
     }
 
     // Construct the store URL
-    const storeUrl = `https://${subdomain}.dropyfy.app`;
+    const storeUrl = `https://${subdomain}.dropyfy.io`;
 
     return new Response(
       JSON.stringify({

@@ -202,7 +202,7 @@ const MyApps = () => {
                   <div className="flex items-start justify-between mb-3">
                     <div className="min-w-0">
                       <h3 className="font-semibold truncate">{store.store_data.productName || "Boutique"}</h3>
-                      <p className="text-sm text-muted-foreground truncate">{store.subdomain}.dropyfy.app</p>
+                      <p className="text-sm text-muted-foreground truncate">{store.subdomain}.dropyfy.io</p>
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
