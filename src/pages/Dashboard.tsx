@@ -169,36 +169,44 @@ const Dashboard = () => {
       }));
       updateStep('images', 'done');
 
-      // Auto-generate AI images for different styles
+      // Auto-generate AI images for different styles (only if we have a source image)
+      const sourceImageUrl = scrapedImages[0]?.url || product.images[0];
       const styles: { style: ImageStyle; stepId: string }[] = [
         { style: 'lifestyle', stepId: 'ai-lifestyle' },
         { style: 'studio', stepId: 'ai-studio' },
       ];
       const aiImages: ProductImage[] = [];
       
-      for (const { style, stepId } of styles) {
-        updateStep(stepId, 'loading');
-        setLoadingMessage(`Génération de l'image ${style === 'lifestyle' ? 'Lifestyle' : 'Studio'}...`);
-        try {
-          const aiResponse = await aliexpressApi.generateProductImage(
-            scrapedImages[0]?.url || product.images[0],
-            reformulated.title,
-            style
-          );
-          
-          if (aiResponse.success && aiResponse.data?.imageUrl) {
-            aiImages.push({
-              id: `ai-${style}-${Date.now()}`,
-              url: aiResponse.data.imageUrl,
-              isAiGenerated: true,
-              isSelected: true,
-            });
+      // Only attempt AI generation if we have a valid source image
+      if (sourceImageUrl && sourceImageUrl.startsWith('http')) {
+        for (const { style, stepId } of styles) {
+          updateStep(stepId, 'loading');
+          setLoadingMessage(`Génération de l'image ${style === 'lifestyle' ? 'Lifestyle' : 'Studio'}...`);
+          try {
+            const aiResponse = await aliexpressApi.generateProductImage(
+              sourceImageUrl,
+              reformulated.title,
+              style
+            );
+            
+            if (aiResponse.success && aiResponse.data?.imageUrl) {
+              aiImages.push({
+                id: `ai-${style}-${Date.now()}`,
+                url: aiResponse.data.imageUrl,
+                isAiGenerated: true,
+                isSelected: true,
+              });
+            }
+            updateStep(stepId, 'done');
+          } catch (err) {
+            console.error(`Error generating ${style} image:`, err);
+            updateStep(stepId, 'done');
           }
-          updateStep(stepId, 'done');
-        } catch (err) {
-          console.error(`Error generating ${style} image:`, err);
-          updateStep(stepId, 'done');
         }
+      } else {
+        // Skip AI generation steps if no source image
+        console.log('No valid source image found, skipping AI generation');
+        styles.forEach(({ stepId }) => updateStep(stepId, 'done'));
       }
 
       const allImages = [...aiImages, ...scrapedImages];
