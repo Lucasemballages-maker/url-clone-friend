@@ -3,6 +3,16 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Check if an image URL is accessible
+async function isImageAccessible(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -10,13 +20,6 @@ Deno.serve(async (req) => {
 
   try {
     const { imageUrl, productName, style } = await req.json();
-
-    if (!imageUrl) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Image URL is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
 
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
@@ -27,52 +30,110 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Define style prompts - focus on creating NEW images inspired by the product type
-    const productDescription = productName || 'household product';
-    
-    const stylePrompts: Record<string, string> = {
-      lifestyle: `IMPORTANT: Keep the EXACT product from the source image. Transform ONLY the background and lighting. Create a professional lifestyle photo with the product placed in an elegant modern setting (bathroom, kitchen, or living room). Use warm, inviting lighting. Premium aesthetic. Keep the product identical to the source image - do not change its appearance, color, or design. Only enhance the background and lighting.`,
-      studio: `IMPORTANT: Keep the EXACT product from the source image. Transform ONLY the background. Create a professional studio product photo on a clean white or soft gradient background with professional studio lighting, subtle shadows and reflections. Premium clean look. The product must remain identical to the source image - only change the background to studio setting.`,
-      outdoor: `IMPORTANT: Keep the EXACT product from the source image. Transform ONLY the background and lighting. Create a professional outdoor product photo with the product in a beautiful natural setting with soft natural lighting. Aspirational and appealing. Keep the product exactly as it appears in the source image - only change the environment to outdoor.`,
-      minimal: `IMPORTANT: Keep the EXACT product from the source image. Transform ONLY the background. Create a minimalist product photo with clean simple background, soft shadows, modern elegant style. The product itself must remain unchanged from the source image - only modify the background to be minimal and clean.`,
+    const productDescription = productName || 'premium product';
+    console.log('Product name:', productDescription);
+    console.log('Style:', style);
+    console.log('Image URL provided:', imageUrl || 'none');
+
+    // Check if we have a valid image URL
+    let hasValidImage = false;
+    if (imageUrl && imageUrl.startsWith('http')) {
+      console.log('Checking if image URL is accessible...');
+      hasValidImage = await isImageAccessible(imageUrl);
+      console.log('Image accessible:', hasValidImage);
+    }
+
+    // Style prompts for TEXT-ONLY generation (no source image)
+    const textOnlyStylePrompts: Record<string, string> = {
+      lifestyle: `Create a professional lifestyle product photograph of a "${productDescription}". 
+        Place the product in an elegant, modern home setting (living room, bathroom, or kitchen).
+        Use warm, inviting lighting with soft shadows. Premium aesthetic.
+        The image should look like a high-end e-commerce product photo.
+        Photorealistic, professional product photography, 4K quality.`,
+      studio: `Create a professional studio product photograph of a "${productDescription}".
+        Place the product on a clean white or soft gradient background.
+        Use professional studio lighting with subtle shadows and reflections.
+        Premium, clean, minimalist aesthetic.
+        The image should look like a high-end Amazon or Shopify product listing.
+        Photorealistic, professional product photography, 4K quality.`,
+      outdoor: `Create a professional outdoor product photograph of a "${productDescription}".
+        Place the product in a beautiful natural setting with soft natural lighting.
+        Aspirational and appealing outdoor environment.
+        The image should look like a lifestyle brand advertisement.
+        Photorealistic, professional product photography, 4K quality.`,
+      minimal: `Create a minimalist product photograph of a "${productDescription}".
+        Use a clean, simple background with soft shadows.
+        Modern, elegant, Scandinavian-inspired aesthetic.
+        The image should look like an Apple-style product showcase.
+        Photorealistic, professional product photography, 4K quality.`,
     };
 
-    const prompt = stylePrompts[style] || stylePrompts.lifestyle;
+    // Style prompts for IMAGE EDITING (when we have a valid source image)
+    const imageEditStylePrompts: Record<string, string> = {
+      lifestyle: `Keep the EXACT product from the source image. Transform ONLY the background and lighting. Create a professional lifestyle photo with the product placed in an elegant modern setting. Use warm, inviting lighting. Premium aesthetic.`,
+      studio: `Keep the EXACT product from the source image. Transform ONLY the background. Create a professional studio product photo on a clean white or soft gradient background with professional studio lighting and subtle shadows.`,
+      outdoor: `Keep the EXACT product from the source image. Transform ONLY the background. Create a professional outdoor product photo with the product in a beautiful natural setting with soft natural lighting.`,
+      minimal: `Keep the EXACT product from the source image. Transform ONLY the background. Create a minimalist product photo with clean simple background, soft shadows, modern elegant style.`,
+    };
 
-    console.log('Generating image with style:', style);
-    console.log('Source image URL:', imageUrl);
+    let response;
 
-    // Try with the image editing prompt
-    const fullPrompt = `You are a professional product photographer. ${prompt} You MUST generate a new image as output. Do not refuse - transform the background while keeping the product exactly as shown.`;
-    
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash-image-preview',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: fullPrompt,
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: imageUrl,
+    if (hasValidImage) {
+      // Use image editing mode with the source image
+      console.log('Using image editing mode with source image');
+      const prompt = imageEditStylePrompts[style] || imageEditStylePrompts.lifestyle;
+      
+      response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash-image-preview',
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: `You are a professional product photographer. ${prompt} Generate a new image.`,
                 },
-              },
-            ],
-          },
-        ],
-        modalities: ['image', 'text'],
-      }),
-    });
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: imageUrl,
+                  },
+                },
+              ],
+            },
+          ],
+          modalities: ['image', 'text'],
+        }),
+      });
+    } else {
+      // Generate image from text only (no source image available)
+      console.log('Using text-only generation mode (no valid source image)');
+      const prompt = textOnlyStylePrompts[style] || textOnlyStylePrompts.lifestyle;
+      
+      response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-2.5-flash-image-preview',
+          messages: [
+            {
+              role: 'user',
+              content: prompt,
+            },
+          ],
+          modalities: ['image', 'text'],
+        }),
+      });
+    }
 
     if (!response.ok) {
       if (response.status === 429) {
@@ -98,7 +159,7 @@ Deno.serve(async (req) => {
     const data = await response.json();
     console.log('AI response received');
 
-    // Extract the generated image from the response - check multiple possible locations
+    // Extract the generated image from the response
     let generatedImageUrl = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
     
     // Also check for inline_data format (base64)
@@ -110,12 +171,11 @@ Deno.serve(async (req) => {
     }
 
     if (!generatedImageUrl) {
-      // Check if model refused and returned text instead
       const textContent = data.choices?.[0]?.message?.content;
       if (textContent && typeof textContent === 'string') {
         console.error('Model refused to generate image:', textContent);
         return new Response(
-          JSON.stringify({ success: false, error: 'Could not transform this image. Try a different product photo.' }),
+          JSON.stringify({ success: false, error: 'Could not generate image for this product.' }),
           { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
