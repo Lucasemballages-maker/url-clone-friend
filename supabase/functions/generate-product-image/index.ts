@@ -69,11 +69,16 @@ Deno.serve(async (req) => {
     };
 
     // Style prompts for IMAGE EDITING (when we have a valid source image)
+    // IMPORTANT: The product must remain EXACTLY as in the source - only change the background/environment
     const imageEditStylePrompts: Record<string, string> = {
-      lifestyle: `Keep the EXACT product from the source image. Transform ONLY the background and lighting. Create a professional lifestyle photo with the product placed in an elegant modern setting. Use warm, inviting lighting. Premium aesthetic.`,
-      studio: `Keep the EXACT product from the source image. Transform ONLY the background. Create a professional studio product photo on a clean white or soft gradient background with professional studio lighting and subtle shadows.`,
-      outdoor: `Keep the EXACT product from the source image. Transform ONLY the background. Create a professional outdoor product photo with the product in a beautiful natural setting with soft natural lighting.`,
-      minimal: `Keep the EXACT product from the source image. Transform ONLY the background. Create a minimalist product photo with clean simple background, soft shadows, modern elegant style.`,
+      lifestyle: `CRITICAL: Do NOT modify, alter, or change the product in ANY way. Keep the EXACT same product with all its details, colors, and features.
+ONLY change the background: Place this exact product in an elegant modern home setting (living room, bathroom, or kitchen) with warm inviting lighting. Professional lifestyle e-commerce photo.`,
+      studio: `CRITICAL: Do NOT modify, alter, or change the product in ANY way. Keep the EXACT same product with all its details, colors, and features.
+ONLY change the background: Place this exact product on a clean white or soft gradient background with professional studio lighting and subtle shadows. Premium studio product photo.`,
+      outdoor: `CRITICAL: Do NOT modify, alter, or change the product in ANY way. Keep the EXACT same product with all its details, colors, and features.
+ONLY change the background: Place this exact product in a beautiful natural outdoor setting with soft natural lighting. Professional outdoor product photo.`,
+      minimal: `CRITICAL: Do NOT modify, alter, or change the product in ANY way. Keep the EXACT same product with all its details, colors, and features.
+ONLY change the background: Place this exact product on a clean minimal background with soft shadows, modern Scandinavian-inspired aesthetic.`,
     };
 
     let response;
@@ -97,7 +102,9 @@ Deno.serve(async (req) => {
               content: [
                 {
                   type: 'text',
-                  text: `You are a professional product photographer. ${prompt} Generate a new image.`,
+                  text: `You are a professional product photographer. Your task is to change ONLY the background/environment of this product image. 
+The product itself must remain COMPLETELY UNCHANGED - same shape, colors, details, and features.
+${prompt}`,
                 },
                 {
                   type: 'image_url',

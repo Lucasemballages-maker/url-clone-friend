@@ -108,6 +108,8 @@ const Dashboard = () => {
       { id: 'images', label: 'Traitement des images', status: 'pending' },
       { id: 'ai-lifestyle', label: 'Génération image IA Lifestyle', status: 'pending' },
       { id: 'ai-studio', label: 'Génération image IA Studio', status: 'pending' },
+      { id: 'ai-outdoor', label: 'Génération image IA Outdoor', status: 'pending' },
+      { id: 'ai-minimal', label: 'Génération image IA Minimal', status: 'pending' },
     ];
     setLoadingSteps(initialSteps);
     setLoadingMessage("Extraction des données du produit...");
@@ -169,13 +171,50 @@ const Dashboard = () => {
       }));
       updateStep('images', 'done');
 
-      // Skip AI image generation - use only real scraped images
-      // Mark AI steps as done without generating
-      updateStep('ai-lifestyle', 'done');
-      updateStep('ai-studio', 'done');
+      // Generate 4 AI images with different styles (background changes only, product unchanged)
+      const sourceImageUrl = scrapedImages[0]?.url || product.images[0];
+      const styles: { style: ImageStyle; stepId: string }[] = [
+        { style: 'lifestyle', stepId: 'ai-lifestyle' },
+        { style: 'studio', stepId: 'ai-studio' },
+        { style: 'outdoor', stepId: 'ai-outdoor' },
+        { style: 'minimal', stepId: 'ai-minimal' },
+      ];
+      const aiImages: ProductImage[] = [];
+      
+      // Only attempt AI generation if we have a valid source image
+      if (sourceImageUrl && sourceImageUrl.startsWith('http')) {
+        for (const { style, stepId } of styles) {
+          updateStep(stepId, 'loading');
+          setLoadingMessage(`Génération de l'image ${style.charAt(0).toUpperCase() + style.slice(1)}...`);
+          try {
+            const aiResponse = await aliexpressApi.generateProductImage(
+              sourceImageUrl,
+              reformulated.title,
+              style
+            );
+            
+            if (aiResponse.success && aiResponse.data?.imageUrl) {
+              aiImages.push({
+                id: `ai-${style}-${Date.now()}`,
+                url: aiResponse.data.imageUrl,
+                isAiGenerated: true,
+                isSelected: true,
+              });
+            }
+            updateStep(stepId, 'done');
+          } catch (err) {
+            console.error(`Error generating ${style} image:`, err);
+            updateStep(stepId, 'done');
+          }
+        }
+      } else {
+        // Skip AI generation steps if no source image
+        console.log('No valid source image found, skipping AI generation');
+        styles.forEach(({ stepId }) => updateStep(stepId, 'done'));
+      }
 
-      // Use only scraped images (no AI modifications)
-      const allImages = scrapedImages;
+      // AI images first, then scraped images
+      const allImages = [...aiImages, ...scrapedImages];
       setProductImages(allImages);
       setStoreName(reformulated.title.split(' ').slice(0, 3).join(' ').toUpperCase());
       
