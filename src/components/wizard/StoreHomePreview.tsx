@@ -1,5 +1,6 @@
-import { ShoppingCart, Star, Check, ChevronRight } from "lucide-react";
+import { ShoppingCart, Star, Check, ChevronRight, Clock } from "lucide-react";
 import { StoreData } from "@/types/store";
+import { useState, useEffect } from "react";
 
 interface StoreHomePreviewProps {
   storeData: StoreData;
@@ -7,7 +8,25 @@ interface StoreHomePreviewProps {
 
 export const StoreHomePreview = ({ storeData }: StoreHomePreviewProps) => {
   const mainImage = storeData.productImages[0] || "/placeholder.svg";
+  const [countdown, setCountdown] = useState({ hours: 2, minutes: 47, seconds: 33 });
   
+  // Countdown timer effect
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown(prev => {
+        if (prev.seconds > 0) {
+          return { ...prev, seconds: prev.seconds - 1 };
+        } else if (prev.minutes > 0) {
+          return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
+        } else if (prev.hours > 0) {
+          return { hours: prev.hours - 1, minutes: 59, seconds: 59 };
+        }
+        return { hours: 2, minutes: 47, seconds: 33 }; // Reset
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   // Use storeData colors with fallbacks
   const primaryColor = storeData.primaryColor || "#4A90E2";
   const accentColor = storeData.accentColor || "#764ba2";
@@ -30,6 +49,33 @@ export const StoreHomePreview = ({ storeData }: StoreHomePreviewProps) => {
           {/* Scrollable Content */}
           <div className="h-[580px] overflow-y-auto scrollbar-hide">
             
+            {/* Promo Banner with Countdown */}
+            <div className="bg-red-600 py-2 px-3">
+              <div className="flex items-center justify-center gap-2 text-white">
+                <Clock className="w-3 h-3 animate-pulse" />
+                <span className="text-[9px] font-bold">🔥 OFFRE FLASH -29%</span>
+                <div className="flex items-center gap-1 bg-white/20 px-2 py-0.5 rounded">
+                  <span className="text-[10px] font-mono font-bold">
+                    {String(countdown.hours).padStart(2, '0')}:{String(countdown.minutes).padStart(2, '0')}:{String(countdown.seconds).padStart(2, '0')}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Marquee Banner */}
+            <div 
+              className="py-1.5 overflow-hidden whitespace-nowrap"
+              style={{ background: gradientBg }}
+            >
+              <div className="animate-marquee inline-flex gap-8">
+                {[...Array(8)].map((_, i) => (
+                  <span key={i} className="text-white text-[10px] font-semibold uppercase tracking-widest">
+                    ✦ {storeData.storeName || "Votre Marque"}
+                  </span>
+                ))}
+              </div>
+            </div>
+
             {/* Header */}
             <header className="bg-white px-4 py-3 shadow-sm sticky top-0 z-10">
               <div className="flex justify-between items-center">
