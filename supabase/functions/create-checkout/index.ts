@@ -8,10 +8,12 @@ const corsHeaders = {
 };
 
 // Plan configuration with Stripe price IDs
+// Starter plan uses a coupon for the first month promo (9€ first month, then 29€/month)
 const PLANS = {
   starter: {
     monthly: "price_1SnljfRwdkDlimtDqq5aJY0N",
     yearly: "price_1SnljfRwdkDlimtDqq5aJY0N",
+    promoMonthly: true, // Flag to apply first month discount
   },
   pro: {
     monthly: "price_1Snlk9RwdkDlimtDekiakUgC",
@@ -63,7 +65,8 @@ serve(async (req) => {
     const plan = PLANS[planId as keyof typeof PLANS];
     if (!plan) throw new Error(`Invalid plan: ${planId}`);
     const priceId = isYearly ? plan.yearly : plan.monthly;
-    logStep("Selected price", { planId, isYearly, priceId });
+    const applyPromo = !isYearly && 'promoMonthly' in plan && plan.promoMonthly;
+    logStep("Selected price", { planId, isYearly, priceId, applyPromo });
 
     // Check if customer exists
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
@@ -73,7 +76,8 @@ serve(async (req) => {
       logStep("Existing customer found", { customerId });
     }
 
-    const session = await stripe.checkout.sessions.create({
+    // Build checkout session options
+    const sessionOptions: any = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: [
@@ -85,7 +89,23 @@ serve(async (req) => {
       mode: "subscription",
       success_url: `${req.headers.get("origin")}/payment-success`,
       cancel_url: `${req.headers.get("origin")}/dashboard`,
-    });
+    };
+
+    // Apply first month promo for Starter plan (9€ first month, then 29€/month)
+    // This uses Stripe's subscription_data with a trial or coupon
+    if (applyPromo) {
+      // Using a fixed amount off coupon for first month: 20€ off (29€ - 9€ = 20€)
+      // You need to create this coupon in Stripe dashboard or via API
+      // Coupon ID: STARTER_FIRST_MONTH_PROMO (20€ off, duration: once)
+      sessionOptions.discounts = [
+        {
+          coupon: "STARTER_FIRST_MONTH_PROMO",
+        },
+      ];
+      logStep("Applied first month promo coupon");
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionOptions);
 
     logStep("Checkout session created", { sessionId: session.id });
 

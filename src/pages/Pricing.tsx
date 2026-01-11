@@ -12,29 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 
 const plans = [
   {
-    id: "starter",
-    name: "Starter",
-    description: "Parfait pour tester et lancer ta première app",
-    icon: Zap,
-    monthlyPrice: 29,
-    yearlyPrice: Math.round(29 * 12 * 0.81),
-    features: [
-      "1 app e-commerce générée",
-      "Design personnalisable",
-      "Fiche produit optimisée",
-      "Intégration paiements Stripe",
-      "Support par email",
-      "Mises à jour incluses",
-    ],
-    notIncluded: [
-      "Multi-produits",
-      "Domaine personnalisé",
-      "Analytics avancés",
-    ],
-    popular: false,
-    cta: "Commencer à 29€/mois",
-  },
-  {
     id: "pro",
     name: "Pro",
     description: "Pour les entrepreneurs qui veulent scaler",
@@ -54,8 +31,32 @@ const plans = [
     notIncluded: [
       "Analytics avancés",
     ],
+    popular: false,
+    cta: "Passer au Pro",
+  },
+  {
+    id: "starter",
+    name: "Starter",
+    description: "Parfait pour tester et lancer ta première app",
+    icon: Zap,
+    monthlyPrice: 29,
+    yearlyPrice: Math.round(29 * 12 * 0.81),
+    promoFirstMonth: 9,
+    features: [
+      "1 app e-commerce générée",
+      "Design personnalisable",
+      "Fiche produit optimisée",
+      "Intégration paiements Stripe",
+      "Support par email",
+      "Mises à jour incluses",
+    ],
+    notIncluded: [
+      "Multi-produits",
+      "Domaine personnalisé",
+      "Analytics avancés",
+    ],
     popular: true,
-    cta: "Essai gratuit 7 jours",
+    cta: "Commencer maintenant",
   },
   {
     id: "business",
@@ -175,7 +176,7 @@ const Pricing = () => {
                   {plan.popular && (
                     <div className="absolute top-0 right-0">
                       <div className="bg-primary text-primary-foreground text-xs font-bold px-4 py-1 rounded-bl-lg">
-                        POPULAIRE
+                        MEILLEURE OFFRE
                       </div>
                     </div>
                   )}
@@ -199,8 +200,22 @@ const Pricing = () => {
                   
                   <CardContent className="pb-6">
                     <div className="mb-6">
-                      <span className="text-4xl font-bold">{price}€</span>
-                      <span className="text-muted-foreground">{period}</span>
+                      {plan.promoFirstMonth && !isYearly ? (
+                        <>
+                          <div className="flex items-baseline gap-2">
+                            <span className="text-4xl font-bold">{plan.promoFirstMonth}€</span>
+                            <span className="text-muted-foreground">le 1er mois</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            puis {plan.monthlyPrice}€/mois
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-4xl font-bold">{price}€</span>
+                          <span className="text-muted-foreground">{period}</span>
+                        </>
+                      )}
                     </div>
                     
                     <ul className="space-y-3 mb-6">
