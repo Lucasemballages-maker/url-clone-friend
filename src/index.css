@@ -221,6 +221,20 @@
     animation: marquee 15s linear infinite;
   }
 
+  /* Shimmer effect for promo cards */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%) skewX(-12deg);
+    }
+    100% {
+      transform: translateX(200%) skewX(-12deg);
+    }
+  }
+
+  .animate-shimmer {
+    animation: shimmer 3s infinite;
+  }
+
   /* Stagger children */
   .stagger-children > * {
     opacity: 0;
