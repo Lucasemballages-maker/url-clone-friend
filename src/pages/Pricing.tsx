@@ -234,10 +234,29 @@ const Pricing = () => {
                       : "border-border/50 bg-card/50"
                   } ${isCurrentPlan ? "ring-2 ring-green-500" : ""}`}
                 >
+                  {/* Shine effect for popular plan */}
+                  {plan.popular && (
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                      <div 
+                        className="absolute -inset-full top-0 h-full w-1/2 bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-12 animate-[shimmer_3s_infinite]"
+                        style={{
+                          animation: 'shimmer 3s infinite',
+                        }}
+                      />
+                    </div>
+                  )}
+                  
                   {plan.popular && (
                     <div className="absolute top-0 right-0">
                       <div className="bg-primary text-primary-foreground text-xs font-bold px-4 py-1 rounded-bl-lg">
                         MEILLEURE OFFRE
+                      </div>
+                    </div>
+                  )}
+                  {plan.popular && !isYearly && (
+                    <div className="absolute top-0 left-0">
+                      <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-4 py-1 rounded-br-lg flex items-center gap-1">
+                        <span className="animate-pulse">🔥</span> OFFRE LIMITÉE
                       </div>
                     </div>
                   )}
