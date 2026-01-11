@@ -92,14 +92,11 @@ serve(async (req) => {
     };
 
     // Apply first month promo for Starter plan (9€ first month, then 29€/month)
-    // This uses Stripe's subscription_data with a trial or coupon
+    // This uses Stripe's coupon: 20€ off for the first month
     if (applyPromo) {
-      // Using a fixed amount off coupon for first month: 20€ off (29€ - 9€ = 20€)
-      // You need to create this coupon in Stripe dashboard or via API
-      // Coupon ID: STARTER_FIRST_MONTH_PROMO (20€ off, duration: once)
       sessionOptions.discounts = [
         {
-          coupon: "STARTER_FIRST_MONTH_PROMO",
+          coupon: "Dmvgmd0o", // STARTER_FIRST_MONTH_PROMO coupon (20€ off, once)
         },
       ];
       logStep("Applied first month promo coupon");
