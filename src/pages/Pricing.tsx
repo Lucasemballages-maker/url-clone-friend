@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Check, Zap, Crown, Rocket, ArrowRight, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Check, Zap, Crown, Rocket, ArrowRight, Loader2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
@@ -9,6 +9,45 @@ import Footer from "@/components/Footer";
 import { useAuth } from "@/hooks/useAuth";
 import { useSubscription } from "@/hooks/useSubscription";
 import { useToast } from "@/hooks/use-toast";
+
+// Countdown hook for promo urgency
+const useCountdown = () => {
+  const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
+
+  useEffect(() => {
+    // Set promo end to midnight tonight
+    const getEndOfDay = () => {
+      const now = new Date();
+      const endOfDay = new Date(now);
+      endOfDay.setHours(23, 59, 59, 999);
+      return endOfDay;
+    };
+
+    const calculateTimeLeft = () => {
+      const now = new Date();
+      const endOfDay = getEndOfDay();
+      const difference = endOfDay.getTime() - now.getTime();
+
+      if (difference > 0) {
+        return {
+          hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+          minutes: Math.floor((difference / (1000 * 60)) % 60),
+          seconds: Math.floor((difference / 1000) % 60),
+        };
+      }
+      return { hours: 0, minutes: 0, seconds: 0 };
+    };
+
+    setTimeLeft(calculateTimeLeft());
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  return timeLeft;
+};
 
 const plans = [
   {
@@ -90,6 +129,7 @@ const Pricing = () => {
   const { createCheckout, subscribed, planName } = useSubscription();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const timeLeft = useCountdown();
 
   const handleSelectPlan = async (planId: string) => {
     if (!user) {
@@ -131,9 +171,30 @@ const Pricing = () => {
               Choisis ta formule{" "}
               <span className="text-gradient">et lance ton business</span>
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-              Colle un lien AliExpress, reçois une app prête à vendre. Commence dès 29€/mois.
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
+              Colle un lien AliExpress, reçois une app prête à vendre. Commence dès 9€/mois.
             </p>
+
+            {/* Promo Countdown */}
+            {!isYearly && (
+              <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-gradient-to-r from-primary/20 to-orange-500/20 border border-primary/30 mb-8 animate-pulse">
+                <Clock className="w-5 h-5 text-primary" />
+                <span className="text-sm font-medium">Offre promo expire dans</span>
+                <div className="flex items-center gap-1">
+                  <div className="bg-primary/30 px-2 py-1 rounded-md">
+                    <span className="text-lg font-bold text-primary">{String(timeLeft.hours).padStart(2, '0')}</span>
+                  </div>
+                  <span className="text-primary font-bold">:</span>
+                  <div className="bg-primary/30 px-2 py-1 rounded-md">
+                    <span className="text-lg font-bold text-primary">{String(timeLeft.minutes).padStart(2, '0')}</span>
+                  </div>
+                  <span className="text-primary font-bold">:</span>
+                  <div className="bg-primary/30 px-2 py-1 rounded-md">
+                    <span className="text-lg font-bold text-primary">{String(timeLeft.seconds).padStart(2, '0')}</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Toggle */}
             <div className="flex items-center justify-center gap-4">
