@@ -493,11 +493,7 @@ export const Step3Personnaliser = ({
 
         {/* Store Preview */}
         <div className="flex-1 overflow-auto rounded-xl border border-border bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 flex items-center justify-center py-6">
-          {previewPage === "product" ? (
-            <StorePreview storeData={storeData} />
-          ) : (
-            <ClairEauStorePreview storeData={storeData} />
-          )}
+          <ClairEauStorePreview storeData={storeData} />
         </div>
       </div>
     </div>
