@@ -25,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import StorePreview from "./StorePreview";
 import ClairEauStorePreview from "./ClairEauStorePreview";
 import { StoreData } from "@/types/store";
 
@@ -492,7 +493,11 @@ export const Step3Personnaliser = ({
 
         {/* Store Preview */}
         <div className="flex-1 overflow-auto rounded-xl border border-border bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 flex items-center justify-center py-6">
-          <ClairEauStorePreview storeData={storeData} />
+          {previewPage === "product" ? (
+            <StorePreview storeData={storeData} />
+          ) : (
+            <ClairEauStorePreview storeData={storeData} />
+          )}
         </div>
       </div>
     </div>
