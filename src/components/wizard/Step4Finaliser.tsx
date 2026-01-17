@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, CreditCard, Loader2, Sparkles } from "lucide-react";
-import StorePreview from "./StorePreview";
+import ClairEauStorePreview from "./ClairEauStorePreview";
 import PricingModal from "./PricingModal";
 import { StoreData } from "@/types/store";
 import { useSubscription } from "@/hooks/useSubscription";
@@ -56,8 +56,8 @@ export const Step4Finaliser = ({
   return (
     <div className="flex flex-col h-[calc(100vh-200px)]">
       {/* Store Preview - Full Width */}
-      <div className="flex-1 overflow-auto rounded-xl border border-border mb-6">
-        <StorePreview storeData={storeData} />
+      <div className="flex-1 overflow-auto rounded-xl border border-border mb-6 bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 flex items-center justify-center py-6">
+        <ClairEauStorePreview storeData={storeData} />
       </div>
 
       {/* Bottom Actions */}
